@@ -1,0 +1,88 @@
+syntax="proto3";
+
+package trader.strategy;
+option go_package = "pm.tcfw.com.au/source/trader/api/pb/strategy";
+
+import "google/api/annotations.proto";
+
+enum Action {
+	STAY = 0;
+	BUY = 1;
+	SELL = 2;
+}
+
+enum StrategyAlgo {
+	MeanLog = 0;
+}
+
+message Strategy {
+	string id = 1;
+	string market = 2;
+	string instrument = 3;
+	StrategyAlgo strategy = 4;
+	map<string,string> params = 5;
+	int64 duration = 6;
+	string next = 7;
+}
+
+message ListRequest {
+	int32 limit = 1;
+	string page = 2;
+}
+
+message ListResponse {
+	repeated Strategy strategies = 1;
+}
+
+message CreateRequest {
+	Strategy strategy = 1;
+}
+
+message CreateResponse {
+	Strategy strategy = 1;
+}
+
+message DeleteRequest {
+	string id = 1;
+}
+
+message DeleteResponse {}
+
+message HistoryRequest{
+	string id = 1;
+	int32 limit = 2;
+	string page = 3;
+}
+
+message HistoryAction {
+	string id = 1;
+	Action action = 2;
+	string timestamp = 3;
+}
+
+message HistoryResponse{
+	repeated HistoryAction events = 1;
+}
+
+service StrategyService {
+	rpc List(ListRequest) returns (ListResponse) {
+		option (google.api.http) = {
+            get: "/v1/strategy"
+		};
+	};
+	rpc History(HistoryRequest) returns (HistoryResponse) {
+		option (google.api.http) = {
+            get: "/v1/strategy/{id}"
+		};
+	};
+	rpc Create(CreateRequest) returns (CreateResponse) {
+		option (google.api.http) = {
+            post: "/v1/strategy"
+		};
+	};
+	rpc Delete(DeleteRequest) returns (DeleteResponse) {
+		option (google.api.http) = {
+            delete: "/v1/strategy/{id}"
+		};
+	};
+}

@@ -1,0 +1,259 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "blocks.proto",
+    "version": "version not set"
+  },
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v1/blocks": {
+      "get": {
+        "operationId": "List",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/blocksListResponse"
+            }
+          }
+        },
+        "tags": [
+          "BlocksService"
+        ]
+      },
+      "post": {
+        "operationId": "New",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/blocksBlock"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/blocksBlock"
+            }
+          }
+        ],
+        "tags": [
+          "BlocksService"
+        ]
+      }
+    },
+    "/v1/blocks/{id}": {
+      "get": {
+        "operationId": "Get",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/blocksBlock"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "BlocksService"
+        ]
+      },
+      "delete": {
+        "operationId": "Delete",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/blocksDeleteResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "BlocksService"
+        ]
+      }
+    },
+    "/v1/blocks/{id}/action": {
+      "post": {
+        "operationId": "ManualAction",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/blocksManualResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/blocksManualRequest"
+            }
+          }
+        ],
+        "tags": [
+          "BlocksService"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "blocksBlock": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "strategy_id": {
+          "type": "string"
+        },
+        "baseUnits": {
+          "type": "number",
+          "format": "float"
+        },
+        "currentUnits": {
+          "type": "number",
+          "format": "float"
+        },
+        "purchase": {
+          "type": "number",
+          "format": "float"
+        },
+        "state": {
+          "$ref": "#/definitions/blocksBlockState"
+        },
+        "watchDuration": {
+          "type": "string",
+          "format": "int64"
+        },
+        "shortSellAllowed": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "backoutPercentage": {
+          "type": "number",
+          "format": "float"
+        },
+        "market": {
+          "type": "string"
+        },
+        "instrument": {
+          "type": "string"
+        }
+      }
+    },
+    "blocksBlockState": {
+      "type": "string",
+      "enum": [
+        "NOTHING",
+        "PURCHASED",
+        "SOLD",
+        "ENDED"
+      ],
+      "default": "NOTHING"
+    },
+    "blocksDeleteResponse": {
+      "type": "object"
+    },
+    "blocksListResponse": {
+      "type": "object",
+      "properties": {
+        "blocks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/blocksBlock"
+          }
+        }
+      }
+    },
+    "blocksManualRequest": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "action": {
+          "$ref": "#/definitions/ordersAction"
+        }
+      }
+    },
+    "blocksManualResponse": {
+      "type": "object",
+      "properties": {
+        "order": {
+          "$ref": "#/definitions/ordersOrder"
+        }
+      }
+    },
+    "ordersAction": {
+      "type": "string",
+      "enum": [
+        "BUY",
+        "SELL"
+      ],
+      "default": "BUY"
+    },
+    "ordersOrder": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "timestamp": {
+          "type": "string"
+        },
+        "action": {
+          "$ref": "#/definitions/ordersAction"
+        },
+        "units": {
+          "type": "number",
+          "format": "float"
+        },
+        "price": {
+          "type": "number",
+          "format": "float"
+        },
+        "blockID": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

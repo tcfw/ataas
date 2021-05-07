@@ -1,0 +1,218 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "strategy.proto",
+    "version": "version not set"
+  },
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v1/strategy": {
+      "get": {
+        "operationId": "List",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/strategyListResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "StrategyService"
+        ]
+      },
+      "post": {
+        "operationId": "Create",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/strategyCreateResponse"
+            }
+          }
+        },
+        "tags": [
+          "StrategyService"
+        ]
+      }
+    },
+    "/v1/strategy/{id}": {
+      "get": {
+        "operationId": "History",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/strategyHistoryResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "StrategyService"
+        ]
+      },
+      "delete": {
+        "operationId": "Delete",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/strategyDeleteResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "StrategyService"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "strategyAction": {
+      "type": "string",
+      "enum": [
+        "STAY",
+        "BUY",
+        "SELL"
+      ],
+      "default": "STAY"
+    },
+    "strategyCreateResponse": {
+      "type": "object",
+      "properties": {
+        "strategy": {
+          "$ref": "#/definitions/strategyStrategy"
+        }
+      }
+    },
+    "strategyDeleteResponse": {
+      "type": "object"
+    },
+    "strategyHistoryAction": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "action": {
+          "$ref": "#/definitions/strategyAction"
+        },
+        "timestamp": {
+          "type": "string"
+        }
+      }
+    },
+    "strategyHistoryResponse": {
+      "type": "object",
+      "properties": {
+        "events": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/strategyHistoryAction"
+          }
+        }
+      }
+    },
+    "strategyListResponse": {
+      "type": "object",
+      "properties": {
+        "strategies": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/strategyStrategy"
+          }
+        }
+      }
+    },
+    "strategyStrategy": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "market": {
+          "type": "string"
+        },
+        "instrument": {
+          "type": "string"
+        },
+        "strategy": {
+          "$ref": "#/definitions/strategyStrategyAlgo"
+        },
+        "params": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "duration": {
+          "type": "string",
+          "format": "int64"
+        },
+        "next": {
+          "type": "string"
+        }
+      }
+    },
+    "strategyStrategyAlgo": {
+      "type": "string",
+      "enum": [
+        "MeanLog"
+      ],
+      "default": "MeanLog"
+    }
+  }
+}

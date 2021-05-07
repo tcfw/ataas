@@ -1,0 +1,380 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "passport.proto",
+    "version": "version not set"
+  },
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v1/auth/login": {
+      "post": {
+        "operationId": "Authenticate",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/passportAuthResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/passportAuthRequest"
+            }
+          }
+        ],
+        "tags": [
+          "PassportSevice"
+        ]
+      }
+    },
+    "/v1/auth/refresh": {
+      "post": {
+        "operationId": "Refresh",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/passportAuthResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/passportRefreshRequest"
+            }
+          }
+        ],
+        "tags": [
+          "PassportSevice"
+        ]
+      }
+    },
+    "/v1/auth/revoke": {
+      "post": {
+        "operationId": "RevokeToken",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/passportEmpty"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/passportRevoke"
+            }
+          }
+        ],
+        "tags": [
+          "PassportSevice"
+        ]
+      }
+    },
+    "/v1/auth/revokeall": {
+      "post": {
+        "operationId": "RevokeAllTokens",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/passportEmpty"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/passportEmpty"
+            }
+          }
+        ],
+        "tags": [
+          "PassportSevice"
+        ]
+      }
+    },
+    "/v1/auth/social": {
+      "post": {
+        "operationId": "SocialLogin",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/passportAuthResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/passportSocialRequest"
+            }
+          }
+        ],
+        "tags": [
+          "PassportSevice"
+        ]
+      }
+    },
+    "/v1/my/sessions": {
+      "get": {
+        "operationId": "Sessions",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/passportSessionList"
+            }
+          }
+        },
+        "tags": [
+          "PassportSevice"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "MFAResponseMFAType": {
+      "type": "string",
+      "enum": [
+        "TOTP",
+        "FIDO",
+        "SMS"
+      ],
+      "default": "TOTP"
+    },
+    "passportAuthRequest": {
+      "type": "object",
+      "properties": {
+        "userCreds": {
+          "$ref": "#/definitions/passportUserCreds"
+        },
+        "oauthClientSecretCreds": {
+          "$ref": "#/definitions/passportOAuthClientSecretCreds"
+        },
+        "OAuthCodeCreds": {
+          "$ref": "#/definitions/passportOAuthCodeCreds"
+        }
+      }
+    },
+    "passportAuthResponse": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "tokens": {
+          "$ref": "#/definitions/passportTokens"
+        },
+        "MFAResponse": {
+          "$ref": "#/definitions/passportMFAResponse"
+        }
+      }
+    },
+    "passportEmpty": {
+      "type": "object"
+    },
+    "passportFIDOChallenge": {
+      "type": "object",
+      "properties": {
+        "challenge": {
+          "type": "string"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "int64"
+        },
+        "appId": {
+          "type": "string"
+        },
+        "trustedFacets": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "passportMFAResponse": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "$ref": "#/definitions/MFAResponseMFAType"
+        },
+        "fido": {
+          "$ref": "#/definitions/passportFIDOChallenge"
+        }
+      }
+    },
+    "passportOAuthClientSecretCreds": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string"
+        },
+        "secret": {
+          "type": "string"
+        },
+        "scopes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "passportOAuthCodeCreds": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string"
+        }
+      }
+    },
+    "passportRefreshRequest": {
+      "type": "object",
+      "properties": {
+        "refreshToken": {
+          "type": "string"
+        }
+      }
+    },
+    "passportRevoke": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "jti": {
+          "type": "string"
+        },
+        "reason": {
+          "type": "string"
+        }
+      }
+    },
+    "passportSession": {
+      "type": "object",
+      "properties": {
+        "userAgent": {
+          "type": "string"
+        },
+        "ip": {
+          "type": "string"
+        },
+        "jti": {
+          "type": "string"
+        }
+      }
+    },
+    "passportSessionList": {
+      "type": "object",
+      "properties": {
+        "sessions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/passportSession"
+          }
+        }
+      }
+    },
+    "passportSocialRequest": {
+      "type": "object",
+      "properties": {
+        "provider": {
+          "type": "string"
+        },
+        "idpTokens": {
+          "$ref": "#/definitions/passportTokens"
+        }
+      }
+    },
+    "passportTokens": {
+      "type": "object",
+      "properties": {
+        "token": {
+          "type": "string"
+        },
+        "tokenExpire": {
+          "type": "string",
+          "format": "int64"
+        },
+        "refreshToken": {
+          "type": "string"
+        },
+        "refreshExpire": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "passportUserCreds": {
+      "type": "object",
+      "properties": {
+        "username": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        },
+        "MFA": {
+          "type": "string"
+        },
+        "devFP": {
+          "type": "string"
+        }
+      }
+    },
+    "passportVerifyTokenResponse": {
+      "type": "object",
+      "properties": {
+        "valid": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "revoked": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "tokenExpire": {
+          "type": "string",
+          "format": "int64"
+        },
+        "refreshExpire": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    }
+  }
+}

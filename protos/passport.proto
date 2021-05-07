@@ -1,0 +1,144 @@
+syntax = "proto3";
+
+package trader.passport;
+option go_package = "pm.tcfw.com.au/source/trader/api/pb/passport";
+
+import "google/api/annotations.proto";
+
+message Tokens {
+    string token = 1;
+    int64 tokenExpire = 2;
+    string refreshToken = 3;
+    int64 refreshExpire = 4;
+}
+
+message VerifyTokenRequest {
+    string token = 1;
+}
+
+message VerifyTokenResponse {
+    bool valid = 1;
+    bool revoked = 2;
+    int64 tokenExpire = 3;
+    int64 refreshExpire = 4;
+}
+
+message UserCreds {
+    string username = 1;
+    string password = 2;
+    string MFA = 3;
+    string devFP = 4;
+}
+
+message OAuthClientSecretCreds {
+    string key = 1;
+    string secret = 2;
+    repeated string scopes = 3;
+}
+
+message OAuthCodeCreds {
+    string code = 1;
+}
+
+message AuthRequest {
+    oneof creds {
+        UserCreds userCreds = 1;
+        OAuthClientSecretCreds oauthClientSecretCreds = 2;
+        OAuthCodeCreds OAuthCodeCreds = 3;
+    }
+    reserved 4 to 50;
+}
+
+message AuthResponse {
+    bool success = 1;
+    Tokens tokens = 2;
+    MFAResponse MFAResponse = 3;
+}
+
+message MFAResponse {
+    enum MFAType {
+        TOTP = 0;
+        FIDO = 1;
+        SMS = 2;
+    }
+
+    MFAType type = 1;
+
+    oneof challenge {
+        FIDOChallenge fido = 2;
+    }
+}
+
+message FIDOChallenge {
+    string challenge = 1;
+    int64 timestamp = 2;
+    string appId = 3;
+    repeated string trustedFacets = 4;
+}
+
+message RefreshRequest {
+    string refreshToken = 1;
+}
+
+message SocialRequest {
+    string provider = 1;
+    Tokens idpTokens = 2;
+}
+
+message Revoke {
+    string id = 1;
+    string jti = 2;
+    string reason = 3;
+}
+
+message Session {
+    string userAgent = 1;
+    string ip = 2;
+    string jti = 3;
+}
+
+message SessionList {
+    repeated Session sessions = 1;
+}
+
+message Empty {}
+
+service PassportSevice {
+    rpc VerifyToken(VerifyTokenRequest) returns (VerifyTokenResponse);
+    
+    rpc Authenticate(AuthRequest) returns (AuthResponse) {
+        option (google.api.http) = {
+            post: "/v1/auth/login"
+            body: "*"
+        };
+    };
+    rpc Refresh(RefreshRequest) returns (AuthResponse) {
+        option (google.api.http) = {
+            post: "/v1/auth/refresh",
+            body: "*"
+        };
+    };
+    rpc SocialLogin(SocialRequest) returns (AuthResponse) {
+        option (google.api.http) = {
+            post: "/v1/auth/social",
+            body: "*"
+        };
+    };
+    rpc RevokeToken(Revoke) returns (Empty) {
+        option (google.api.http) = {
+            post: "/v1/auth/revoke",
+            body: "*"
+        };
+    };
+    rpc RevokeAllTokens(Empty) returns (Empty) {
+        option (google.api.http) = {
+            post: "/v1/auth/revokeall",
+            body: "*"
+        };
+    };
+    rpc Sessions(Empty) returns (SessionList) {
+        option (google.api.http) = {
+            get: "/v1/my/sessions"
+        };
+    };
+}

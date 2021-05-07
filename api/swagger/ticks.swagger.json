@@ -1,0 +1,276 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "ticks.proto",
+    "version": "version not set"
+  },
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v1/history/candle": {
+      "get": {
+        "operationId": "Candles",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/ticksCandlesResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "market",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "instrument",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "interval",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "HistoryService"
+        ]
+      }
+    },
+    "/v1/history/compare": {
+      "get": {
+        "operationId": "RangeCompare",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/ticksCompareResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "market",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "instrument",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "interval",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "HistoryService"
+        ]
+      }
+    },
+    "/v1/history/trades": {
+      "get": {
+        "operationId": "Trades",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/ticksTradesResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "market",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "instrument",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "HistoryService"
+        ]
+      }
+    },
+    "/v1/history/trades/{since}": {
+      "get": {
+        "operationId": "TradesRange",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/ticksTradesResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "since",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "market",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "instrument",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "HistoryService"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "ticksCandlesResponse": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ticksOHLCV"
+          }
+        }
+      }
+    },
+    "ticksCompareResponse": {
+      "type": "object",
+      "properties": {
+        "difference": {
+          "type": "number",
+          "format": "float"
+        }
+      }
+    },
+    "ticksOHLCV": {
+      "type": "object",
+      "properties": {
+        "market": {
+          "type": "string"
+        },
+        "instrument": {
+          "type": "string"
+        },
+        "open": {
+          "type": "number",
+          "format": "float"
+        },
+        "high": {
+          "type": "number",
+          "format": "float"
+        },
+        "low": {
+          "type": "number",
+          "format": "float"
+        },
+        "close": {
+          "type": "number",
+          "format": "float"
+        },
+        "volume": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "ticksTrade": {
+      "type": "object",
+      "properties": {
+        "market": {
+          "type": "string"
+        },
+        "instrument": {
+          "type": "string"
+        },
+        "tradeID": {
+          "type": "string"
+        },
+        "direction": {
+          "$ref": "#/definitions/ticksTradeDirection"
+        },
+        "amount": {
+          "type": "number",
+          "format": "float"
+        },
+        "units": {
+          "type": "number",
+          "format": "float"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "ticksTradeDirection": {
+      "type": "string",
+      "enum": [
+        "BUY",
+        "SELL"
+      ],
+      "default": "BUY"
+    },
+    "ticksTradesResponse": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ticksTrade"
+          }
+        }
+      }
+    }
+  }
+}

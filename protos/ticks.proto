@@ -1,0 +1,110 @@
+syntax="proto3";
+
+package trader.ticks;
+option go_package = "pm.tcfw.com.au/source/trader/api/pb/ticks";
+
+import "google/api/annotations.proto";
+
+message Tick {
+	string market = 1;
+	string instrument = 2;
+	float bestBid = 3;
+	float bestAsk = 4;
+	float last = 5;
+	float timestamp = 6;
+	float volume24h = 7;
+	float highest24h = 8;
+	float lowest24h = 9;
+	float closePriceChange24h = 10;
+	float open = 11;
+}
+
+message OHLCV {
+	string market = 1;
+	string instrument = 2;
+	float open = 3;
+	float high = 4;
+	float low = 5;
+	float close = 6;
+	int32 volume = 7;
+	int64 timestamp = 8;
+}
+
+enum TradeDirection {
+	BUY = 0;
+	SELL = 1;
+}
+
+message Trade {
+	string market = 1;
+	string instrument = 2;
+	string tradeID = 3;
+	TradeDirection direction = 4;
+	float amount = 5;
+	float units = 6;
+	int64 timestamp = 7;
+}
+
+message GetRequest {
+	string market = 1;
+	string instrument = 2;
+	int32 depth = 4;
+}
+
+message TicksResponse {
+	repeated Tick ticks = 1;
+}
+
+message TradesResponse {
+	repeated Trade data = 1;
+}
+
+message CandlesRequest {
+	string market = 1;
+	string instrument = 2;
+	string interval = 3;
+	int32 depth = 4;
+}
+
+message CandlesResponse {
+	repeated OHLCV data = 1;
+}
+
+message RangeRequest {
+	string market = 1;
+	string instrument = 2;
+	string since = 3;
+}
+
+message CompareRequest {
+	string market = 1;
+	string instrument = 2;
+	string interval = 3;
+}
+
+message CompareResponse {
+	float difference = 1;
+}
+
+service HistoryService {
+	rpc Trades(GetRequest) returns (TradesResponse)  {
+        option (google.api.http) = {
+            get: "/v1/history/trades"
+        };
+    };
+	rpc TradesRange(RangeRequest) returns (TradesResponse)  {
+        option (google.api.http) = {
+            get: "/v1/history/trades/{since}"
+        };
+    };
+	rpc Candles(CandlesRequest) returns (CandlesResponse)  {
+        option (google.api.http) = {
+            get: "/v1/history/candle"
+        };
+    };
+	rpc RangeCompare(CompareRequest) returns (CompareResponse) {
+		option (google.api.http) = {
+			get: "/v1/history/compare"
+		};
+	};
+}
