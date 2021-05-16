@@ -10,6 +10,7 @@ import (
 	"pm.tcfw.com.au/source/trader/api/pb/ticks"
 	"pm.tcfw.com.au/source/trader/db"
 	"pm.tcfw.com.au/source/trader/internal/broadcast"
+	binance_client "pm.tcfw.com.au/source/trader/internal/exchanges/binance-client"
 	crypto_com_client "pm.tcfw.com.au/source/trader/internal/exchanges/crypto-com-client"
 )
 
@@ -24,13 +25,13 @@ func (s *Server) Collect(ctx context.Context) {
 	go s.collectFromCh(ctx, ch)
 
 	//crypto.com
-	go func() {
-		err := s.collectCryptoDotCom(ctx, ch)
-		if err != nil {
-			s.log.Fatalf("Disconnected from crypto.com: %s", err)
-			os.Exit(1)
-		}
-	}()
+	// go func() {
+	// 	err := s.collectCryptoDotCom(ctx, ch)
+	// 	if err != nil {
+	// 		s.log.Fatalf("Disconnected from crypto.com: %s", err)
+	// 		os.Exit(1)
+	// 	}
+	// }()
 
 	//binance.com
 	go func() {
@@ -60,39 +61,43 @@ func (s *Server) collectFromCh(ctx context.Context, ch <-chan *ticks.Trade) {
 	var n int8 = 0
 	block := make([]*ticks.Trade, 30)
 
-	for e := range ch {
+	for trade := range ch {
 		n++
 
-		block[n] = e
+		block[n] = trade
 
 		if n == 19 {
 			n = 0
 
-			q := db.Build().Insert("trades").Columns("market", "instrument", "tradeid", "ts", "direction", "amount", "units")
+			// 	q := db.Build().Insert("trades").Columns("market", "instrument", "tradeid", "ts", "direction", "amount", "units")
 
 			for _, b := range block {
 				if b == nil {
 					continue
 				}
 
-				q = q.Values(b.Market, b.Instrument, b.TradeID, time.Unix(b.Timestamp/1000, 0), b.Direction == ticks.TradeDirection_SELL, b.Amount, b.Units)
+				if err := s.library.Add(b); err != nil {
+					s.log.Errorf("failed to record in library: %s", err)
+				}
+
+				// 		q = q.Values(b.Market, b.Instrument, b.TradeID, time.Unix(b.Timestamp/1000, 0), b.Direction == ticks.TradeDirection_SELL, b.Amount, b.Units)
 				br.Publish(fmt.Sprintf("TRADE.%s.%s", b.Market, b.Instrument), b)
 			}
 
-			q = q.Suffix("ON CONFLICT DO NOTHING")
+			// 	q = q.Suffix("ON CONFLICT DO NOTHING")
 
-			tx, err := conn.Begin(ctx)
-			if err != nil {
-				panic(err)
-			}
+			// 	tx, err := conn.Begin(ctx)
+			// 	if err != nil {
+			// 		panic(err)
+			// 	}
 
-			if _, err = db.Exec(ctx, tx, q); err != nil {
-				panic(err)
-			}
+			// 	if _, err = db.Exec(ctx, tx, q); err != nil {
+			// 		panic(err)
+			// 	}
 
-			if err := tx.Commit(ctx); err != nil {
-				panic(err)
-			}
+			// 	if err := tx.Commit(ctx); err != nil {
+			// 		panic(err)
+			// 	}
 
 		}
 	}
@@ -109,7 +114,7 @@ func (s *Server) gcTrades() {
 	t := time.NewTicker(10 * time.Minute)
 
 	for range t.C {
-		_, err := conn.Exec(ctx, "DELETE FROM trades WHERE ts < $1", time.Now().Add(-1*48*time.Hour))
+		_, err := conn.Exec(ctx, "DELETE FROM trades WHERE ts < $1", time.Now().Add(-48*time.Hour))
 		if err != nil {
 			panic(err)
 		}
@@ -137,21 +142,21 @@ func (s *Server) collectCryptoDotCom(ctx context.Context, ch chan *ticks.Trade) 
 }
 
 func (s *Server) collectBinanceDotCom(ctx context.Context, ch chan *ticks.Trade) error {
-	// key := viper.GetString("collector.binance.key")
-	// secret := viper.GetString("collector.binance.secret")
+	key := viper.GetString("collector.binance.key")
+	secret := viper.GetString("collector.binance.secret")
 
-	// c := binance_client.NewClient(key, secret)
+	c := binance_client.NewClient(key, secret)
 
-	// tch, err := c.SubscribeTradesAll()
-	// if err != nil {
-	// 	return err
-	// }
+	tch, err := c.SubscribeTradesAll()
+	if err != nil {
+		return err
+	}
 
-	// s.log.Info("Collecting trades from binance.com")
+	s.log.Info("Collecting trades from binance.com")
 
-	// for t := range tch {
-	// 	ch <- t
-	// }
+	for t := range tch {
+		ch <- t
+	}
 
 	return nil
 }

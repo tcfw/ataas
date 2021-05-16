@@ -20,6 +20,7 @@ const _ = grpc.SupportPackageIsVersion7
 type HistoryServiceClient interface {
 	Trades(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*TradesResponse, error)
 	TradesRange(ctx context.Context, in *RangeRequest, opts ...grpc.CallOption) (*TradesResponse, error)
+	TradesRangeStream(ctx context.Context, in *RangeRequest, opts ...grpc.CallOption) (HistoryService_TradesRangeStreamClient, error)
 	Candles(ctx context.Context, in *CandlesRequest, opts ...grpc.CallOption) (*CandlesResponse, error)
 	RangeCompare(ctx context.Context, in *CompareRequest, opts ...grpc.CallOption) (*CompareResponse, error)
 }
@@ -50,6 +51,38 @@ func (c *historyServiceClient) TradesRange(ctx context.Context, in *RangeRequest
 	return out, nil
 }
 
+func (c *historyServiceClient) TradesRangeStream(ctx context.Context, in *RangeRequest, opts ...grpc.CallOption) (HistoryService_TradesRangeStreamClient, error) {
+	stream, err := c.cc.NewStream(ctx, &HistoryService_ServiceDesc.Streams[0], "/trader.ticks.HistoryService/TradesRangeStream", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &historyServiceTradesRangeStreamClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type HistoryService_TradesRangeStreamClient interface {
+	Recv() (*Trade, error)
+	grpc.ClientStream
+}
+
+type historyServiceTradesRangeStreamClient struct {
+	grpc.ClientStream
+}
+
+func (x *historyServiceTradesRangeStreamClient) Recv() (*Trade, error) {
+	m := new(Trade)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 func (c *historyServiceClient) Candles(ctx context.Context, in *CandlesRequest, opts ...grpc.CallOption) (*CandlesResponse, error) {
 	out := new(CandlesResponse)
 	err := c.cc.Invoke(ctx, "/trader.ticks.HistoryService/Candles", in, out, opts...)
@@ -74,6 +107,7 @@ func (c *historyServiceClient) RangeCompare(ctx context.Context, in *CompareRequ
 type HistoryServiceServer interface {
 	Trades(context.Context, *GetRequest) (*TradesResponse, error)
 	TradesRange(context.Context, *RangeRequest) (*TradesResponse, error)
+	TradesRangeStream(*RangeRequest, HistoryService_TradesRangeStreamServer) error
 	Candles(context.Context, *CandlesRequest) (*CandlesResponse, error)
 	RangeCompare(context.Context, *CompareRequest) (*CompareResponse, error)
 	mustEmbedUnimplementedHistoryServiceServer()
@@ -88,6 +122,9 @@ func (UnimplementedHistoryServiceServer) Trades(context.Context, *GetRequest) (*
 }
 func (UnimplementedHistoryServiceServer) TradesRange(context.Context, *RangeRequest) (*TradesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method TradesRange not implemented")
+}
+func (UnimplementedHistoryServiceServer) TradesRangeStream(*RangeRequest, HistoryService_TradesRangeStreamServer) error {
+	return status.Errorf(codes.Unimplemented, "method TradesRangeStream not implemented")
 }
 func (UnimplementedHistoryServiceServer) Candles(context.Context, *CandlesRequest) (*CandlesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Candles not implemented")
@@ -142,6 +179,27 @@ func _HistoryService_TradesRange_Handler(srv interface{}, ctx context.Context, d
 		return srv.(HistoryServiceServer).TradesRange(ctx, req.(*RangeRequest))
 	}
 	return interceptor(ctx, in, info, handler)
+}
+
+func _HistoryService_TradesRangeStream_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(RangeRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(HistoryServiceServer).TradesRangeStream(m, &historyServiceTradesRangeStreamServer{stream})
+}
+
+type HistoryService_TradesRangeStreamServer interface {
+	Send(*Trade) error
+	grpc.ServerStream
+}
+
+type historyServiceTradesRangeStreamServer struct {
+	grpc.ServerStream
+}
+
+func (x *historyServiceTradesRangeStreamServer) Send(m *Trade) error {
+	return x.ServerStream.SendMsg(m)
 }
 
 func _HistoryService_Candles_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -204,6 +262,12 @@ var HistoryService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _HistoryService_RangeCompare_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "TradesRangeStream",
+			Handler:       _HistoryService_TradesRangeStream_Handler,
+			ServerStreams: true,
+		},
+	},
 	Metadata: "ticks.proto",
 }

@@ -19,7 +19,7 @@ import (
 	usersImpl "pm.tcfw.com.au/source/trader/internal/users"
 )
 
-func newGRPCServer(ctx context.Context, opts ...grpc.ServerOption) (func(), *grpc.Server) {
+func newGRPCServer(ctx context.Context, opts ...grpc.ServerOption) (func(), func(), *grpc.Server) {
 	grpcServer := grpc.NewServer(opts...)
 
 	ticksServer, err := ticksImpl.NewServer(ctx)
@@ -42,12 +42,22 @@ func newGRPCServer(ctx context.Context, opts ...grpc.ServerOption) (func(), *grp
 		panic(err)
 	}
 
+	usersServer, err := usersImpl.NewServer(ctx)
+	if err != nil {
+		panic(err)
+	}
+
+	passportServer, err := passportImpl.NewServer(ctx)
+	if err != nil {
+		panic(err)
+	}
+
 	blocks.RegisterBlocksServiceServer(grpcServer, blockServer)
 	orders.RegisterOrdersServiceServer(grpcServer, ordersServer)
 	ticks.RegisterHistoryServiceServer(grpcServer, ticksServer)
 	strategy.RegisterStrategyServiceServer(grpcServer, stratServer)
-	users.RegisterUserServiceServer(grpcServer, &usersImpl.Server{})
-	passport.RegisterPassportSeviceServer(grpcServer, &passportImpl.Server{})
+	users.RegisterUserServiceServer(grpcServer, usersServer)
+	passport.RegisterPassportSeviceServer(grpcServer, passportServer)
 
 	startServices := func() {
 		blockServer.Listen()
@@ -57,5 +67,15 @@ func newGRPCServer(ctx context.Context, opts ...grpc.ServerOption) (func(), *grp
 		logrus.New().Infoln("Started services")
 	}
 
-	return startServices, grpcServer
+	stopServices := func() {
+		blockServer.Stop()
+
+		err := ticksServer.Close()
+		if err != nil {
+			panic(err)
+		}
+
+	}
+
+	return startServices, stopServices, grpcServer
 }

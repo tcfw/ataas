@@ -26,6 +26,7 @@ paths=source_relative:api/pb/${service} \
                 --swagger_out=logtostderr=true:api/swagger \
                 --grpc-gateway_out=logtostderr=true,paths=source_relative:api/pb/${service} \
                 -I=$GOPATH/src/github.com/gogo/protobuf/protobuf \
+                -I=$GOPATH/src/github.com/gogo/protobuf/gogoproto \
                 -I=$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
                 --go-grpc_out=\
 Mgoogle/protobuf/descriptor.proto=github.com/gogo/protobuf,\

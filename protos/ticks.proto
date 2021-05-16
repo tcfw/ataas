@@ -4,6 +4,11 @@ package trader.ticks;
 option go_package = "pm.tcfw.com.au/source/trader/api/pb/ticks";
 
 import "google/api/annotations.proto";
+import "gogo.proto";
+
+option (gogoproto.marshaler_all) = true;
+option (gogoproto.sizer_all) = true;
+option (gogoproto.unmarshaler_all) = true;
 
 message Tick {
 	string market = 1;
@@ -36,13 +41,13 @@ enum TradeDirection {
 }
 
 message Trade {
-	string market = 1;
-	string instrument = 2;
-	string tradeID = 3;
-	TradeDirection direction = 4;
-	float amount = 5;
-	float units = 6;
-	int64 timestamp = 7;
+	string market = 1 [(gogoproto.moretags) = "msgpack:\"m\""];
+	string instrument = 2 [(gogoproto.moretags) = "msgpack:\"s\""];
+	string tradeID = 3 [(gogoproto.moretags) = "msgpack:\"i\""];
+	TradeDirection direction = 4 [(gogoproto.moretags) = "msgpack:\"d\""];
+	float amount = 5 [(gogoproto.moretags) = "msgpack:\"p\""];
+	float units = 6 [(gogoproto.moretags) = "msgpack:\"q\""];
+	int64 timestamp = 7 [(gogoproto.moretags) = "msgpack:\"t\""];
 }
 
 message GetRequest {
@@ -93,10 +98,13 @@ service HistoryService {
         };
     };
 	rpc TradesRange(RangeRequest) returns (TradesResponse)  {
-        option (google.api.http) = {
-            get: "/v1/history/trades/{since}"
+		option (google.api.http) = {
+			get: "/v1/history/trades/{since}"
         };
     };
+	
+	rpc TradesRangeStream(RangeRequest) returns (stream Trade);
+
 	rpc Candles(CandlesRequest) returns (CandlesResponse)  {
         option (google.api.http) = {
             get: "/v1/history/candle"

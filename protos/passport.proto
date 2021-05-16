@@ -4,6 +4,12 @@ package trader.passport;
 option go_package = "pm.tcfw.com.au/source/trader/api/pb/passport";
 
 import "google/api/annotations.proto";
+import "gogo.proto";
+
+option (gogoproto.marshaler_all) = true;
+option (gogoproto.sizer_all) = true;
+option (gogoproto.unmarshaler_all) = true;
+
 
 message Tokens {
     string token = 1;
@@ -28,6 +34,8 @@ message UserCreds {
     string password = 2;
     string MFA = 3;
     string devFP = 4;
+    bool insecureLogin = 5;
+    string recaptcha = 6;
 }
 
 message OAuthClientSecretCreds {

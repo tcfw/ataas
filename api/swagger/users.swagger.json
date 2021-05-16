@@ -414,6 +414,23 @@
     "usersEmpty": {
       "type": "object"
     },
+    "usersFIDOAuthenticator": {
+      "type": "object",
+      "properties": {
+        "AAGUID": {
+          "type": "string",
+          "format": "byte"
+        },
+        "SignCount": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "CloneWarning": {
+          "type": "boolean",
+          "format": "boolean"
+        }
+      }
+    },
     "usersForgotPasswordRequest": {
       "type": "object",
       "properties": {
@@ -439,13 +456,19 @@
     "usersMFAFIDO": {
       "type": "object",
       "properties": {
-        "registration": {
+        "id": {
           "type": "string",
           "format": "byte"
         },
-        "registrationChallenge": {
+        "pk": {
           "type": "string",
           "format": "byte"
+        },
+        "attestationType": {
+          "type": "string"
+        },
+        "authenticator": {
+          "$ref": "#/definitions/usersFIDOAuthenticator"
         }
       }
     },
@@ -525,9 +548,6 @@
         "lastName": {
           "type": "string"
         },
-        "company": {
-          "type": "string"
-        },
         "email": {
           "type": "string"
         },
@@ -553,36 +573,11 @@
             "format": "byte"
           }
         },
-        "picture": {
-          "type": "string"
-        },
         "mfa": {
           "$ref": "#/definitions/usersMFA"
         },
-        "country": {
+        "account": {
           "type": "string"
-        },
-        "state": {
-          "type": "string"
-        },
-        "postcode": {
-          "type": "string"
-        },
-        "city": {
-          "type": "string"
-        },
-        "address_1": {
-          "type": "string"
-        },
-        "address_2": {
-          "type": "string"
-        },
-        "address_3": {
-          "type": "string"
-        },
-        "isAdmin": {
-          "type": "boolean",
-          "format": "boolean"
         }
       }
     },

@@ -19,8 +19,8 @@ import (
 type CryptoComRequest struct {
 	Id        uint64      `json:"id"`
 	Method    string      `json:"method"`
-	Params    interface{} `json:"params,omitempty"`
 	ApiKey    string      `json:"api_key,omitempty"`
+	Params    interface{} `json:"params,omitempty"`
 	Signature string      `json:"sig,omitempty"`
 	Nonce     uint64      `json:"nonce"`
 }
@@ -356,17 +356,17 @@ func (c *wsClientConn) readPump() {
 }
 
 func (c *wsClientConn) reconnect() {
-	time.Sleep(10 * time.Second)
+	time.Sleep(5 * time.Second)
 	for {
 		err := c.connect()
 		if err == nil {
 			break
 		}
-		fmt.Println("failed to reconnect", err)
+		fmt.Println("failed to reconnect crypto.com", err)
 		time.Sleep(5 * time.Second)
 	}
 
-	fmt.Println("reconnected")
+	fmt.Println("reconnected crypto.com")
 
 	var err error
 
@@ -413,7 +413,7 @@ func (c *wsClientConn) reconnect() {
 		fmt.Println("resubscribed trades")
 	}
 
-	c.readPump()
+	go c.readPump()
 }
 
 func (c *wsClientConn) handleHeartbeat(resp *CryptoComResponse) {

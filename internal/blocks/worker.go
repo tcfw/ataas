@@ -18,6 +18,9 @@ var (
 )
 
 func (s *Server) work(id int) {
+	s.workWg.Add(1)
+	defer s.workWg.Done()
+
 	for a := range s.applyCh {
 		err := s.handleApply(id, a)
 		if err != nil {
@@ -73,6 +76,8 @@ func (s *Server) applyState(b *blocks.Block, ns blocks.BlockState, n int) (*orde
 		return nil, ErrSameState
 	}
 
+	s.log.Warnf("Applying state to block %s: %s x%d", b.Id, ns, n)
+
 	ordersSvc, err := ordersSvc()
 	if err != nil {
 		return nil, err
@@ -82,7 +87,11 @@ func (s *Server) applyState(b *blocks.Block, ns blocks.BlockState, n int) (*orde
 	defer cancel()
 
 	nUnits := b.CurrentUnits
-	unitDiff := b.BaseUnits * float32(n)
+	unitDiff := b.BaseUnits * float64(n)
+	if b.CurrentUnits < unitDiff {
+		unitDiff = b.CurrentUnits
+	}
+
 	var price float32
 	var order *orders.Order
 
@@ -122,7 +131,7 @@ func (s *Server) applyState(b *blocks.Block, ns blocks.BlockState, n int) (*orde
 			resp, err := ordersSvc.Create(ctx, &orders.CreateRequest{
 				BlockID: b.Id,
 				Action:  orders.Action_SELL,
-				Units:   b.CurrentUnits,
+				Units:   unitDiff,
 				Price:   -1, //market
 			})
 			if err != nil {

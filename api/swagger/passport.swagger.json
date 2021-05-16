@@ -352,6 +352,13 @@
         },
         "devFP": {
           "type": "string"
+        },
+        "insecureLogin": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "recaptcha": {
+          "type": "string"
         }
       }
     },

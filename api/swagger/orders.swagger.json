@@ -98,7 +98,7 @@
         },
         "units": {
           "type": "number",
-          "format": "float"
+          "format": "double"
         },
         "price": {
           "type": "number",

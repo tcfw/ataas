@@ -27,7 +27,7 @@ func init() {
 					units FLOAT8 NOT NULL,
 					ts TIMESTAMPTZ NOT NULL,
 					PRIMARY KEY (market, instrument, tradeid),
-					INDEX trades_ts_idx (ts DESC) USING HASH WITH BUCKET_COUNT=8
+					INDEX trades_ts_idx (ts DESC) USING HASH WITH BUCKET_COUNT=24
 				)
 			`)
 			return err

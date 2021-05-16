@@ -6,6 +6,7 @@ import (
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
+	"pm.tcfw.com.au/source/trader/api/marshalers"
 	"pm.tcfw.com.au/source/trader/api/pb/blocks"
 	"pm.tcfw.com.au/source/trader/api/pb/orders"
 	"pm.tcfw.com.au/source/trader/api/pb/passport"
@@ -15,7 +16,9 @@ import (
 )
 
 func newRouter(ctx context.Context) (*runtime.ServeMux, error) {
-	r := runtime.NewServeMux()
+	r := runtime.NewServeMux(
+		runtime.WithMarshalerOption("application/json", &marshalers.JSONMarshaler{}),
+	)
 
 	conn, err := grpc.DialContext(
 		ctx,

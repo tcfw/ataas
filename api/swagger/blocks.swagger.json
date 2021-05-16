@@ -101,7 +101,7 @@
         ]
       }
     },
-    "/v1/blocks/{id}/action": {
+    "/v1/blocks/{id}/action/{action}": {
       "post": {
         "operationId": "ManualAction",
         "responses": {
@@ -118,6 +118,16 @@
             "in": "path",
             "required": true,
             "type": "string"
+          },
+          {
+            "name": "action",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "enum": [
+              "BUY",
+              "SELL"
+            ]
           },
           {
             "name": "body",
@@ -146,11 +156,11 @@
         },
         "baseUnits": {
           "type": "number",
-          "format": "float"
+          "format": "double"
         },
         "currentUnits": {
           "type": "number",
-          "format": "float"
+          "format": "double"
         },
         "purchase": {
           "type": "number",
@@ -244,7 +254,7 @@
         },
         "units": {
           "type": "number",
-          "format": "float"
+          "format": "double"
         },
         "price": {
           "type": "number",

@@ -44,7 +44,7 @@ func (s *Server) Start(ctx context.Context) error {
 }
 
 func (s *Server) RunOnce() error {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
 	q := db.Build().Select("id", "market", "instrument", "strategy", "params", "duration").

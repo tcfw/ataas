@@ -20,6 +20,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/grpclog"
 	"google.golang.org/grpc/status"
+	"pm.tcfw.com.au/source/trader/api/pb/orders"
 )
 
 var _ codes.Code
@@ -95,6 +96,7 @@ func request_BlocksService_ManualAction_0(ctx context.Context, marshaler runtime
 
 	var (
 		val string
+		e   int32
 		ok  bool
 		err error
 		_   = err
@@ -110,6 +112,19 @@ func request_BlocksService_ManualAction_0(ctx context.Context, marshaler runtime
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "id", err)
 	}
+
+	val, ok = pathParams["action"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "action")
+	}
+
+	e, err = runtime.Enum(val, orders.Action_value)
+
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "action", err)
+	}
+
+	protoReq.Action = orders.Action(e)
 
 	msg, err := client.ManualAction(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
@@ -291,7 +306,7 @@ var (
 
 	pattern_BlocksService_Get_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"v1", "blocks", "id"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_BlocksService_ManualAction_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3}, []string{"v1", "blocks", "id", "action"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_BlocksService_ManualAction_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3, 1, 0, 4, 1, 5, 3}, []string{"v1", "blocks", "id", "action"}, "", runtime.AssumeColonVerbOpt(true)))
 
 	pattern_BlocksService_Delete_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"v1", "blocks", "id"}, "", runtime.AssumeColonVerbOpt(true)))
 )

@@ -3,8 +3,10 @@ package main
 import (
 	"context"
 	"os"
+	"os/signal"
 	"strings"
 	"sync"
+	"syscall"
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
@@ -66,6 +68,16 @@ func main() {
 			log.Errorf("%s\n", err)
 			os.Exit(1)
 		}
+	}()
+
+	c := make(chan os.Signal)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-c
+		log.Warnln("Shutting down...")
+		apiServer.Stop()
+		log.Infoln("Gracefully shutdown")
+		os.Exit(0)
 	}()
 
 	wg.Wait()

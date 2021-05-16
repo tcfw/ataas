@@ -14,11 +14,10 @@ func TestSignature(t *testing.T) {
 		"side":            "BUY",
 		"type":            "MARKET",
 		"time_in_force":   "IMMEDIATE_OR_CANCEL",
-		"client_oid":      "Trader",
 		"notional":        12345.23,
 	}
 
-	hmac := c.sign("private/get-order-detail", params, 5577006791947779410, 1620090103445)
+	hmac := c.sign("private/create-order", params, 5577006791947779410, 1620090103445)
 
-	assert.Equal(t, "95453ee99107c53e142a546f0a275a40209eaaefbccc1e875fd7bee0cb3ecd90", hmac)
+	assert.Equal(t, "887ef25120ceef609ba05da4109c288d234b5839843fdd9404a2ad151727039c", hmac)
 }

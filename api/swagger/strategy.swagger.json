@@ -51,10 +51,36 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/strategyCreateResponse"
+              "$ref": "#/definitions/traderstrategyCreateResponse"
             }
           }
         },
+        "tags": [
+          "StrategyService"
+        ]
+      }
+    },
+    "/v1/strategy/backtest": {
+      "post": {
+        "operationId": "BackTest",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/strategyBacktestResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/strategyBacktestRequest"
+            }
+          }
+        ],
         "tags": [
           "StrategyService"
         ]
@@ -121,20 +147,50 @@
     }
   },
   "definitions": {
-    "strategyAction": {
-      "type": "string",
-      "enum": [
-        "STAY",
-        "BUY",
-        "SELL"
-      ],
-      "default": "STAY"
+    "ordersOrder": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "timestamp": {
+          "type": "string"
+        },
+        "action": {
+          "$ref": "#/definitions/traderordersAction"
+        },
+        "units": {
+          "type": "number",
+          "format": "double"
+        },
+        "price": {
+          "type": "number",
+          "format": "float"
+        },
+        "blockID": {
+          "type": "string"
+        }
+      }
     },
-    "strategyCreateResponse": {
+    "strategyBacktestRequest": {
       "type": "object",
       "properties": {
         "strategy": {
           "$ref": "#/definitions/strategyStrategy"
+        },
+        "fromTimestamp": {
+          "type": "string"
+        }
+      }
+    },
+    "strategyBacktestResponse": {
+      "type": "object",
+      "properties": {
+        "orders": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ordersOrder"
+          }
         }
       }
     },
@@ -148,7 +204,7 @@
           "type": "string"
         },
         "action": {
-          "$ref": "#/definitions/strategyAction"
+          "$ref": "#/definitions/traderstrategyAction"
         },
         "timestamp": {
           "type": "string"
@@ -213,6 +269,31 @@
         "MeanLog"
       ],
       "default": "MeanLog"
+    },
+    "traderordersAction": {
+      "type": "string",
+      "enum": [
+        "BUY",
+        "SELL"
+      ],
+      "default": "BUY"
+    },
+    "traderstrategyAction": {
+      "type": "string",
+      "enum": [
+        "STAY",
+        "BUY",
+        "SELL"
+      ],
+      "default": "STAY"
+    },
+    "traderstrategyCreateResponse": {
+      "type": "object",
+      "properties": {
+        "strategy": {
+          "$ref": "#/definitions/strategyStrategy"
+        }
+      }
     }
   }
 }

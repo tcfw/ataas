@@ -14,6 +14,8 @@ import (
 
 type APIServer struct {
 	router *mux.Router
+
+	Stop func()
 }
 
 func NewAPIServer(ctx context.Context) (*APIServer, error) {
@@ -61,7 +63,9 @@ func (s *APIServer) serveGRPC(ctx context.Context) error {
 		return err
 	}
 
-	start, grpc := newGRPCServer(ctx)
+	start, stop, grpc := newGRPCServer(ctx)
+
+	s.Stop = stop
 
 	if viper.GetBool("services.start") {
 		start()
@@ -81,6 +85,7 @@ func (s *APIServer) serveHTTPS(ctx context.Context) error {
 	h3Serv := &http3.Server{Server: httpServ}
 
 	s.router.Use(h3Headers(h3Serv))
+	// s.router.Use(authHandler)
 
 	httpServ.Handler = s.router
 

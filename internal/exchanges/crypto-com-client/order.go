@@ -21,27 +21,31 @@ const (
 
 type OrderResponse struct {
 	price float32
-	units float32
+	units float64
 }
 
 func (or *OrderResponse) Price() float32 { return or.price }
-func (or *OrderResponse) Units() float32 { return or.units }
+func (or *OrderResponse) Units() float64 { return or.units }
 
-func (c *Client) Buy(instrument string, price float32, units float32) (exchanges.OrderResponse, error) {
-	if price < 0 {
-
-	}
-
+func (c *Client) Buy(instrument string, price float32, units float64) (exchanges.OrderResponse, error) {
 	return c.createImmediateOrder(instrument, true, OrderTypeMarket, price, units)
 }
 
-func (c *Client) Sell(instrument string, price float32, units float32) (exchanges.OrderResponse, error) {
+func (c *Client) Sell(instrument string, price float32, units float64) (exchanges.OrderResponse, error) {
 	return c.createImmediateOrder(instrument, false, OrderTypeMarket, 0, units)
 }
 
-//createOrder creates a new signed order
+func (c *Client) getOrderHistory() (*CryptoComResponse, error) {
+	return c.doReq(getOrderHistory, map[string]interface{}{})
+}
+
+func (c *Client) getTrades() (*CryptoComResponse, error) {
+	return c.doReq(getUserTrades, map[string]interface{}{})
+}
+
+//createImmediateOrder creates a new signed order
 //side: true for buy, false for sell
-func (c *Client) createImmediateOrder(instrument string, side bool, orderType OrderType, price float32, quantity float32) (exchanges.OrderResponse, error) {
+func (c *Client) createImmediateOrder(instrument string, side bool, orderType OrderType, price float32, quantity float64) (exchanges.OrderResponse, error) {
 	sideStr := "SELL"
 	if side {
 		sideStr = "BUY"
@@ -51,7 +55,6 @@ func (c *Client) createImmediateOrder(instrument string, side bool, orderType Or
 		"instrument_name": instrument,
 		"side":            sideStr,
 		"type":            orderType,
-		"time_in_force":   "IMMEDIATE_OR_CANCEL",
 	}
 
 	if side { //buy
@@ -89,7 +92,7 @@ func (c *Client) createImmediateOrder(instrument string, side bool, orderType Or
 
 	fnResp := &OrderResponse{
 		price: order.TradeList[0].TradedPrice,
-		units: order.TradeList[0].TradedQuantity,
+		units: float64(order.TradeList[0].TradedQuantity),
 	}
 
 	return fnResp, nil

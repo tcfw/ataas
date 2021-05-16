@@ -3,6 +3,7 @@ package blocks
 import (
 	"context"
 	"fmt"
+	"sync"
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/google/uuid"
@@ -67,6 +68,8 @@ type Server struct {
 	log     *logrus.Logger
 	unsub   func() error
 	applyCh chan *apply
+
+	workWg sync.WaitGroup
 }
 
 type apply struct {
@@ -82,6 +85,13 @@ func (s *Server) Migrate(ctx context.Context) error {
 	defer conn.Release()
 
 	return migrate.Migrate(ctx, conn.Conn(), s.log)
+}
+
+func (s *Server) Stop() {
+	close(s.applyCh)
+
+	//Wait for all processing orders to complete
+	s.workWg.Wait()
 }
 
 func (s *Server) Listen() error {
@@ -101,6 +111,8 @@ func (s *Server) Listen() error {
 }
 
 func (s *Server) handleAction(data *strategies.ActionEvent) {
+	s.log.Infoln("Handling STRAT action")
+
 	q := db.Build().Select(allColumns...).From(tblName).Where(sq.Eq{"strategy_id": data.StrategyID})
 	res, done, err := db.SimpleQuery(context.Background(), q)
 	if err != nil {
@@ -108,6 +120,8 @@ func (s *Server) handleAction(data *strategies.ActionEvent) {
 		return
 	}
 	defer done()
+
+	n := 0
 
 	for res.Next() {
 		block := &blocksAPI.Block{}
@@ -129,10 +143,12 @@ func (s *Server) handleAction(data *strategies.ActionEvent) {
 			continue
 		}
 		s.applyCh <- &apply{data.Action, block}
+		n++
 	}
+
+	s.log.Infof("Applied to %d blocks", n)
 }
 
-//TODO(tcfw)
 func (s *Server) New(ctx context.Context, req *blocksAPI.Block) (*blocksAPI.Block, error) {
 	if req.BackoutPercentage == 0 {
 		req.BackoutPercentage = defaultBackoutPercentage
@@ -208,6 +224,7 @@ func (s *Server) List(ctx context.Context, req *blocksAPI.ListRequest) (*blocksA
 
 	for res.Next() {
 		block := &blocksAPI.Block{}
+
 		err := res.Scan(
 			&block.Id,
 			&block.StrategyId,
@@ -241,7 +258,7 @@ func (s *Server) Get(ctx context.Context, req *blocksAPI.GetRequest) (*blocksAPI
 	defer done()
 
 	if !res.Next() {
-		return nil, status.Error(codes.NotFound, "block now found")
+		return nil, status.Error(codes.NotFound, "block not found")
 	}
 
 	block := &blocksAPI.Block{}
@@ -275,7 +292,7 @@ func (s *Server) ManualAction(ctx context.Context, req *blocksAPI.ManualRequest)
 	alreadyPurchased := block.State == blocksAPI.BlockState_PURCHASED && req.Action == orders.Action_BUY
 	alreadySold := block.State == blocksAPI.BlockState_SOLD && req.Action == orders.Action_SELL
 	if alreadyPurchased || alreadySold {
-		return nil, status.Error(codes.FailedPrecondition, "invalid future state")
+		return nil, status.Errorf(codes.FailedPrecondition, "invalid future state %t %t", alreadyPurchased, alreadySold)
 	}
 
 	var order *orders.Order

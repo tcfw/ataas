@@ -10,6 +10,7 @@ import (
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
@@ -24,10 +25,25 @@ var (
 )
 
 func NewServer(ctx context.Context) (*Server, error) {
-	s := &Server{
-		log: logrus.New(),
+	log := logrus.New()
+
+	libDir := viper.GetString("collector.library")
+	if libDir == "" {
+		return nil, fmt.Errorf("no library loc provided")
 	}
-	err := s.Migrate(ctx)
+	log.Infof("Loading trades library: %s", libDir)
+
+	lib, err := NewLibrary(libDir, log)
+	if err != nil {
+		return nil, err
+	}
+
+	s := &Server{
+		log:     log,
+		library: lib,
+	}
+
+	err = s.Migrate(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -39,6 +55,8 @@ type Server struct {
 	ticks.UnimplementedHistoryServiceServer
 
 	log *logrus.Logger
+
+	library *TradeLibrary
 }
 
 func (s *Server) Migrate(ctx context.Context) error {
@@ -49,6 +67,10 @@ func (s *Server) Migrate(ctx context.Context) error {
 	defer conn.Release()
 
 	return migrate.Migrate(ctx, conn.Conn(), s.log)
+}
+
+func (s *Server) Close() error {
+	return s.library.Close()
 }
 
 //TradesRange provides trades of a specific instrument/market within a specific time span from now
@@ -66,12 +88,25 @@ func (s *Server) TradesRange(ctx context.Context, req *ticks.RangeRequest) (*tic
 		return nil, ErrDurationTooLong
 	}
 
-	query := db.Build().Select("tradeid", "ts", "direction", "amount", "units").
-		From("trades").
-		Where(sq.And{sq.Eq{"market": req.Market, "instrument": req.Instrument}, sq.GtOrEq{"ts": time.Now().Add(-1 * ts)}}).
-		OrderBy("ts DESC")
+	// query := db.Build().Select("tradeid", "ts", "direction", "amount", "units").
+	// 	From("trades").
+	// 	Where(sq.And{sq.Eq{"market": req.Market, "instrument": req.Instrument}, sq.GtOrEq{"ts": time.Now().Add(-1 * ts)}}).
+	// 	OrderBy("ts ASC")
 
-	return s.readTrades(ctx, query, req.Market, req.Instrument)
+	// return s.readTrades(ctx, query, req.Market, req.Instrument)
+
+	trades, err := s.library.GetSince(req.Market, req.Instrument, time.Now().Add(-ts))
+	if err != nil {
+		return nil, err
+	}
+
+	for _, trade := range trades {
+		trade.Market = ""
+		trade.Instrument = ""
+		trade.TradeID = ""
+	}
+
+	return &ticks.TradesResponse{Data: trades}, nil
 }
 
 //Ticks provides a history of transactions for a particular instrument
@@ -84,13 +119,60 @@ func (s *Server) Trades(ctx context.Context, req *ticks.GetRequest) (*ticks.Trad
 		req.Depth = 100
 	}
 
-	query := db.Build().Select("tradeid", "ts", "direction", "amount", "units").
-		From("trades").
-		Where(sq.Eq{"market": req.Market, "instrument": req.Instrument}).
-		OrderBy("ts DESC").
-		Limit(uint64(req.Depth))
+	// query := db.Build().Select("tradeid", "ts", "direction", "amount", "units").
+	// 	From("trades").
+	// 	Where(sq.Eq{"market": req.Market, "instrument": req.Instrument}).
+	// 	OrderBy("ts DESC").
+	// 	Limit(uint64(req.Depth))
 
-	return s.readTrades(ctx, query, req.Market, req.Instrument)
+	// return s.readTrades(ctx, query, req.Market, req.Instrument)
+
+	trades, err := s.library.GetSince(req.Market, req.Instrument, time.Now().Add(-time.Duration(req.Depth+60)*time.Second))
+	if err != nil {
+		return nil, err
+	}
+
+	c := int32(len(trades)) - req.Depth
+	if c < 0 {
+		c = 0
+	}
+
+	for _, trade := range trades[c:] {
+		trade.Market = ""
+		trade.Instrument = ""
+		trade.TradeID = ""
+	}
+
+	return &ticks.TradesResponse{Data: trades[c:]}, nil
+}
+
+func (s *Server) TradesRangeStream(req *ticks.RangeRequest, stream ticks.HistoryService_TradesRangeStreamServer) error {
+	if req.Instrument == "" || req.Market == "" {
+		return status.Error(codes.InvalidArgument, "missing required arguments")
+	}
+
+	ts, err := time.ParseDuration(req.Since)
+	if err != nil {
+		return err
+	}
+
+	if ts > 48*time.Hour {
+		return ErrDurationTooLong
+	}
+
+	tradesCh, err := s.library.GetSinceStream(req.Market, req.Instrument, time.Now().Add(-1*time.Hour))
+	if err != nil {
+		return err
+	}
+
+	for t := range tradesCh {
+		err := stream.Send(t)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (s *Server) readTrades(ctx context.Context, query sq.Sqlizer, market, instrument string) (*ticks.TradesResponse, error) {
@@ -144,15 +226,15 @@ func (s *Server) Candles(ctx context.Context, req *ticks.CandlesRequest) (*ticks
 	}
 
 	query := db.Build().Select(
-		"array_agg(amount)[1]",
-		"array_agg(amount)[array_length(array_agg(amount), 1)]",
-		"max(amount)",
-		"min(amount)",
-		"count(*)",
+		"array_agg(amount)[1] as open",
+		"array_agg(amount)[array_length(array_agg(amount), 1)] as close",
+		"max(amount) as high",
+		"min(amount) as low",
+		"count(*) as volume",
 		tsExpr,
 	).From("trades").
 		Where(sq.Eq{"market": req.Market, "instrument": req.Instrument}).
-		GroupBy("timestamp").OrderBy("timestamp DESC").Limit(uint64(req.Depth))
+		GroupBy("timestamp").OrderBy("timestamp ASC").Limit(uint64(req.Depth))
 
 	res, done, err := db.SimpleQuery(ctx, query)
 	if err != nil {
@@ -182,18 +264,19 @@ func (s *Server) timeframeExpr(interval string) (string, error) {
 	largeUnit := ""
 	smallUnit := ""
 	multipler := 0
-	switch interval {
-	case "1m", "5m", "15m", "30m":
+
+	switch interval[len(interval)-1] {
+	case 'm':
 		suffix = "m"
 		largeUnit = "hour"
 		smallUnit = "minute"
 		multipler = 60
-	case "1h", "4h", "6h", "12h":
+	case 'h':
 		suffix = "h"
 		largeUnit = "day"
 		smallUnit = "hour"
 		multipler = 60 * 60
-	case "1d":
+	case 'd':
 		return "date_trunc('day', ts)", nil
 	default:
 		return "", ErrUnknownInterval

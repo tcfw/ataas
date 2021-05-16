@@ -5,6 +5,12 @@ option go_package = "pm.tcfw.com.au/source/trader/api/pb/blocks";
 
 import "google/api/annotations.proto";
 import "orders.proto";
+import "gogo.proto";
+
+option (gogoproto.marshaler_all) = true;
+option (gogoproto.sizer_all) = true;
+option (gogoproto.unmarshaler_all) = true;
+
 
 enum BlockState {
 	NOTHING = 0;
@@ -16,8 +22,8 @@ enum BlockState {
 message Block {
 	string id = 1;
 	string strategy_id = 2;
-	float baseUnits = 3;
-	float currentUnits = 4;
+	double baseUnits = 3;
+	double currentUnits = 4;
 	float purchase = 5;
 	BlockState state = 8;
 	int64 watchDuration = 9;
@@ -72,7 +78,7 @@ service BlocksService {
 	};
 	rpc ManualAction(ManualRequest) returns (ManualResponse) {
 		option (google.api.http) = {
-            post: "/v1/blocks/{id}/action"
+            post: "/v1/blocks/{id}/action/{action}"
 			body: "*"
 		};
 	};

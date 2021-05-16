@@ -4,6 +4,13 @@ package trader.strategy;
 option go_package = "pm.tcfw.com.au/source/trader/api/pb/strategy";
 
 import "google/api/annotations.proto";
+import "gogo.proto";
+import "orders.proto";
+
+option (gogoproto.marshaler_all) = true;
+option (gogoproto.sizer_all) = true;
+option (gogoproto.unmarshaler_all) = true;
+
 
 enum Action {
 	STAY = 0;
@@ -60,8 +67,17 @@ message HistoryAction {
 	string timestamp = 3;
 }
 
-message HistoryResponse{
+message HistoryResponse {
 	repeated HistoryAction events = 1;
+}
+
+message BacktestRequest {
+	Strategy strategy = 1;
+	string fromTimestamp = 2;
+}
+
+message BacktestResponse {
+	repeated trader.orders.Order orders = 1;
 }
 
 service StrategyService {
@@ -83,6 +99,12 @@ service StrategyService {
 	rpc Delete(DeleteRequest) returns (DeleteResponse) {
 		option (google.api.http) = {
             delete: "/v1/strategy/{id}"
+		};
+	};
+	rpc BackTest(BacktestRequest) returns (BacktestResponse) {
+		option (google.api.http) = {
+			post: "/v1/strategy/backtest"
+			body: "*"
 		};
 	};
 }

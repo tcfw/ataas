@@ -16,9 +16,8 @@ type Client struct {
 	c  *http.Client
 	ws *wsManager
 
-	key    string
-	secret string
-
+	key          string
+	secret       string
 	httpEndpoint string
 }
 

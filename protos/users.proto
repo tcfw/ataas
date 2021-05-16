@@ -4,6 +4,12 @@ package trader.users;
 option go_package = "pm.tcfw.com.au/source/trader/api/pb/users;users";
 
 import "google/api/annotations.proto";
+import "gogo.proto";
+
+option (gogoproto.marshaler_all) = true;
+option (gogoproto.sizer_all) = true;
+option (gogoproto.unmarshaler_all) = true;
+
 
 message User {
 	enum Status {
@@ -17,28 +23,18 @@ message User {
 	
     string firstName = 3;
     string lastName = 4;
-    string company = 12;
     string email = 5;
 	
     int64 createdAt = 6;
 	int64 updatedAt = 7;
-	int64 deletedAt = 20;
+	int64 deletedAt = 8;
 	
-	string password = 8;
+	string password = 9;
 	
-    map<string, bytes> metadata = 9;
-    string picture = 10;
+    map<string, bytes> metadata = 10;
     MFA mfa = 11;
-
-    string country = 13;
-    string state = 14;
-    string postcode = 15;
-    string city = 16;
-    string address_1 = 17;
-    string address_2 = 18;
-    string address_3 = 19;
-
-    bool isAdmin = 23;
+    
+    string account = 12;
 }
 
 message UserRequest {
@@ -79,8 +75,16 @@ message AuthRequest {
 }
 
 message MFAFIDO {
-    bytes registration = 1;
-    bytes registrationChallenge = 2;
+    bytes id = 1;
+    bytes pk = 2;
+    string attestationType = 3;
+    FIDOAuthenticator authenticator = 4;
+}
+
+message FIDOAuthenticator {
+    bytes AAGUID = 1;
+    uint32 SignCount = 2;
+    bool CloneWarning = 3;
 }
 
 message MFASMS {

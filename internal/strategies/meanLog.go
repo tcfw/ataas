@@ -16,7 +16,7 @@ func (w *Worker) handleMeanLog(job *strategy.Strategy) error {
 		return err
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
 	var dur string
@@ -25,6 +25,24 @@ func (w *Worker) handleMeanLog(job *strategy.Strategy) error {
 	if ok {
 		dur = "5m"
 	}
+
+	// tradesResp, err := t.TradesRangeStream(ctx, &ticks.RangeRequest{Market: job.Market, Instrument: job.Instrument, Since: dur})
+	// if err != nil {
+	// 	return err
+	// }
+
+	// trades := make([]*ticks.Trade, 0, 1000)
+
+	// for {
+	// 	trade, err := tradesResp.Recv()
+	// 	if err == io.EOF {
+	// 		break
+	// 	} else if err != nil {
+	// 		return err
+	// 	}
+
+	// 	trades = append(trades, trade)
+	// }
 
 	tradesResp, err := t.TradesRange(ctx, &ticks.RangeRequest{Market: job.Market, Instrument: job.Instrument, Since: dur})
 	if err != nil {
@@ -52,6 +70,7 @@ func meanLog(trades []*ticks.Trade) strategy.Action {
 		return strategy.Action_STAY
 	}
 
+	//Ensure is sorted in ascending timestamp
 	sort.Sort(SortableTrades(trades))
 
 	sum := 0.0
@@ -66,19 +85,20 @@ func meanLog(trades []*ticks.Trade) strategy.Action {
 
 		n++
 
-		s := math.Log(float64(a / b))
-		if s < 0 {
-			sum += -1
-		} else {
-			sum += 1
-		}
+		sum += math.Log(float64(a / b))
+		// s := math.Log(float64(a / b))
+		// if s < 0 {
+		// 	sum += -1
+		// } else {
+		// 	sum += 1
+		// }
 	}
 
-	avg := sum / n
+	// avg := sum / n
 
-	if avg == 0 {
+	if sum == 0 {
 		return strategy.Action_STAY
-	} else if avg < 0 {
+	} else if sum < 0 {
 		return strategy.Action_SELL
 	}
 

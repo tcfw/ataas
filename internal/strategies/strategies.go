@@ -18,7 +18,7 @@ import (
 type Action int8
 
 const (
-	checkT         = 5 * time.Second
+	checkT         = 1 * time.Second
 	tblName        = "strategies"
 	historyTblName = "strategy_history"
 )

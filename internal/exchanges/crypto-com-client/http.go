@@ -44,7 +44,7 @@ func (c *Client) newHttpRequest(method apiMethod, params map[string]interface{})
 	} else if httpMethod == http.MethodPost {
 		req := &CryptoComRequest{
 			Id:     uint64(rand.Uint64() / 100000),
-			Nonce:  uint64(time.Now().UnixNano() / 1000000),
+			Nonce:  uint64(time.Now().Unix() * 1000),
 			Method: string(method),
 			Params: params,
 		}

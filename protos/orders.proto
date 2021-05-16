@@ -4,6 +4,12 @@ package trader.orders;
 option go_package = "pm.tcfw.com.au/source/trader/api/pb/orders";
 
 import "google/api/annotations.proto";
+import "gogo.proto";
+
+option (gogoproto.marshaler_all) = true;
+option (gogoproto.sizer_all) = true;
+option (gogoproto.unmarshaler_all) = true;
+
 
 enum Action {
 	BUY = 0;
@@ -14,7 +20,7 @@ message Order {
 	string id = 1;
 	string timestamp = 2;
 	Action action = 3;
-	float units = 4;
+	double units = 4;
 	float price = 5;
 	string blockID = 6;
 }
@@ -31,7 +37,7 @@ message CreateRequest {
 	string blockID = 1;
 	Action action = 2;
 	float price = 3;
-	float units = 4;
+	double units = 4;
 }
 
 message CreateResponse {
