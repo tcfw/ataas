@@ -31,7 +31,7 @@ message OHLCV {
 	float high = 4;
 	float low = 5;
 	float close = 6;
-	int32 volume = 7;
+	float volume = 7;
 	int64 timestamp = 8;
 }
 
@@ -110,9 +110,4 @@ service HistoryService {
             get: "/v1/history/candle"
         };
     };
-	rpc RangeCompare(CompareRequest) returns (CompareResponse) {
-		option (google.api.http) = {
-			get: "/v1/history/compare"
-		};
-	};
 }

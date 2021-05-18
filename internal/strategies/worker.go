@@ -59,6 +59,8 @@ func (s *Server) RunOnce() error {
 
 	var duration time.Duration
 
+	ts := time.Now()
+
 	for res.Next() {
 		job := &strategy.Strategy{}
 		err := res.Scan(&job.Id, &job.Market, &job.Instrument, &job.Strategy, &job.Params, &duration)
@@ -67,7 +69,7 @@ func (s *Server) RunOnce() error {
 		}
 
 		q := db.Build().Update(tblName).
-			SetMap(sq.Eq{"next": time.Now().Add(duration)}).
+			SetMap(sq.Eq{"next": ts.Add(duration)}).
 			Where(sq.Eq{"id": job.Id}).
 			Limit(1)
 

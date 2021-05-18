@@ -106,26 +106,6 @@ func request_HistoryService_Candles_0(ctx context.Context, marshaler runtime.Mar
 
 }
 
-var (
-	filter_HistoryService_RangeCompare_0 = &utilities.DoubleArray{Encoding: map[string]int{}, Base: []int(nil), Check: []int(nil)}
-)
-
-func request_HistoryService_RangeCompare_0(ctx context.Context, marshaler runtime.Marshaler, client HistoryServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq CompareRequest
-	var metadata runtime.ServerMetadata
-
-	if err := req.ParseForm(); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_HistoryService_RangeCompare_0); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-
-	msg, err := client.RangeCompare(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
-	return msg, metadata, err
-
-}
-
 // RegisterHistoryServiceHandlerFromEndpoint is same as RegisterHistoryServiceHandler but
 // automatically dials to "endpoint" and closes the connection when "ctx" gets done.
 func RegisterHistoryServiceHandlerFromEndpoint(ctx context.Context, mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) (err error) {
@@ -224,26 +204,6 @@ func RegisterHistoryServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 
 	})
 
-	mux.Handle("GET", pattern_HistoryService_RangeCompare_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(req.Context())
-		defer cancel()
-		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateContext(ctx, mux, req)
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		resp, md, err := request_HistoryService_RangeCompare_0(rctx, inboundMarshaler, client, req, pathParams)
-		ctx = runtime.NewServerMetadataContext(ctx, md)
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-
-		forward_HistoryService_RangeCompare_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
-
-	})
-
 	return nil
 }
 
@@ -253,8 +213,6 @@ var (
 	pattern_HistoryService_TradesRange_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"v1", "history", "trades", "since"}, "", runtime.AssumeColonVerbOpt(true)))
 
 	pattern_HistoryService_Candles_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"v1", "history", "candle"}, "", runtime.AssumeColonVerbOpt(true)))
-
-	pattern_HistoryService_RangeCompare_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"v1", "history", "compare"}, "", runtime.AssumeColonVerbOpt(true)))
 )
 
 var (
@@ -263,6 +221,4 @@ var (
 	forward_HistoryService_TradesRange_0 = runtime.ForwardResponseMessage
 
 	forward_HistoryService_Candles_0 = runtime.ForwardResponseMessage
-
-	forward_HistoryService_RangeCompare_0 = runtime.ForwardResponseMessage
 )

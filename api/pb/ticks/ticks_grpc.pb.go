@@ -22,7 +22,6 @@ type HistoryServiceClient interface {
 	TradesRange(ctx context.Context, in *RangeRequest, opts ...grpc.CallOption) (*TradesResponse, error)
 	TradesRangeStream(ctx context.Context, in *RangeRequest, opts ...grpc.CallOption) (HistoryService_TradesRangeStreamClient, error)
 	Candles(ctx context.Context, in *CandlesRequest, opts ...grpc.CallOption) (*CandlesResponse, error)
-	RangeCompare(ctx context.Context, in *CompareRequest, opts ...grpc.CallOption) (*CompareResponse, error)
 }
 
 type historyServiceClient struct {
@@ -92,15 +91,6 @@ func (c *historyServiceClient) Candles(ctx context.Context, in *CandlesRequest, 
 	return out, nil
 }
 
-func (c *historyServiceClient) RangeCompare(ctx context.Context, in *CompareRequest, opts ...grpc.CallOption) (*CompareResponse, error) {
-	out := new(CompareResponse)
-	err := c.cc.Invoke(ctx, "/trader.ticks.HistoryService/RangeCompare", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // HistoryServiceServer is the server API for HistoryService service.
 // All implementations must embed UnimplementedHistoryServiceServer
 // for forward compatibility
@@ -109,7 +99,6 @@ type HistoryServiceServer interface {
 	TradesRange(context.Context, *RangeRequest) (*TradesResponse, error)
 	TradesRangeStream(*RangeRequest, HistoryService_TradesRangeStreamServer) error
 	Candles(context.Context, *CandlesRequest) (*CandlesResponse, error)
-	RangeCompare(context.Context, *CompareRequest) (*CompareResponse, error)
 	mustEmbedUnimplementedHistoryServiceServer()
 }
 
@@ -128,9 +117,6 @@ func (UnimplementedHistoryServiceServer) TradesRangeStream(*RangeRequest, Histor
 }
 func (UnimplementedHistoryServiceServer) Candles(context.Context, *CandlesRequest) (*CandlesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Candles not implemented")
-}
-func (UnimplementedHistoryServiceServer) RangeCompare(context.Context, *CompareRequest) (*CompareResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method RangeCompare not implemented")
 }
 func (UnimplementedHistoryServiceServer) mustEmbedUnimplementedHistoryServiceServer() {}
 
@@ -220,24 +206,6 @@ func _HistoryService_Candles_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
-func _HistoryService_RangeCompare_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CompareRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(HistoryServiceServer).RangeCompare(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/trader.ticks.HistoryService/RangeCompare",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(HistoryServiceServer).RangeCompare(ctx, req.(*CompareRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 // HistoryService_ServiceDesc is the grpc.ServiceDesc for HistoryService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -256,10 +224,6 @@ var HistoryService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Candles",
 			Handler:    _HistoryService_Candles_Handler,
-		},
-		{
-			MethodName: "RangeCompare",
-			Handler:    _HistoryService_RangeCompare_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

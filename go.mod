@@ -1,4 +1,4 @@
-module pm.tcfw.com.au/source/trader
+module pm.tcfw.com.au/source/ataas
 
 go 1.16
 

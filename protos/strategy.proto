@@ -80,6 +80,11 @@ message BacktestResponse {
 	repeated trader.orders.Order orders = 1;
 }
 
+message UpdateRequest {
+	string id = 1;
+	Strategy strategy = 2;
+}
+
 service StrategyService {
 	rpc List(ListRequest) returns (ListResponse) {
 		option (google.api.http) = {
@@ -99,6 +104,11 @@ service StrategyService {
 	rpc Delete(DeleteRequest) returns (DeleteResponse) {
 		option (google.api.http) = {
             delete: "/v1/strategy/{id}"
+		};
+	};
+	rpc Update(UpdateRequest) returns (Strategy) {
+		option (google.api.http) = {
+			post: "/v1/strategy/{id}"
 		};
 	};
 	rpc BackTest(BacktestRequest) returns (BacktestResponse) {

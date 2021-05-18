@@ -58,42 +58,6 @@
         ]
       }
     },
-    "/v1/history/compare": {
-      "get": {
-        "operationId": "RangeCompare",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/ticksCompareResponse"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "market",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "instrument",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "interval",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "HistoryService"
-        ]
-      }
-    },
     "/v1/history/trades": {
       "get": {
         "operationId": "Trades",
@@ -217,15 +181,6 @@
         }
       }
     },
-    "ticksCompareResponse": {
-      "type": "object",
-      "properties": {
-        "difference": {
-          "type": "number",
-          "format": "float"
-        }
-      }
-    },
     "ticksOHLCV": {
       "type": "object",
       "properties": {
@@ -252,8 +207,8 @@
           "format": "float"
         },
         "volume": {
-          "type": "integer",
-          "format": "int32"
+          "type": "number",
+          "format": "float"
         },
         "timestamp": {
           "type": "string",

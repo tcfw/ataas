@@ -99,6 +99,28 @@
         "tags": [
           "BlocksService"
         ]
+      },
+      "post": {
+        "operationId": "Update",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/blocksBlock"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "BlocksService"
+        ]
       }
     },
     "/v1/blocks/{id}/action/{action}": {

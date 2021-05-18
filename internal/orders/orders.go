@@ -2,6 +2,7 @@ package orders
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
@@ -188,12 +189,10 @@ func (s *Server) getMarketPrice(ctx context.Context, market, instrument string) 
 	if err != nil {
 		return 0, err
 	}
-	// var avgS float32
 
-	// for _, t := range trades.Data {
-	// 	avgS += t.Amount
-	// }
+	if len(trades.Data) == 0 {
+		return 0, fmt.Errorf("no data")
+	}
 
-	// return avgS / 3, nil
 	return trades.Data[0].Amount, nil
 }

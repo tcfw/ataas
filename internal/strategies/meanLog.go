@@ -2,6 +2,7 @@ package strategies
 
 import (
 	"context"
+	"fmt"
 	"math"
 	"sort"
 	"time"
@@ -74,33 +75,24 @@ func meanLog(trades []*ticks.Trade) strategy.Action {
 	sort.Sort(SortableTrades(trades))
 
 	sum := 0.0
-	n := 0.0
 
 	for i := 1; i < len(trades); i++ {
-		a := trades[i].Amount
-		b := trades[i-1].Amount
+		a := float64(trades[i].Amount)
+		b := float64(trades[i-1].Amount)
 		if a == b {
 			continue
 		}
 
-		n++
-
-		sum += math.Log(float64(a / b))
-		// s := math.Log(float64(a / b))
-		// if s < 0 {
-		// 	sum += -1
-		// } else {
-		// 	sum += 1
-		// }
+		sum += math.Log(a / b)
 	}
 
-	// avg := sum / n
+	fmt.Printf("ML: %+v\n", sum)
 
-	if sum == 0 {
+	if sum > 0.004 {
+		return strategy.Action_BUY
+	} else if sum > 0.001 {
 		return strategy.Action_STAY
-	} else if sum < 0 {
-		return strategy.Action_SELL
 	}
 
-	return strategy.Action_BUY
+	return strategy.Action_SELL
 }

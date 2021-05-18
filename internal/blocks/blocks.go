@@ -111,8 +111,6 @@ func (s *Server) Listen() error {
 }
 
 func (s *Server) handleAction(data *strategies.ActionEvent) {
-	s.log.Infoln("Handling STRAT action")
-
 	q := db.Build().Select(allColumns...).From(tblName).Where(sq.Eq{"strategy_id": data.StrategyID})
 	res, done, err := db.SimpleQuery(context.Background(), q)
 	if err != nil {

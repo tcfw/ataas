@@ -43,9 +43,12 @@ func NewFileStoreFromFile(file string) (*FileStore, error) {
 		startTime: time.Time{},
 		lastTime:  time.Time{},
 		size:      fstat.Size(),
+		sk:        &skipList{},
 	}
 
 	if fStore.size != 0 {
+		// go fStore.buildSK()
+
 		s, l, err := findSLTimestamps(fStore)
 		if err != nil {
 			return nil, err
@@ -61,9 +64,9 @@ func findSLTimestamps(fs *FileStore) (time.Time, time.Time, error) {
 
 	var startTime, lastTime time.Time
 
-	r := fs.newReader()
+	r := fs.newReader(time.Time{})
 	for {
-		trade, err := r.next(0)
+		ts, err := r.nextTs(0)
 		if err == io.EOF {
 			break
 		}
@@ -71,13 +74,13 @@ func findSLTimestamps(fs *FileStore) (time.Time, time.Time, error) {
 			return startTime, lastTime, err
 		}
 
-		ts := time.Unix(trade.Timestamp/1000, 0)
+		pTs := time.Unix(int64(ts), 0)
 
-		if startTime.IsZero() || ts.Before(startTime) {
-			startTime = ts
+		if startTime.IsZero() || pTs.Before(startTime) {
+			startTime = pTs
 		}
-		if lastTime.IsZero() || ts.After(lastTime) {
-			lastTime = ts
+		if lastTime.IsZero() || pTs.After(lastTime) {
+			lastTime = pTs
 		}
 	}
 
@@ -101,6 +104,47 @@ type FileStore struct {
 
 	writeMu sync.Mutex
 	cMu     sync.RWMutex
+	sk      *skipList
+}
+
+func (fs *FileStore) buildSK() {
+	r := fs.newReader(time.Time{})
+
+	buf := make([]byte, 1024)
+	var off uint64
+
+	for {
+		rowN := 0
+		n, err := r.r.Read(buf[:2])
+		if err == io.EOF {
+			return
+		} else if err != nil {
+			return
+		}
+		rowN += n
+
+		rl := binary.LittleEndian.Uint16(buf[:2])
+
+		n, err = r.r.Read(buf[:8])
+		if err != nil {
+			return
+		}
+		rowN += n
+
+		ts := binary.LittleEndian.Uint64(buf[:8])
+
+		no, err := r.r.Seek(int64(rl), io.SeekCurrent)
+		if err != nil {
+			return
+		}
+		rowN += int(no)
+
+		if fs.sk.coinFlip() {
+			fs.sk.insert(time.Unix(int64(ts), 0), off)
+		}
+
+		off += uint64(rowN)
+	}
 }
 
 func (fs *FileStore) Add(trade *ticks.Trade) error {
@@ -113,11 +157,20 @@ func (fs *FileStore) Add(trade *ticks.Trade) error {
 		return err
 	}
 
+	tradeTs := trade.Timestamp
+	if tradeTs > 9999999999 {
+		tradeTs = tradeTs / 1000
+	}
+
+	if fs.sk.coinFlip() {
+		fs.sk.insert(time.Unix(tradeTs, 0), uint64(fs.size))
+	}
+
 	lenBuff := make([]byte, 2)
 	binary.LittleEndian.PutUint16(lenBuff, uint16(recBuf.Len()))
 
 	tsBuff := make([]byte, 8)
-	binary.LittleEndian.PutUint64(tsBuff, uint64(trade.Timestamp/1000))
+	binary.LittleEndian.PutUint64(tsBuff, uint64(tradeTs))
 
 	buf := bytes.NewBuffer(make([]byte, 0, 2+recBuf.Len()))
 	buf.Write(lenBuff)
@@ -131,7 +184,7 @@ func (fs *FileStore) Add(trade *ticks.Trade) error {
 
 	fs.size += int64(n)
 
-	ts := time.Unix(trade.Timestamp/1000, 0)
+	ts := time.Unix(tradeTs, 0)
 	if fs.startTime.IsZero() {
 		fs.startTime = ts
 	}
@@ -176,7 +229,7 @@ func (fs *FileStore) GetAll(market, instrument string, after uint64) ([]*ticks.T
 	defer fs.cMu.RUnlock()
 
 	trades := make([]*ticks.Trade, 0, 200)
-	r := fs.newReader()
+	r := fs.newReader(time.Unix(int64(after), 0))
 
 	for {
 		trade, err := r.next(after)
@@ -199,7 +252,7 @@ func (fs *FileStore) GetStream(market, instrument string, after uint64) (<-chan 
 	defer fs.cMu.RUnlock()
 
 	trades := make(chan *ticks.Trade)
-	r := fs.newReader()
+	r := fs.newReader(time.Unix(int64(after), 0))
 
 	go func() {
 		defer close(trades)
@@ -227,11 +280,17 @@ func (fs *FileStore) encode(w io.Writer, t *ticks.Trade) error {
 	return msgpack.NewEncoder(w).Encode(t)
 }
 
-func (fs *FileStore) newReader() *fsReader {
+func (fs *FileStore) newReader(ts time.Time) *fsReader {
 	fs.writeMu.Lock()
 	defer fs.writeMu.Unlock()
 
-	roff := io.NewSectionReader(fs.f, 0, fs.size)
+	var offset int64
+	n := fs.sk.search(ts)
+	if n != nil {
+		offset = int64(n.offset)
+	}
+
+	roff := io.NewSectionReader(fs.f, offset, fs.size)
 
 	// r := bufio.NewReader(roff)
 
@@ -244,7 +303,7 @@ func (fs *FileStore) newReader() *fsReader {
 }
 
 type fsReader struct {
-	r   io.Reader
+	r   io.ReadSeeker
 	buf []byte
 }
 
@@ -281,13 +340,14 @@ func (fs *fsReader) next(after uint64) (*ticks.Trade, error) {
 
 	ts := binary.LittleEndian.Uint64(fs.buf[:8])
 
+	if ts < after {
+		fs.r.Seek(int64(rl), io.SeekCurrent)
+		return fs.next(after)
+	}
+
 	n, err := fs.r.Read(fs.buf[:rl])
 	if err != nil {
 		return nil, fmt.Errorf("failed to read record: %s", err)
-	}
-
-	if ts < after {
-		return fs.next(after)
 	}
 
 	trade, err := fs.decode(fs.buf[:n])
@@ -296,6 +356,35 @@ func (fs *fsReader) next(after uint64) (*ticks.Trade, error) {
 	}
 
 	return trade, nil
+}
+
+func (fs *fsReader) nextTs(after uint64) (uint64, error) {
+	_, err := fs.r.Read(fs.buf[:2])
+	if err == io.EOF {
+		return 0, err
+	} else if err != nil {
+		return 0, fmt.Errorf("failed to read record len: %s", err)
+	}
+
+	rl := binary.LittleEndian.Uint16(fs.buf[:2])
+
+	_, err = fs.r.Read(fs.buf[:8])
+	if err != nil {
+		return 0, fmt.Errorf("failed to read record ts: %s", err)
+	}
+
+	ts := binary.LittleEndian.Uint64(fs.buf[:8])
+
+	_, err = fs.r.Read(fs.buf[:rl])
+	if err != nil {
+		return 0, fmt.Errorf("failed to read record: %s", err)
+	}
+
+	if ts < after {
+		return fs.nextTs(after)
+	}
+
+	return ts, nil
 }
 
 func fileName(ts time.Time) string {

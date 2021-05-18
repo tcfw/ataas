@@ -21,6 +21,7 @@ type BlocksServiceClient interface {
 	New(ctx context.Context, in *Block, opts ...grpc.CallOption) (*Block, error)
 	List(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*ListResponse, error)
 	Get(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*Block, error)
+	Update(ctx context.Context, in *UpdateRequest, opts ...grpc.CallOption) (*Block, error)
 	ManualAction(ctx context.Context, in *ManualRequest, opts ...grpc.CallOption) (*ManualResponse, error)
 	Delete(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*DeleteResponse, error)
 }
@@ -60,6 +61,15 @@ func (c *blocksServiceClient) Get(ctx context.Context, in *GetRequest, opts ...g
 	return out, nil
 }
 
+func (c *blocksServiceClient) Update(ctx context.Context, in *UpdateRequest, opts ...grpc.CallOption) (*Block, error) {
+	out := new(Block)
+	err := c.cc.Invoke(ctx, "/trader.blocks.BlocksService/Update", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *blocksServiceClient) ManualAction(ctx context.Context, in *ManualRequest, opts ...grpc.CallOption) (*ManualResponse, error) {
 	out := new(ManualResponse)
 	err := c.cc.Invoke(ctx, "/trader.blocks.BlocksService/ManualAction", in, out, opts...)
@@ -85,6 +95,7 @@ type BlocksServiceServer interface {
 	New(context.Context, *Block) (*Block, error)
 	List(context.Context, *ListRequest) (*ListResponse, error)
 	Get(context.Context, *GetRequest) (*Block, error)
+	Update(context.Context, *UpdateRequest) (*Block, error)
 	ManualAction(context.Context, *ManualRequest) (*ManualResponse, error)
 	Delete(context.Context, *DeleteRequest) (*DeleteResponse, error)
 	mustEmbedUnimplementedBlocksServiceServer()
@@ -102,6 +113,9 @@ func (UnimplementedBlocksServiceServer) List(context.Context, *ListRequest) (*Li
 }
 func (UnimplementedBlocksServiceServer) Get(context.Context, *GetRequest) (*Block, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
+}
+func (UnimplementedBlocksServiceServer) Update(context.Context, *UpdateRequest) (*Block, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Update not implemented")
 }
 func (UnimplementedBlocksServiceServer) ManualAction(context.Context, *ManualRequest) (*ManualResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ManualAction not implemented")
@@ -176,6 +190,24 @@ func _BlocksService_Get_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
+func _BlocksService_Update_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BlocksServiceServer).Update(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/trader.blocks.BlocksService/Update",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BlocksServiceServer).Update(ctx, req.(*UpdateRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _BlocksService_ManualAction_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ManualRequest)
 	if err := dec(in); err != nil {
@@ -230,6 +262,10 @@ var BlocksService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Get",
 			Handler:    _BlocksService_Get_Handler,
+		},
+		{
+			MethodName: "Update",
+			Handler:    _BlocksService_Update_Handler,
 		},
 		{
 			MethodName: "ManualAction",

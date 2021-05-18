@@ -3,6 +3,7 @@ package ticks
 import (
 	"fmt"
 	"io/ioutil"
+	"os"
 	"sort"
 	"strings"
 	"sync"
@@ -44,7 +45,33 @@ func NewLibrary(dir string, log *logrus.Logger) (*TradeLibrary, error) {
 		return nil, err
 	}
 
+	go l.gc()
+
 	return l, nil
+}
+
+func (tl *TradeLibrary) gc() {
+	t := time.NewTicker(5 * time.Minute)
+
+	for range t.C {
+		tl.mu.Lock()
+
+		t := time.Now().Add(-24 * time.Hour)
+
+		for f, fileStore := range tl.refs {
+			if fileStore.lastTime.Before(t) {
+				fileStore.f.Close()
+				if err := os.Remove(fileStore.f.Name()); err != nil {
+					tl.log.Printf("failed to delete file %s: %s", f, err)
+					continue
+				}
+
+				delete(tl.refs, f)
+			}
+		}
+
+		tl.mu.Unlock()
+	}
 }
 
 func (tl *TradeLibrary) findFileStores() error {
@@ -179,7 +206,7 @@ func (tl *TradeLibrary) GetSinceStream(market, instrument string, since time.Tim
 		return nil, fmt.Errorf("since must not be zero")
 	}
 
-	trades := make(chan *ticks.Trade)
+	trades := make(chan *ticks.Trade, 1000)
 
 	fsList := FileStoreList{}
 
@@ -194,6 +221,8 @@ func (tl *TradeLibrary) GetSinceStream(market, instrument string, since time.Tim
 	sort.Sort(fsList)
 
 	go func() {
+		defer close(trades)
+
 		for _, fs := range fsList {
 			s, err := fs.GetStream(market, instrument, uint64(since.Unix()))
 			if err != nil {

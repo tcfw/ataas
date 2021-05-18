@@ -2,20 +2,14 @@ package binance
 
 var (
 	subSymbols = []string{
-		// "btcaud@trade",
-		// "ethaud@trade",
-		// "xrpaud@trade",
-		// "bnbaud@trade",
-		// "linkaud@trade",
-		// "sxpaud@trade",
-		// "dogeaud@trade",
-		// "adaaud@trade",
-		// "trxaud@trade",
-		"xmrusdt@trade",
-		"btcusdt@trade",
+		"adausdt@trade",
+		"bnbusdt@trade",
+		// "btcusdt@trade",
+		"dogeusdt@trade",
 		"ethusdt@trade",
 		"icpusdt@trade",
-		"bnbusdt@trade",
-		"dogeusdt@trade",
+		"maticusdt@trade",
+		"xmrusdt@trade",
+		"xrpusdt@trade",
 	}
 )

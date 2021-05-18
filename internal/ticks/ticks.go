@@ -4,11 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"strconv"
-	"strings"
 	"time"
 
-	sq "github.com/Masterminds/squirrel"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc/codes"
@@ -88,13 +85,6 @@ func (s *Server) TradesRange(ctx context.Context, req *ticks.RangeRequest) (*tic
 		return nil, ErrDurationTooLong
 	}
 
-	// query := db.Build().Select("tradeid", "ts", "direction", "amount", "units").
-	// 	From("trades").
-	// 	Where(sq.And{sq.Eq{"market": req.Market, "instrument": req.Instrument}, sq.GtOrEq{"ts": time.Now().Add(-1 * ts)}}).
-	// 	OrderBy("ts ASC")
-
-	// return s.readTrades(ctx, query, req.Market, req.Instrument)
-
 	trades, err := s.library.GetSince(req.Market, req.Instrument, time.Now().Add(-ts))
 	if err != nil {
 		return nil, err
@@ -118,14 +108,6 @@ func (s *Server) Trades(ctx context.Context, req *ticks.GetRequest) (*ticks.Trad
 	if req.Depth == 0 {
 		req.Depth = 100
 	}
-
-	// query := db.Build().Select("tradeid", "ts", "direction", "amount", "units").
-	// 	From("trades").
-	// 	Where(sq.Eq{"market": req.Market, "instrument": req.Instrument}).
-	// 	OrderBy("ts DESC").
-	// 	Limit(uint64(req.Depth))
-
-	// return s.readTrades(ctx, query, req.Market, req.Instrument)
 
 	trades, err := s.library.GetSince(req.Market, req.Instrument, time.Now().Add(-time.Duration(req.Depth+60)*time.Second))
 	if err != nil {
@@ -175,161 +157,53 @@ func (s *Server) TradesRangeStream(req *ticks.RangeRequest, stream ticks.History
 	return nil
 }
 
-func (s *Server) readTrades(ctx context.Context, query sq.Sqlizer, market, instrument string) (*ticks.TradesResponse, error) {
-	res, done, err := db.SimpleQuery(ctx, query)
-	if err != nil {
-		return nil, err
-	}
-	defer done()
-
-	data := []*ticks.Trade{}
-
-	for res.Next() {
-		trade := &ticks.Trade{
-			Market:     market,
-			Instrument: instrument,
-		}
-
-		ts := &time.Time{}
-		direction := false
-
-		err := res.Scan(&trade.TradeID, &ts, &direction, &trade.Amount, &trade.Units)
-		if err != nil {
-			return nil, err
-		}
-
-		trade.Timestamp = ts.Unix()
-
-		if direction {
-			trade.Direction = ticks.TradeDirection_SELL
-		}
-
-		data = append(data, trade)
-	}
-
-	return &ticks.TradesResponse{Data: data}, nil
-}
-
 //Candles provides a means of sumarising trades into OHLCV formats for a particular instrument
 func (s *Server) Candles(ctx context.Context, req *ticks.CandlesRequest) (*ticks.CandlesResponse, error) {
-	if req.Instrument == "" || req.Market == "" {
+	if req.Instrument == "" || req.Market == "" || req.Interval == "" {
 		return nil, status.Error(codes.InvalidArgument, "missing required arguments")
 	}
 
-	tsExpr, err := s.timeframeExpr(req.Interval)
+	interval, err := time.ParseDuration(req.Interval)
 	if err != nil {
 		return nil, err
 	}
 
-	if req.Depth == 0 {
-		req.Depth = 100
-	}
+	startingPoint := time.Now().Add(-time.Duration(req.Depth) * interval).Round(interval)
 
-	query := db.Build().Select(
-		"array_agg(amount)[1] as open",
-		"array_agg(amount)[array_length(array_agg(amount), 1)] as close",
-		"max(amount) as high",
-		"min(amount) as low",
-		"count(*) as volume",
-		tsExpr,
-	).From("trades").
-		Where(sq.Eq{"market": req.Market, "instrument": req.Instrument}).
-		GroupBy("timestamp").OrderBy("timestamp ASC").Limit(uint64(req.Depth))
-
-	res, done, err := db.SimpleQuery(ctx, query)
+	trades, err := s.library.GetSinceStream(req.Market, req.Instrument, startingPoint)
 	if err != nil {
 		return nil, err
 	}
-
-	defer done()
 
 	data := []*ticks.OHLCV{}
 
-	for res.Next() {
-		tick := &ticks.OHLCV{}
-		ts := time.Time{}
-		err := res.Scan(&tick.Open, &tick.Close, &tick.High, &tick.Low, &tick.Volume, &ts)
-		if err != nil {
-			return nil, err
+	var current *ticks.OHLCV
+	var currentTs time.Time
+
+	for trade := range trades {
+		tts := trade.Timestamp
+		if tts > 9999999999 {
+			tts = tts / 1000
 		}
-		tick.Timestamp = ts.Unix()
-		data = append(data, tick)
+		ts := time.Unix(tts, 0).Truncate(interval)
+		if current == nil || ts != currentTs {
+			currentTs = ts
+			current = &ticks.OHLCV{
+				Market:     trade.Market,
+				Instrument: trade.Instrument,
+				Open:       trade.Amount,
+				Timestamp:  ts.Unix(),
+			}
+			data = append(data, current)
+		}
+		if trade.Amount < current.Low {
+			current.Low = trade.Amount
+		} else if trade.Amount > current.High {
+			current.High = trade.Amount
+		}
+		current.Close = trade.Amount
+		current.Volume += trade.Units
 	}
 
 	return &ticks.CandlesResponse{Data: data}, nil
-}
-
-func (s *Server) timeframeExpr(interval string) (string, error) {
-	suffix := ""
-	largeUnit := ""
-	smallUnit := ""
-	multipler := 0
-
-	switch interval[len(interval)-1] {
-	case 'm':
-		suffix = "m"
-		largeUnit = "hour"
-		smallUnit = "minute"
-		multipler = 60
-	case 'h':
-		suffix = "h"
-		largeUnit = "day"
-		smallUnit = "hour"
-		multipler = 60 * 60
-	case 'd':
-		return "date_trunc('day', ts)", nil
-	default:
-		return "", ErrUnknownInterval
-	}
-
-	d, err := strconv.Atoi(strings.TrimSuffix(interval, suffix))
-	if err != nil {
-		return "", nil
-	}
-
-	expr := "date_trunc('%s', ts) + ((extract('%s', ts) / %d)::int * %d)::interval as timestamp"
-
-	return fmt.Sprintf(expr, largeUnit, smallUnit, d, d*multipler), nil
-}
-
-func (s *Server) RangeCompare(ctx context.Context, req *ticks.CompareRequest) (*ticks.CompareResponse, error) {
-	if req.Instrument == "" || req.Market == "" {
-		return nil, status.Error(codes.InvalidArgument, "missing required arguments")
-	}
-
-	tsExpr, err := s.timeframeExpr(req.Interval)
-	if err != nil {
-		return nil, err
-	}
-
-	query := db.Build().Select(
-		"array_agg(amount)[1]",
-		"array_agg(amount)[array_length(array_agg(amount), 1)]",
-		tsExpr,
-	).From("trades").
-		Where(sq.Eq{"market": req.Market, "instrument": req.Instrument}).
-		GroupBy("timestamp").OrderBy("timestamp DESC").Limit(2)
-
-	res, done, err := db.SimpleQuery(ctx, query)
-	if err != nil {
-		return nil, err
-	}
-	defer done()
-
-	openClose := []struct{ o, c float32 }{}
-
-	for res.Next() {
-		tick := struct{ o, c float32 }{}
-		ts := &time.Time{}
-
-		if err := res.Scan(&tick.o, &tick.c, &ts); err != nil {
-			return nil, err
-		}
-
-		openClose = append(openClose, tick)
-	}
-
-	diff := (openClose[0].c / (openClose[1].o + 0.000000000000001)) - 1
-
-	return &ticks.CompareResponse{Difference: diff}, nil
 }

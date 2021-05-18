@@ -59,6 +59,11 @@ message DeleteRequest {
 
 message DeleteResponse {}
 
+message UpdateRequest {
+	string id = 1;
+	Block block = 2;
+}
+
 service BlocksService {
 	rpc New(Block) returns (Block) {
 		option (google.api.http) = {
@@ -74,6 +79,11 @@ service BlocksService {
 	rpc Get(GetRequest) returns (Block) {
 		option (google.api.http) = {
             get: "/v1/blocks/{id}"
+		};
+	};
+	rpc Update(UpdateRequest) returns (Block) {
+		option (google.api.http) = {
+			post: "/v1/blocks/{id}"
 		};
 	};
 	rpc ManualAction(ManualRequest) returns (ManualResponse) {

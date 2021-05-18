@@ -92,40 +92,42 @@ func (s *Server) applyState(b *blocks.Block, ns blocks.BlockState, n int) (*orde
 		unitDiff = b.CurrentUnits
 	}
 
-	var price float32
+	var price float32 = -1
 	var order *orders.Order
 
 	switch ns {
 	case blocks.BlockState_PURCHASED:
 		//buy
+		if b.Purchase > 0 {
+			price = b.Purchase
+		}
+
 		resp, err := ordersSvc.Create(ctx, &orders.CreateRequest{
 			BlockID: b.Id,
 			Action:  orders.Action_BUY,
 			Units:   unitDiff,
-			Price:   -1, //market
+			Price:   price,
 		})
 		if err != nil {
 			return nil, err
 		}
 		order = resp.Order
-
 		nUnits += order.Units
-		price = order.Price
+
 	case blocks.BlockState_SOLD:
 		//sell
 		resp, err := ordersSvc.Create(ctx, &orders.CreateRequest{
 			BlockID: b.Id,
 			Action:  orders.Action_SELL,
 			Units:   unitDiff,
-			Price:   -1, //market
+			Price:   price, //market
 		})
 		if err != nil {
 			return nil, err
 		}
 		order = resp.Order
-
 		nUnits -= order.Units
-		price = 0.0
+
 	case blocks.BlockState_ENDED:
 		if b.State == blocks.BlockState_PURCHASED {
 			resp, err := ordersSvc.Create(ctx, &orders.CreateRequest{
@@ -140,7 +142,6 @@ func (s *Server) applyState(b *blocks.Block, ns blocks.BlockState, n int) (*orde
 			order = resp.Order
 
 			nUnits = 0
-			price = 0.0
 		}
 	default:
 		return nil, fmt.Errorf("unknown desired state")
@@ -150,7 +151,6 @@ func (s *Server) applyState(b *blocks.Block, ns blocks.BlockState, n int) (*orde
 	q := db.Build().Update(tblName).SetMap(sq.Eq{
 		"state":         ns,
 		"current_units": nUnits,
-		"purchase":      price,
 	}).Where(sq.Eq{"id": b.Id}).Limit(1)
 
 	if err := db.SimpleExec(ctx, q); err != nil {
