@@ -12,7 +12,7 @@ import (
 
 	"github.com/gogo/status"
 	"google.golang.org/grpc/codes"
-	"pm.tcfw.com.au/source/trader/internal/exchanges"
+	"pm.tcfw.com.au/source/ataas/internal/exchanges"
 )
 
 const (

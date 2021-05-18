@@ -5,7 +5,7 @@ import (
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"pm.tcfw.com.au/source/trader/internal/exchanges"
+	"pm.tcfw.com.au/source/ataas/internal/exchanges"
 )
 
 type OrderType string

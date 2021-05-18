@@ -10,14 +10,14 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	"pm.tcfw.com.au/source/trader/api"
-	"pm.tcfw.com.au/source/trader/db"
+	"pm.tcfw.com.au/source/ataas/api"
+	"pm.tcfw.com.au/source/ataas/db"
 )
 
 func init() {
-	viper.SetConfigName("trader")
+	viper.SetConfigName("ataas")
 	viper.SetConfigType("yaml")
-	viper.SetEnvPrefix("trader")
+	viper.SetEnvPrefix("ataas")
 	viper.AutomaticEnv()
 
 	viper.SetDefault("db.url", "postgres://root@localhost:26257/trader_ticks?pool_max_conns=20")
@@ -33,7 +33,7 @@ func main() {
 	defer cancel()
 
 	log := logrus.New()
-	log.Infof("Auto Trader %s", appVersion)
+	log.Infof("Ataas %s", appVersion)
 
 	replacer := strings.NewReplacer(".", "_")
 	viper.SetEnvKeyReplacer(replacer)

@@ -3,7 +3,7 @@ package client
 import (
 	"encoding/json"
 
-	"pm.tcfw.com.au/source/trader/common"
+	"pm.tcfw.com.au/source/ataas/common"
 )
 
 type CryptoComResponse struct {

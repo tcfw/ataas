@@ -3,9 +3,9 @@ package orders
 import (
 	"context"
 
-	"pm.tcfw.com.au/source/trader/internal/exchanges"
-	binance "pm.tcfw.com.au/source/trader/internal/exchanges/binance-client"
-	cryptoCom "pm.tcfw.com.au/source/trader/internal/exchanges/crypto-com-client"
+	"pm.tcfw.com.au/source/ataas/internal/exchanges"
+	binance "pm.tcfw.com.au/source/ataas/internal/exchanges/binance-client"
+	cryptoCom "pm.tcfw.com.au/source/ataas/internal/exchanges/crypto-com-client"
 )
 
 type MarketList map[string]exchanges.Exchange

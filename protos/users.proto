@@ -1,7 +1,7 @@
 syntax = "proto3";
 
-package trader.users;
-option go_package = "pm.tcfw.com.au/source/trader/api/pb/users;users";
+package ataas.users;
+option go_package = "pm.tcfw.com.au/source/ataas/api/pb/users;users";
 
 import "google/api/annotations.proto";
 import "gogo.proto";

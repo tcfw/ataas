@@ -11,9 +11,9 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"pm.tcfw.com.au/source/trader/api/pb/ticks"
-	"pm.tcfw.com.au/source/trader/db"
-	migrate "pm.tcfw.com.au/source/trader/internal/ticks/db"
+	"pm.tcfw.com.au/source/ataas/api/pb/ticks"
+	"pm.tcfw.com.au/source/ataas/db"
+	migrate "pm.tcfw.com.au/source/ataas/internal/ticks/db"
 )
 
 var (

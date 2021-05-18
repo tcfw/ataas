@@ -7,8 +7,8 @@ import (
 	"sort"
 	"time"
 
-	"pm.tcfw.com.au/source/trader/api/pb/strategy"
-	"pm.tcfw.com.au/source/trader/api/pb/ticks"
+	"pm.tcfw.com.au/source/ataas/api/pb/strategy"
+	"pm.tcfw.com.au/source/ataas/api/pb/ticks"
 )
 
 func (w *Worker) handleMeanLog(job *strategy.Strategy) error {

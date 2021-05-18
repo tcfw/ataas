@@ -7,11 +7,11 @@ import (
 	"time"
 
 	"github.com/spf13/viper"
-	"pm.tcfw.com.au/source/trader/api/pb/ticks"
-	"pm.tcfw.com.au/source/trader/db"
-	"pm.tcfw.com.au/source/trader/internal/broadcast"
-	binance_client "pm.tcfw.com.au/source/trader/internal/exchanges/binance-client"
-	crypto_com_client "pm.tcfw.com.au/source/trader/internal/exchanges/crypto-com-client"
+	"pm.tcfw.com.au/source/ataas/api/pb/ticks"
+	"pm.tcfw.com.au/source/ataas/db"
+	"pm.tcfw.com.au/source/ataas/internal/broadcast"
+	binance_client "pm.tcfw.com.au/source/ataas/internal/exchanges/binance-client"
+	crypto_com_client "pm.tcfw.com.au/source/ataas/internal/exchanges/crypto-com-client"
 )
 
 func init() {

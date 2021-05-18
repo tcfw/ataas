@@ -10,12 +10,12 @@ import (
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
-	"pm.tcfw.com.au/source/trader/api/pb/blocks"
-	ordersAPI "pm.tcfw.com.au/source/trader/api/pb/orders"
-	ticksAPI "pm.tcfw.com.au/source/trader/api/pb/ticks"
-	"pm.tcfw.com.au/source/trader/db"
-	"pm.tcfw.com.au/source/trader/internal/exchanges"
-	migrate "pm.tcfw.com.au/source/trader/internal/orders/db"
+	"pm.tcfw.com.au/source/ataas/api/pb/blocks"
+	ordersAPI "pm.tcfw.com.au/source/ataas/api/pb/orders"
+	ticksAPI "pm.tcfw.com.au/source/ataas/api/pb/ticks"
+	"pm.tcfw.com.au/source/ataas/db"
+	"pm.tcfw.com.au/source/ataas/internal/exchanges"
+	migrate "pm.tcfw.com.au/source/ataas/internal/orders/db"
 )
 
 const (

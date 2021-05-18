@@ -1,7 +1,7 @@
 syntax = "proto3";
 
-package trader.passport;
-option go_package = "pm.tcfw.com.au/source/trader/api/pb/passport";
+package ataas.passport;
+option go_package = "pm.tcfw.com.au/source/ataas/api/pb/passport";
 
 import "google/api/annotations.proto";
 import "gogo.proto";

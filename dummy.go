@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"pm.tcfw.com.au/source/trader/common"
+	"pm.tcfw.com.au/source/ataas/common"
 )
 
 type DummyMarketController struct{}

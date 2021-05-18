@@ -9,10 +9,10 @@ import (
 	"github.com/gogo/status"
 	"github.com/jackc/pgx/v4"
 	"github.com/sirupsen/logrus"
-	usersAPI "pm.tcfw.com.au/source/trader/api/pb/users"
-	"pm.tcfw.com.au/source/trader/db"
-	"pm.tcfw.com.au/source/trader/internal/passport/utils"
-	migrate "pm.tcfw.com.au/source/trader/internal/users/db"
+	usersAPI "pm.tcfw.com.au/source/ataas/api/pb/users"
+	"pm.tcfw.com.au/source/ataas/db"
+	"pm.tcfw.com.au/source/ataas/internal/passport/utils"
+	migrate "pm.tcfw.com.au/source/ataas/internal/users/db"
 )
 
 var (

@@ -14,13 +14,13 @@ import (
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 
-	passportAPI "pm.tcfw.com.au/source/trader/api/pb/passport"
-	"pm.tcfw.com.au/source/trader/api/pb/users"
-	"pm.tcfw.com.au/source/trader/db"
-	"pm.tcfw.com.au/source/trader/internal/broadcast"
-	migrate "pm.tcfw.com.au/source/trader/internal/passport/db"
-	authUtils "pm.tcfw.com.au/source/trader/internal/passport/utils"
-	rpcUtils "pm.tcfw.com.au/source/trader/internal/utils/rpc"
+	passportAPI "pm.tcfw.com.au/source/ataas/api/pb/passport"
+	"pm.tcfw.com.au/source/ataas/api/pb/users"
+	"pm.tcfw.com.au/source/ataas/db"
+	"pm.tcfw.com.au/source/ataas/internal/broadcast"
+	migrate "pm.tcfw.com.au/source/ataas/internal/passport/db"
+	authUtils "pm.tcfw.com.au/source/ataas/internal/passport/utils"
+	rpcUtils "pm.tcfw.com.au/source/ataas/internal/utils/rpc"
 )
 
 //NewServer creates a ne struct to interface the auth server

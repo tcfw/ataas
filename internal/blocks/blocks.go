@@ -10,13 +10,13 @@ import (
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	blocksAPI "pm.tcfw.com.au/source/trader/api/pb/blocks"
-	"pm.tcfw.com.au/source/trader/api/pb/orders"
-	"pm.tcfw.com.au/source/trader/api/pb/strategy"
-	"pm.tcfw.com.au/source/trader/db"
-	migrate "pm.tcfw.com.au/source/trader/internal/blocks/db"
-	"pm.tcfw.com.au/source/trader/internal/broadcast"
-	"pm.tcfw.com.au/source/trader/internal/strategies"
+	blocksAPI "pm.tcfw.com.au/source/ataas/api/pb/blocks"
+	"pm.tcfw.com.au/source/ataas/api/pb/orders"
+	"pm.tcfw.com.au/source/ataas/api/pb/strategy"
+	"pm.tcfw.com.au/source/ataas/db"
+	migrate "pm.tcfw.com.au/source/ataas/internal/blocks/db"
+	"pm.tcfw.com.au/source/ataas/internal/broadcast"
+	"pm.tcfw.com.au/source/ataas/internal/strategies"
 )
 
 const (

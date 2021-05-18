@@ -6,7 +6,7 @@ import (
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
 
-	blocksAPI "pm.tcfw.com.au/source/trader/api/pb/blocks"
+	blocksAPI "pm.tcfw.com.au/source/ataas/api/pb/blocks"
 )
 
 var (

@@ -7,10 +7,10 @@ import (
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
-	"pm.tcfw.com.au/source/trader/api/pb/blocks"
-	"pm.tcfw.com.au/source/trader/api/pb/orders"
-	"pm.tcfw.com.au/source/trader/api/pb/strategy"
-	"pm.tcfw.com.au/source/trader/db"
+	"pm.tcfw.com.au/source/ataas/api/pb/blocks"
+	"pm.tcfw.com.au/source/ataas/api/pb/orders"
+	"pm.tcfw.com.au/source/ataas/api/pb/strategy"
+	"pm.tcfw.com.au/source/ataas/db"
 )
 
 var (

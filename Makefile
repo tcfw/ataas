@@ -4,7 +4,7 @@ BUILD_FLAGS := -ldflags="-s -w" -trimpath
 
 build:
 	@mkdir -p ./bin
-	$(GOBUILD) $(BUILD_FLAGS) -o $(BUILD_DIR)/trader ./.
+	$(GOBUILD) $(BUILD_FLAGS) -o $(BUILD_DIR)/ataas ./.
 
 .PHONY: run
 run:

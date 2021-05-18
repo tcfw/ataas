@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"time"
 
-	passportAPI "pm.tcfw.com.au/source/trader/api/pb/passport"
-	usersAPI "pm.tcfw.com.au/source/trader/api/pb/users"
+	passportAPI "pm.tcfw.com.au/source/ataas/api/pb/passport"
+	usersAPI "pm.tcfw.com.au/source/ataas/api/pb/users"
 )
 
 //mfaChallenge signals the auth requestor via a relevant MFA challenge

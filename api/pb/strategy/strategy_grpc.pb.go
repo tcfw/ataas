@@ -36,7 +36,7 @@ func NewStrategyServiceClient(cc grpc.ClientConnInterface) StrategyServiceClient
 
 func (c *strategyServiceClient) List(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*ListResponse, error) {
 	out := new(ListResponse)
-	err := c.cc.Invoke(ctx, "/trader.strategy.StrategyService/List", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/ataas.strategy.StrategyService/List", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -45,7 +45,7 @@ func (c *strategyServiceClient) List(ctx context.Context, in *ListRequest, opts 
 
 func (c *strategyServiceClient) History(ctx context.Context, in *HistoryRequest, opts ...grpc.CallOption) (*HistoryResponse, error) {
 	out := new(HistoryResponse)
-	err := c.cc.Invoke(ctx, "/trader.strategy.StrategyService/History", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/ataas.strategy.StrategyService/History", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -54,7 +54,7 @@ func (c *strategyServiceClient) History(ctx context.Context, in *HistoryRequest,
 
 func (c *strategyServiceClient) Create(ctx context.Context, in *CreateRequest, opts ...grpc.CallOption) (*CreateResponse, error) {
 	out := new(CreateResponse)
-	err := c.cc.Invoke(ctx, "/trader.strategy.StrategyService/Create", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/ataas.strategy.StrategyService/Create", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -63,7 +63,7 @@ func (c *strategyServiceClient) Create(ctx context.Context, in *CreateRequest, o
 
 func (c *strategyServiceClient) Delete(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*DeleteResponse, error) {
 	out := new(DeleteResponse)
-	err := c.cc.Invoke(ctx, "/trader.strategy.StrategyService/Delete", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/ataas.strategy.StrategyService/Delete", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -72,7 +72,7 @@ func (c *strategyServiceClient) Delete(ctx context.Context, in *DeleteRequest, o
 
 func (c *strategyServiceClient) Update(ctx context.Context, in *UpdateRequest, opts ...grpc.CallOption) (*Strategy, error) {
 	out := new(Strategy)
-	err := c.cc.Invoke(ctx, "/trader.strategy.StrategyService/Update", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/ataas.strategy.StrategyService/Update", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -81,7 +81,7 @@ func (c *strategyServiceClient) Update(ctx context.Context, in *UpdateRequest, o
 
 func (c *strategyServiceClient) BackTest(ctx context.Context, in *BacktestRequest, opts ...grpc.CallOption) (*BacktestResponse, error) {
 	out := new(BacktestResponse)
-	err := c.cc.Invoke(ctx, "/trader.strategy.StrategyService/BackTest", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/ataas.strategy.StrategyService/BackTest", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -146,7 +146,7 @@ func _StrategyService_List_Handler(srv interface{}, ctx context.Context, dec fun
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/trader.strategy.StrategyService/List",
+		FullMethod: "/ataas.strategy.StrategyService/List",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(StrategyServiceServer).List(ctx, req.(*ListRequest))
@@ -164,7 +164,7 @@ func _StrategyService_History_Handler(srv interface{}, ctx context.Context, dec 
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/trader.strategy.StrategyService/History",
+		FullMethod: "/ataas.strategy.StrategyService/History",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(StrategyServiceServer).History(ctx, req.(*HistoryRequest))
@@ -182,7 +182,7 @@ func _StrategyService_Create_Handler(srv interface{}, ctx context.Context, dec f
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/trader.strategy.StrategyService/Create",
+		FullMethod: "/ataas.strategy.StrategyService/Create",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(StrategyServiceServer).Create(ctx, req.(*CreateRequest))
@@ -200,7 +200,7 @@ func _StrategyService_Delete_Handler(srv interface{}, ctx context.Context, dec f
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/trader.strategy.StrategyService/Delete",
+		FullMethod: "/ataas.strategy.StrategyService/Delete",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(StrategyServiceServer).Delete(ctx, req.(*DeleteRequest))
@@ -218,7 +218,7 @@ func _StrategyService_Update_Handler(srv interface{}, ctx context.Context, dec f
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/trader.strategy.StrategyService/Update",
+		FullMethod: "/ataas.strategy.StrategyService/Update",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(StrategyServiceServer).Update(ctx, req.(*UpdateRequest))
@@ -236,7 +236,7 @@ func _StrategyService_BackTest_Handler(srv interface{}, ctx context.Context, dec
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/trader.strategy.StrategyService/BackTest",
+		FullMethod: "/ataas.strategy.StrategyService/BackTest",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(StrategyServiceServer).BackTest(ctx, req.(*BacktestRequest))
@@ -248,7 +248,7 @@ func _StrategyService_BackTest_Handler(srv interface{}, ctx context.Context, dec
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var StrategyService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "trader.strategy.StrategyService",
+	ServiceName: "ataas.strategy.StrategyService",
 	HandlerType: (*StrategyServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{

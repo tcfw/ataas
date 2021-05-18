@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
-	"pm.tcfw.com.au/source/trader/api/pb/ticks"
+	"pm.tcfw.com.au/source/ataas/api/pb/ticks"
 )
 
 func TestAdd(t *testing.T) {

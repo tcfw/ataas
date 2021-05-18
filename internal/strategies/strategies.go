@@ -10,9 +10,9 @@ import (
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
-	"pm.tcfw.com.au/source/trader/api/pb/strategy"
-	"pm.tcfw.com.au/source/trader/db"
-	migrate "pm.tcfw.com.au/source/trader/internal/strategies/db"
+	"pm.tcfw.com.au/source/ataas/api/pb/strategy"
+	"pm.tcfw.com.au/source/ataas/db"
+	migrate "pm.tcfw.com.au/source/ataas/internal/strategies/db"
 )
 
 type Action int8

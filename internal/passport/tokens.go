@@ -17,9 +17,9 @@ import (
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/peer"
 
-	passportAPI "pm.tcfw.com.au/source/trader/api/pb/passport"
-	"pm.tcfw.com.au/source/trader/api/pb/users"
-	"pm.tcfw.com.au/source/trader/db"
+	passportAPI "pm.tcfw.com.au/source/ataas/api/pb/passport"
+	"pm.tcfw.com.au/source/ataas/api/pb/users"
+	"pm.tcfw.com.au/source/ataas/db"
 )
 
 func (s *Server) verifyToken(ctx context.Context, request *passportAPI.VerifyTokenRequest) (*passportAPI.VerifyTokenResponse, error) {

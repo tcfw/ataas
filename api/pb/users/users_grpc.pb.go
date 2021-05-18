@@ -44,7 +44,7 @@ func NewUserServiceClient(cc grpc.ClientConnInterface) UserServiceClient {
 
 func (c *userServiceClient) Create(ctx context.Context, in *CreateRequest, opts ...grpc.CallOption) (*User, error) {
 	out := new(User)
-	err := c.cc.Invoke(ctx, "/trader.users.UserService/Create", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/ataas.users.UserService/Create", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -53,7 +53,7 @@ func (c *userServiceClient) Create(ctx context.Context, in *CreateRequest, opts 
 
 func (c *userServiceClient) ValidateAccount(ctx context.Context, in *ValidateRequest, opts ...grpc.CallOption) (*Empty, error) {
 	out := new(Empty)
-	err := c.cc.Invoke(ctx, "/trader.users.UserService/ValidateAccount", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/ataas.users.UserService/ValidateAccount", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -62,7 +62,7 @@ func (c *userServiceClient) ValidateAccount(ctx context.Context, in *ValidateReq
 
 func (c *userServiceClient) Delete(ctx context.Context, in *UserRequest, opts ...grpc.CallOption) (*Empty, error) {
 	out := new(Empty)
-	err := c.cc.Invoke(ctx, "/trader.users.UserService/Delete", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/ataas.users.UserService/Delete", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -71,7 +71,7 @@ func (c *userServiceClient) Delete(ctx context.Context, in *UserRequest, opts ..
 
 func (c *userServiceClient) Get(ctx context.Context, in *UserRequest, opts ...grpc.CallOption) (*User, error) {
 	out := new(User)
-	err := c.cc.Invoke(ctx, "/trader.users.UserService/Get", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/ataas.users.UserService/Get", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -80,7 +80,7 @@ func (c *userServiceClient) Get(ctx context.Context, in *UserRequest, opts ...gr
 
 func (c *userServiceClient) List(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*UserList, error) {
 	out := new(UserList)
-	err := c.cc.Invoke(ctx, "/trader.users.UserService/List", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/ataas.users.UserService/List", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -89,7 +89,7 @@ func (c *userServiceClient) List(ctx context.Context, in *ListRequest, opts ...g
 
 func (c *userServiceClient) SetPassword(ctx context.Context, in *PasswordUpdateRequest, opts ...grpc.CallOption) (*Empty, error) {
 	out := new(Empty)
-	err := c.cc.Invoke(ctx, "/trader.users.UserService/SetPassword", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/ataas.users.UserService/SetPassword", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -98,7 +98,7 @@ func (c *userServiceClient) SetPassword(ctx context.Context, in *PasswordUpdateR
 
 func (c *userServiceClient) Update(ctx context.Context, in *UpdateRequest, opts ...grpc.CallOption) (*User, error) {
 	out := new(User)
-	err := c.cc.Invoke(ctx, "/trader.users.UserService/Update", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/ataas.users.UserService/Update", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -107,7 +107,7 @@ func (c *userServiceClient) Update(ctx context.Context, in *UpdateRequest, opts 
 
 func (c *userServiceClient) Me(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*User, error) {
 	out := new(User)
-	err := c.cc.Invoke(ctx, "/trader.users.UserService/Me", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/ataas.users.UserService/Me", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -116,7 +116,7 @@ func (c *userServiceClient) Me(ctx context.Context, in *Empty, opts ...grpc.Call
 
 func (c *userServiceClient) ForgotPassword(ctx context.Context, in *ForgotPasswordRequest, opts ...grpc.CallOption) (*Empty, error) {
 	out := new(Empty)
-	err := c.cc.Invoke(ctx, "/trader.users.UserService/ForgotPassword", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/ataas.users.UserService/ForgotPassword", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -125,7 +125,7 @@ func (c *userServiceClient) ForgotPassword(ctx context.Context, in *ForgotPasswo
 
 func (c *userServiceClient) ResetPassword(ctx context.Context, in *ResetPasswordRequest, opts ...grpc.CallOption) (*Empty, error) {
 	out := new(Empty)
-	err := c.cc.Invoke(ctx, "/trader.users.UserService/ResetPassword", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/ataas.users.UserService/ResetPassword", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -134,7 +134,7 @@ func (c *userServiceClient) ResetPassword(ctx context.Context, in *ResetPassword
 
 func (c *userServiceClient) Find(ctx context.Context, in *UserRequest, opts ...grpc.CallOption) (*User, error) {
 	out := new(User)
-	err := c.cc.Invoke(ctx, "/trader.users.UserService/Find", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/ataas.users.UserService/Find", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -143,7 +143,7 @@ func (c *userServiceClient) Find(ctx context.Context, in *UserRequest, opts ...g
 
 func (c *userServiceClient) Amend(ctx context.Context, in *UpdateRequest, opts ...grpc.CallOption) (*User, error) {
 	out := new(User)
-	err := c.cc.Invoke(ctx, "/trader.users.UserService/Amend", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/ataas.users.UserService/Amend", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -234,7 +234,7 @@ func _UserService_Create_Handler(srv interface{}, ctx context.Context, dec func(
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/trader.users.UserService/Create",
+		FullMethod: "/ataas.users.UserService/Create",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(UserServiceServer).Create(ctx, req.(*CreateRequest))
@@ -252,7 +252,7 @@ func _UserService_ValidateAccount_Handler(srv interface{}, ctx context.Context, 
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/trader.users.UserService/ValidateAccount",
+		FullMethod: "/ataas.users.UserService/ValidateAccount",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(UserServiceServer).ValidateAccount(ctx, req.(*ValidateRequest))
@@ -270,7 +270,7 @@ func _UserService_Delete_Handler(srv interface{}, ctx context.Context, dec func(
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/trader.users.UserService/Delete",
+		FullMethod: "/ataas.users.UserService/Delete",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(UserServiceServer).Delete(ctx, req.(*UserRequest))
@@ -288,7 +288,7 @@ func _UserService_Get_Handler(srv interface{}, ctx context.Context, dec func(int
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/trader.users.UserService/Get",
+		FullMethod: "/ataas.users.UserService/Get",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(UserServiceServer).Get(ctx, req.(*UserRequest))
@@ -306,7 +306,7 @@ func _UserService_List_Handler(srv interface{}, ctx context.Context, dec func(in
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/trader.users.UserService/List",
+		FullMethod: "/ataas.users.UserService/List",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(UserServiceServer).List(ctx, req.(*ListRequest))
@@ -324,7 +324,7 @@ func _UserService_SetPassword_Handler(srv interface{}, ctx context.Context, dec 
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/trader.users.UserService/SetPassword",
+		FullMethod: "/ataas.users.UserService/SetPassword",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(UserServiceServer).SetPassword(ctx, req.(*PasswordUpdateRequest))
@@ -342,7 +342,7 @@ func _UserService_Update_Handler(srv interface{}, ctx context.Context, dec func(
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/trader.users.UserService/Update",
+		FullMethod: "/ataas.users.UserService/Update",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(UserServiceServer).Update(ctx, req.(*UpdateRequest))
@@ -360,7 +360,7 @@ func _UserService_Me_Handler(srv interface{}, ctx context.Context, dec func(inte
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/trader.users.UserService/Me",
+		FullMethod: "/ataas.users.UserService/Me",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(UserServiceServer).Me(ctx, req.(*Empty))
@@ -378,7 +378,7 @@ func _UserService_ForgotPassword_Handler(srv interface{}, ctx context.Context, d
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/trader.users.UserService/ForgotPassword",
+		FullMethod: "/ataas.users.UserService/ForgotPassword",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(UserServiceServer).ForgotPassword(ctx, req.(*ForgotPasswordRequest))
@@ -396,7 +396,7 @@ func _UserService_ResetPassword_Handler(srv interface{}, ctx context.Context, de
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/trader.users.UserService/ResetPassword",
+		FullMethod: "/ataas.users.UserService/ResetPassword",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(UserServiceServer).ResetPassword(ctx, req.(*ResetPasswordRequest))
@@ -414,7 +414,7 @@ func _UserService_Find_Handler(srv interface{}, ctx context.Context, dec func(in
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/trader.users.UserService/Find",
+		FullMethod: "/ataas.users.UserService/Find",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(UserServiceServer).Find(ctx, req.(*UserRequest))
@@ -432,7 +432,7 @@ func _UserService_Amend_Handler(srv interface{}, ctx context.Context, dec func(i
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/trader.users.UserService/Amend",
+		FullMethod: "/ataas.users.UserService/Amend",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(UserServiceServer).Amend(ctx, req.(*UpdateRequest))
@@ -444,7 +444,7 @@ func _UserService_Amend_Handler(srv interface{}, ctx context.Context, dec func(i
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var UserService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "trader.users.UserService",
+	ServiceName: "ataas.users.UserService",
 	HandlerType: (*UserServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{

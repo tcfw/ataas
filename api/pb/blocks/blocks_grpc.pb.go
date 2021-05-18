@@ -36,7 +36,7 @@ func NewBlocksServiceClient(cc grpc.ClientConnInterface) BlocksServiceClient {
 
 func (c *blocksServiceClient) New(ctx context.Context, in *Block, opts ...grpc.CallOption) (*Block, error) {
 	out := new(Block)
-	err := c.cc.Invoke(ctx, "/trader.blocks.BlocksService/New", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/ataas.blocks.BlocksService/New", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -45,7 +45,7 @@ func (c *blocksServiceClient) New(ctx context.Context, in *Block, opts ...grpc.C
 
 func (c *blocksServiceClient) List(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*ListResponse, error) {
 	out := new(ListResponse)
-	err := c.cc.Invoke(ctx, "/trader.blocks.BlocksService/List", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/ataas.blocks.BlocksService/List", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -54,7 +54,7 @@ func (c *blocksServiceClient) List(ctx context.Context, in *ListRequest, opts ..
 
 func (c *blocksServiceClient) Get(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*Block, error) {
 	out := new(Block)
-	err := c.cc.Invoke(ctx, "/trader.blocks.BlocksService/Get", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/ataas.blocks.BlocksService/Get", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -63,7 +63,7 @@ func (c *blocksServiceClient) Get(ctx context.Context, in *GetRequest, opts ...g
 
 func (c *blocksServiceClient) Update(ctx context.Context, in *UpdateRequest, opts ...grpc.CallOption) (*Block, error) {
 	out := new(Block)
-	err := c.cc.Invoke(ctx, "/trader.blocks.BlocksService/Update", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/ataas.blocks.BlocksService/Update", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -72,7 +72,7 @@ func (c *blocksServiceClient) Update(ctx context.Context, in *UpdateRequest, opt
 
 func (c *blocksServiceClient) ManualAction(ctx context.Context, in *ManualRequest, opts ...grpc.CallOption) (*ManualResponse, error) {
 	out := new(ManualResponse)
-	err := c.cc.Invoke(ctx, "/trader.blocks.BlocksService/ManualAction", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/ataas.blocks.BlocksService/ManualAction", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -81,7 +81,7 @@ func (c *blocksServiceClient) ManualAction(ctx context.Context, in *ManualReques
 
 func (c *blocksServiceClient) Delete(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*DeleteResponse, error) {
 	out := new(DeleteResponse)
-	err := c.cc.Invoke(ctx, "/trader.blocks.BlocksService/Delete", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/ataas.blocks.BlocksService/Delete", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -146,7 +146,7 @@ func _BlocksService_New_Handler(srv interface{}, ctx context.Context, dec func(i
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/trader.blocks.BlocksService/New",
+		FullMethod: "/ataas.blocks.BlocksService/New",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(BlocksServiceServer).New(ctx, req.(*Block))
@@ -164,7 +164,7 @@ func _BlocksService_List_Handler(srv interface{}, ctx context.Context, dec func(
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/trader.blocks.BlocksService/List",
+		FullMethod: "/ataas.blocks.BlocksService/List",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(BlocksServiceServer).List(ctx, req.(*ListRequest))
@@ -182,7 +182,7 @@ func _BlocksService_Get_Handler(srv interface{}, ctx context.Context, dec func(i
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/trader.blocks.BlocksService/Get",
+		FullMethod: "/ataas.blocks.BlocksService/Get",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(BlocksServiceServer).Get(ctx, req.(*GetRequest))
@@ -200,7 +200,7 @@ func _BlocksService_Update_Handler(srv interface{}, ctx context.Context, dec fun
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/trader.blocks.BlocksService/Update",
+		FullMethod: "/ataas.blocks.BlocksService/Update",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(BlocksServiceServer).Update(ctx, req.(*UpdateRequest))
@@ -218,7 +218,7 @@ func _BlocksService_ManualAction_Handler(srv interface{}, ctx context.Context, d
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/trader.blocks.BlocksService/ManualAction",
+		FullMethod: "/ataas.blocks.BlocksService/ManualAction",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(BlocksServiceServer).ManualAction(ctx, req.(*ManualRequest))
@@ -236,7 +236,7 @@ func _BlocksService_Delete_Handler(srv interface{}, ctx context.Context, dec fun
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/trader.blocks.BlocksService/Delete",
+		FullMethod: "/ataas.blocks.BlocksService/Delete",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(BlocksServiceServer).Delete(ctx, req.(*DeleteRequest))
@@ -248,7 +248,7 @@ func _BlocksService_Delete_Handler(srv interface{}, ctx context.Context, dec fun
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var BlocksService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "trader.blocks.BlocksService",
+	ServiceName: "ataas.blocks.BlocksService",
 	HandlerType: (*BlocksServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{

@@ -1,7 +1,7 @@
 syntax="proto3";
 
-package trader.ticks;
-option go_package = "pm.tcfw.com.au/source/trader/api/pb/ticks";
+package ataas.ticks;
+option go_package = "pm.tcfw.com.au/source/ataas/api/pb/ticks";
 
 import "google/api/annotations.proto";
 import "gogo.proto";

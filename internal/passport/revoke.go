@@ -10,10 +10,10 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	passportAPI "pm.tcfw.com.au/source/trader/api/pb/passport"
-	"pm.tcfw.com.au/source/trader/db"
-	"pm.tcfw.com.au/source/trader/internal/broadcast"
-	authUtils "pm.tcfw.com.au/source/trader/internal/passport/utils"
+	passportAPI "pm.tcfw.com.au/source/ataas/api/pb/passport"
+	"pm.tcfw.com.au/source/ataas/db"
+	"pm.tcfw.com.au/source/ataas/internal/broadcast"
+	authUtils "pm.tcfw.com.au/source/ataas/internal/passport/utils"
 )
 
 var (

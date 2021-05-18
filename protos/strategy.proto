@@ -1,7 +1,7 @@
 syntax="proto3";
 
-package trader.strategy;
-option go_package = "pm.tcfw.com.au/source/trader/api/pb/strategy";
+package ataas.strategy;
+option go_package = "pm.tcfw.com.au/source/ataas/api/pb/strategy";
 
 import "google/api/annotations.proto";
 import "gogo.proto";
@@ -77,7 +77,7 @@ message BacktestRequest {
 }
 
 message BacktestResponse {
-	repeated trader.orders.Order orders = 1;
+	repeated ataas.orders.Order orders = 1;
 }
 
 message UpdateRequest {

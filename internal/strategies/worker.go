@@ -7,9 +7,9 @@ import (
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/sirupsen/logrus"
-	"pm.tcfw.com.au/source/trader/api/pb/strategy"
-	"pm.tcfw.com.au/source/trader/db"
-	"pm.tcfw.com.au/source/trader/internal/broadcast"
+	"pm.tcfw.com.au/source/ataas/api/pb/strategy"
+	"pm.tcfw.com.au/source/ataas/db"
+	"pm.tcfw.com.au/source/ataas/internal/broadcast"
 )
 
 type Worker struct {

@@ -20,7 +20,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/grpclog"
 	"google.golang.org/grpc/status"
-	"pm.tcfw.com.au/source/trader/api/pb/orders"
+	"pm.tcfw.com.au/source/ataas/api/pb/orders"
 )
 
 var _ codes.Code

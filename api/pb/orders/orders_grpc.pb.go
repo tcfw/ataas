@@ -32,7 +32,7 @@ func NewOrdersServiceClient(cc grpc.ClientConnInterface) OrdersServiceClient {
 
 func (c *ordersServiceClient) Create(ctx context.Context, in *CreateRequest, opts ...grpc.CallOption) (*CreateResponse, error) {
 	out := new(CreateResponse)
-	err := c.cc.Invoke(ctx, "/trader.orders.OrdersService/Create", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/ataas.orders.OrdersService/Create", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -41,7 +41,7 @@ func (c *ordersServiceClient) Create(ctx context.Context, in *CreateRequest, opt
 
 func (c *ordersServiceClient) Get(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*GetResponse, error) {
 	out := new(GetResponse)
-	err := c.cc.Invoke(ctx, "/trader.orders.OrdersService/Get", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/ataas.orders.OrdersService/Get", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -90,7 +90,7 @@ func _OrdersService_Create_Handler(srv interface{}, ctx context.Context, dec fun
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/trader.orders.OrdersService/Create",
+		FullMethod: "/ataas.orders.OrdersService/Create",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(OrdersServiceServer).Create(ctx, req.(*CreateRequest))
@@ -108,7 +108,7 @@ func _OrdersService_Get_Handler(srv interface{}, ctx context.Context, dec func(i
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/trader.orders.OrdersService/Get",
+		FullMethod: "/ataas.orders.OrdersService/Get",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(OrdersServiceServer).Get(ctx, req.(*GetRequest))
@@ -120,7 +120,7 @@ func _OrdersService_Get_Handler(srv interface{}, ctx context.Context, dec func(i
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var OrdersService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "trader.orders.OrdersService",
+	ServiceName: "ataas.orders.OrdersService",
 	HandlerType: (*OrdersServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{

@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 
-	auth "pm.tcfw.com.au/source/trader/internal/passport/utils"
+	auth "pm.tcfw.com.au/source/ataas/internal/passport/utils"
 )
 
 func appendContextUserInfo(ctx context.Context, event EventInterface) EventInterface {

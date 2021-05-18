@@ -1,7 +1,7 @@
 syntax="proto3";
 
-package trader.blocks;
-option go_package = "pm.tcfw.com.au/source/trader/api/pb/blocks";
+package ataas.blocks;
+option go_package = "pm.tcfw.com.au/source/ataas/api/pb/blocks";
 
 import "google/api/annotations.proto";
 import "orders.proto";
@@ -46,11 +46,11 @@ message ListResponse {
 
 message ManualRequest {
 	string id = 1;
-	trader.orders.Action action = 2;
+	ataas.orders.Action action = 2;
 }
 
 message ManualResponse {
-	trader.orders.Order order = 1;
+	ataas.orders.Order order = 1;
 }
 
 message DeleteRequest {

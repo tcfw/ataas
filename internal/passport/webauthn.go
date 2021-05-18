@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/duo-labs/webauthn/webauthn"
-	usersAPI "pm.tcfw.com.au/source/trader/api/pb/users"
+	usersAPI "pm.tcfw.com.au/source/ataas/api/pb/users"
 )
 
 func webAuthn() (*webauthn.WebAuthn, error) {

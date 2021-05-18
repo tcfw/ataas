@@ -37,7 +37,7 @@ func NewPassportSeviceClient(cc grpc.ClientConnInterface) PassportSeviceClient {
 
 func (c *passportSeviceClient) VerifyToken(ctx context.Context, in *VerifyTokenRequest, opts ...grpc.CallOption) (*VerifyTokenResponse, error) {
 	out := new(VerifyTokenResponse)
-	err := c.cc.Invoke(ctx, "/trader.passport.PassportSevice/VerifyToken", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/ataas.passport.PassportSevice/VerifyToken", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +46,7 @@ func (c *passportSeviceClient) VerifyToken(ctx context.Context, in *VerifyTokenR
 
 func (c *passportSeviceClient) Authenticate(ctx context.Context, in *AuthRequest, opts ...grpc.CallOption) (*AuthResponse, error) {
 	out := new(AuthResponse)
-	err := c.cc.Invoke(ctx, "/trader.passport.PassportSevice/Authenticate", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/ataas.passport.PassportSevice/Authenticate", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -55,7 +55,7 @@ func (c *passportSeviceClient) Authenticate(ctx context.Context, in *AuthRequest
 
 func (c *passportSeviceClient) Refresh(ctx context.Context, in *RefreshRequest, opts ...grpc.CallOption) (*AuthResponse, error) {
 	out := new(AuthResponse)
-	err := c.cc.Invoke(ctx, "/trader.passport.PassportSevice/Refresh", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/ataas.passport.PassportSevice/Refresh", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -64,7 +64,7 @@ func (c *passportSeviceClient) Refresh(ctx context.Context, in *RefreshRequest, 
 
 func (c *passportSeviceClient) SocialLogin(ctx context.Context, in *SocialRequest, opts ...grpc.CallOption) (*AuthResponse, error) {
 	out := new(AuthResponse)
-	err := c.cc.Invoke(ctx, "/trader.passport.PassportSevice/SocialLogin", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/ataas.passport.PassportSevice/SocialLogin", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -73,7 +73,7 @@ func (c *passportSeviceClient) SocialLogin(ctx context.Context, in *SocialReques
 
 func (c *passportSeviceClient) RevokeToken(ctx context.Context, in *Revoke, opts ...grpc.CallOption) (*Empty, error) {
 	out := new(Empty)
-	err := c.cc.Invoke(ctx, "/trader.passport.PassportSevice/RevokeToken", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/ataas.passport.PassportSevice/RevokeToken", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -82,7 +82,7 @@ func (c *passportSeviceClient) RevokeToken(ctx context.Context, in *Revoke, opts
 
 func (c *passportSeviceClient) RevokeAllTokens(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Empty, error) {
 	out := new(Empty)
-	err := c.cc.Invoke(ctx, "/trader.passport.PassportSevice/RevokeAllTokens", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/ataas.passport.PassportSevice/RevokeAllTokens", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -91,7 +91,7 @@ func (c *passportSeviceClient) RevokeAllTokens(ctx context.Context, in *Empty, o
 
 func (c *passportSeviceClient) Sessions(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*SessionList, error) {
 	out := new(SessionList)
-	err := c.cc.Invoke(ctx, "/trader.passport.PassportSevice/Sessions", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/ataas.passport.PassportSevice/Sessions", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -160,7 +160,7 @@ func _PassportSevice_VerifyToken_Handler(srv interface{}, ctx context.Context, d
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/trader.passport.PassportSevice/VerifyToken",
+		FullMethod: "/ataas.passport.PassportSevice/VerifyToken",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(PassportSeviceServer).VerifyToken(ctx, req.(*VerifyTokenRequest))
@@ -178,7 +178,7 @@ func _PassportSevice_Authenticate_Handler(srv interface{}, ctx context.Context, 
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/trader.passport.PassportSevice/Authenticate",
+		FullMethod: "/ataas.passport.PassportSevice/Authenticate",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(PassportSeviceServer).Authenticate(ctx, req.(*AuthRequest))
@@ -196,7 +196,7 @@ func _PassportSevice_Refresh_Handler(srv interface{}, ctx context.Context, dec f
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/trader.passport.PassportSevice/Refresh",
+		FullMethod: "/ataas.passport.PassportSevice/Refresh",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(PassportSeviceServer).Refresh(ctx, req.(*RefreshRequest))
@@ -214,7 +214,7 @@ func _PassportSevice_SocialLogin_Handler(srv interface{}, ctx context.Context, d
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/trader.passport.PassportSevice/SocialLogin",
+		FullMethod: "/ataas.passport.PassportSevice/SocialLogin",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(PassportSeviceServer).SocialLogin(ctx, req.(*SocialRequest))
@@ -232,7 +232,7 @@ func _PassportSevice_RevokeToken_Handler(srv interface{}, ctx context.Context, d
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/trader.passport.PassportSevice/RevokeToken",
+		FullMethod: "/ataas.passport.PassportSevice/RevokeToken",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(PassportSeviceServer).RevokeToken(ctx, req.(*Revoke))
@@ -250,7 +250,7 @@ func _PassportSevice_RevokeAllTokens_Handler(srv interface{}, ctx context.Contex
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/trader.passport.PassportSevice/RevokeAllTokens",
+		FullMethod: "/ataas.passport.PassportSevice/RevokeAllTokens",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(PassportSeviceServer).RevokeAllTokens(ctx, req.(*Empty))
@@ -268,7 +268,7 @@ func _PassportSevice_Sessions_Handler(srv interface{}, ctx context.Context, dec 
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/trader.passport.PassportSevice/Sessions",
+		FullMethod: "/ataas.passport.PassportSevice/Sessions",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(PassportSeviceServer).Sessions(ctx, req.(*Empty))
@@ -280,7 +280,7 @@ func _PassportSevice_Sessions_Handler(srv interface{}, ctx context.Context, dec 
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var PassportSevice_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "trader.passport.PassportSevice",
+	ServiceName: "ataas.passport.PassportSevice",
 	HandlerType: (*PassportSeviceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{

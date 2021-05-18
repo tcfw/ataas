@@ -14,10 +14,10 @@ import (
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 
-	passportAPI "pm.tcfw.com.au/source/trader/api/pb/passport"
-	usersAPI "pm.tcfw.com.au/source/trader/api/pb/users"
-	"pm.tcfw.com.au/source/trader/internal/broadcast"
-	rpcUtils "pm.tcfw.com.au/source/trader/internal/utils/rpc"
+	passportAPI "pm.tcfw.com.au/source/ataas/api/pb/passport"
+	usersAPI "pm.tcfw.com.au/source/ataas/api/pb/users"
+	"pm.tcfw.com.au/source/ataas/internal/broadcast"
+	rpcUtils "pm.tcfw.com.au/source/ataas/internal/utils/rpc"
 )
 
 type socialUserInfo struct {

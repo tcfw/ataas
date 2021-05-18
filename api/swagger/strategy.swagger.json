@@ -51,7 +51,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/traderstrategyCreateResponse"
+              "$ref": "#/definitions/ataasstrategyCreateResponse"
             }
           }
         },
@@ -169,6 +169,31 @@
     }
   },
   "definitions": {
+    "ataasordersAction": {
+      "type": "string",
+      "enum": [
+        "BUY",
+        "SELL"
+      ],
+      "default": "BUY"
+    },
+    "ataasstrategyAction": {
+      "type": "string",
+      "enum": [
+        "STAY",
+        "BUY",
+        "SELL"
+      ],
+      "default": "STAY"
+    },
+    "ataasstrategyCreateResponse": {
+      "type": "object",
+      "properties": {
+        "strategy": {
+          "$ref": "#/definitions/strategyStrategy"
+        }
+      }
+    },
     "ordersOrder": {
       "type": "object",
       "properties": {
@@ -179,7 +204,7 @@
           "type": "string"
         },
         "action": {
-          "$ref": "#/definitions/traderordersAction"
+          "$ref": "#/definitions/ataasordersAction"
         },
         "units": {
           "type": "number",
@@ -226,7 +251,7 @@
           "type": "string"
         },
         "action": {
-          "$ref": "#/definitions/traderstrategyAction"
+          "$ref": "#/definitions/ataasstrategyAction"
         },
         "timestamp": {
           "type": "string"
@@ -291,31 +316,6 @@
         "MeanLog"
       ],
       "default": "MeanLog"
-    },
-    "traderordersAction": {
-      "type": "string",
-      "enum": [
-        "BUY",
-        "SELL"
-      ],
-      "default": "BUY"
-    },
-    "traderstrategyAction": {
-      "type": "string",
-      "enum": [
-        "STAY",
-        "BUY",
-        "SELL"
-      ],
-      "default": "STAY"
-    },
-    "traderstrategyCreateResponse": {
-      "type": "object",
-      "properties": {
-        "strategy": {
-          "$ref": "#/definitions/strategyStrategy"
-        }
-      }
     }
   }
 }

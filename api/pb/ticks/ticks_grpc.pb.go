@@ -34,7 +34,7 @@ func NewHistoryServiceClient(cc grpc.ClientConnInterface) HistoryServiceClient {
 
 func (c *historyServiceClient) Trades(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*TradesResponse, error) {
 	out := new(TradesResponse)
-	err := c.cc.Invoke(ctx, "/trader.ticks.HistoryService/Trades", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/ataas.ticks.HistoryService/Trades", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -43,7 +43,7 @@ func (c *historyServiceClient) Trades(ctx context.Context, in *GetRequest, opts 
 
 func (c *historyServiceClient) TradesRange(ctx context.Context, in *RangeRequest, opts ...grpc.CallOption) (*TradesResponse, error) {
 	out := new(TradesResponse)
-	err := c.cc.Invoke(ctx, "/trader.ticks.HistoryService/TradesRange", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/ataas.ticks.HistoryService/TradesRange", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +51,7 @@ func (c *historyServiceClient) TradesRange(ctx context.Context, in *RangeRequest
 }
 
 func (c *historyServiceClient) TradesRangeStream(ctx context.Context, in *RangeRequest, opts ...grpc.CallOption) (HistoryService_TradesRangeStreamClient, error) {
-	stream, err := c.cc.NewStream(ctx, &HistoryService_ServiceDesc.Streams[0], "/trader.ticks.HistoryService/TradesRangeStream", opts...)
+	stream, err := c.cc.NewStream(ctx, &HistoryService_ServiceDesc.Streams[0], "/ataas.ticks.HistoryService/TradesRangeStream", opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -84,7 +84,7 @@ func (x *historyServiceTradesRangeStreamClient) Recv() (*Trade, error) {
 
 func (c *historyServiceClient) Candles(ctx context.Context, in *CandlesRequest, opts ...grpc.CallOption) (*CandlesResponse, error) {
 	out := new(CandlesResponse)
-	err := c.cc.Invoke(ctx, "/trader.ticks.HistoryService/Candles", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/ataas.ticks.HistoryService/Candles", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -141,7 +141,7 @@ func _HistoryService_Trades_Handler(srv interface{}, ctx context.Context, dec fu
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/trader.ticks.HistoryService/Trades",
+		FullMethod: "/ataas.ticks.HistoryService/Trades",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(HistoryServiceServer).Trades(ctx, req.(*GetRequest))
@@ -159,7 +159,7 @@ func _HistoryService_TradesRange_Handler(srv interface{}, ctx context.Context, d
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/trader.ticks.HistoryService/TradesRange",
+		FullMethod: "/ataas.ticks.HistoryService/TradesRange",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(HistoryServiceServer).TradesRange(ctx, req.(*RangeRequest))
@@ -198,7 +198,7 @@ func _HistoryService_Candles_Handler(srv interface{}, ctx context.Context, dec f
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/trader.ticks.HistoryService/Candles",
+		FullMethod: "/ataas.ticks.HistoryService/Candles",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(HistoryServiceServer).Candles(ctx, req.(*CandlesRequest))
@@ -210,7 +210,7 @@ func _HistoryService_Candles_Handler(srv interface{}, ctx context.Context, dec f
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var HistoryService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "trader.ticks.HistoryService",
+	ServiceName: "ataas.ticks.HistoryService",
 	HandlerType: (*HistoryServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{

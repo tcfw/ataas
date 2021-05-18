@@ -15,8 +15,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/spf13/viper"
 
-	authUtils "pm.tcfw.com.au/source/trader/internal/passport/utils"
-	cryptoUtils "pm.tcfw.com.au/source/trader/internal/utils/crypto"
+	authUtils "pm.tcfw.com.au/source/ataas/internal/passport/utils"
+	cryptoUtils "pm.tcfw.com.au/source/ataas/internal/utils/crypto"
 )
 
 const (

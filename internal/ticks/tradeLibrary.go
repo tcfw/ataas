@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/sirupsen/logrus"
-	"pm.tcfw.com.au/source/trader/api/pb/ticks"
+	"pm.tcfw.com.au/source/ataas/api/pb/ticks"
 )
 
 const (

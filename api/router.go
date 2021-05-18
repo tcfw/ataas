@@ -6,13 +6,13 @@ import (
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
-	"pm.tcfw.com.au/source/trader/api/marshalers"
-	"pm.tcfw.com.au/source/trader/api/pb/blocks"
-	"pm.tcfw.com.au/source/trader/api/pb/orders"
-	"pm.tcfw.com.au/source/trader/api/pb/passport"
-	"pm.tcfw.com.au/source/trader/api/pb/strategy"
-	"pm.tcfw.com.au/source/trader/api/pb/ticks"
-	"pm.tcfw.com.au/source/trader/api/pb/users"
+	"pm.tcfw.com.au/source/ataas/api/marshalers"
+	"pm.tcfw.com.au/source/ataas/api/pb/blocks"
+	"pm.tcfw.com.au/source/ataas/api/pb/orders"
+	"pm.tcfw.com.au/source/ataas/api/pb/passport"
+	"pm.tcfw.com.au/source/ataas/api/pb/strategy"
+	"pm.tcfw.com.au/source/ataas/api/pb/ticks"
+	"pm.tcfw.com.au/source/ataas/api/pb/users"
 )
 
 func newRouter(ctx context.Context) (*runtime.ServeMux, error) {

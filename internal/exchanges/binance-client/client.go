@@ -3,7 +3,7 @@ package binance
 import (
 	"net/http"
 
-	"pm.tcfw.com.au/source/trader/api/pb/ticks"
+	"pm.tcfw.com.au/source/ataas/api/pb/ticks"
 )
 
 const (
@@ -40,4 +40,3 @@ func newHttpClent() *http.Client {
 func (c *Client) SubscribeTradesAll() (<-chan *ticks.Trade, error) {
 	return c.ws.SubscribeTradesAll()
 }
-

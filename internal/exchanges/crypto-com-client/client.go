@@ -7,9 +7,9 @@ import (
 	"net/http"
 
 	"github.com/sirupsen/logrus"
-	"pm.tcfw.com.au/source/trader/api/pb/ticks"
-	"pm.tcfw.com.au/source/trader/common"
-	"pm.tcfw.com.au/source/trader/internal/exchanges"
+	"pm.tcfw.com.au/source/ataas/api/pb/ticks"
+	"pm.tcfw.com.au/source/ataas/common"
+	"pm.tcfw.com.au/source/ataas/internal/exchanges"
 )
 
 type Client struct {
