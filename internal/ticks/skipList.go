@@ -1,16 +1,17 @@
 package ticks
 
 import (
-	"math/rand"
 	"time"
+
+	"github.com/valyala/fastrand"
 )
 
 const (
-	maxL = 21
+	maxL = 10
 )
 
 type skipListLink struct {
-	prev, next *skipListNode
+	next *skipListNode //prev
 }
 
 type skipListNode struct {
@@ -21,25 +22,27 @@ type skipListNode struct {
 
 type skipList struct {
 	head *skipListNode
+	last [maxL]*skipListNode
 }
 
 func (sk *skipList) search(ts time.Time) *skipListNode {
 	p := sk.head
-	i := maxL - 1
+	i := 0
 
 	if p == nil {
 		return nil
 	}
 
-	for i >= 0 {
-		if p.tower[i].next == nil {
-			i--
-			continue
+	var isAfter bool
+	for i < maxL {
+		next := p.tower[i].next
+		if next != nil {
+			isAfter = ts.After(next.ts) || ts == next.ts
 		}
 
-		next := p.tower[i].next
-
-		if ts.After(next.ts) || ts == next.ts {
+		if next == nil || !isAfter {
+			i++
+		} else if isAfter {
 			p = next
 		} else {
 			break
@@ -50,7 +53,7 @@ func (sk *skipList) search(ts time.Time) *skipListNode {
 }
 
 func (sk *skipList) coinFlip() bool {
-	return rand.Intn(2) == 1
+	return fastrand.Uint32n(2) == 1
 }
 
 func (sk *skipList) insert(ts time.Time, offset uint64) *skipListNode {
@@ -59,22 +62,16 @@ func (sk *skipList) insert(ts time.Time, offset uint64) *skipListNode {
 	if sk.head == nil {
 		//first add
 		sk.head = q
+		for level := 0; level < maxL; level++ {
+			sk.last[level] = q
+		}
 		return q
 	}
 
-	p := sk.search(ts)
-	sk.attach(p, q, 0)
+	for level := maxL - 1; level >= 0; level-- {
+		sk.attach(sk.last[level], q, level)
 
-	for i := maxL - 1; i >= 0; i-- {
-		if p.tower[i].next != nil || p == sk.head {
-			sk.attach(p, q, i)
-		} else {
-			//move back
-			if p.tower[maxL-1].prev != nil {
-				p = p.tower[maxL-1].prev
-				continue
-			}
-		}
+		sk.last[level] = q
 
 		if sk.coinFlip() {
 			break
@@ -86,8 +83,8 @@ func (sk *skipList) insert(ts time.Time, offset uint64) *skipListNode {
 
 func (sk *skipList) attach(p, q *skipListNode, h int) {
 	q.tower[h].next = p.tower[h].next
-	q.tower[h].prev = p
 	p.tower[h].next = q
+	// q.tower[h].prev = p
 }
 
 func (sk *skipList) newNode(ts time.Time, offset uint64) *skipListNode {

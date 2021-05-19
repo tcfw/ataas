@@ -80,6 +80,10 @@ message BacktestResponse {
 	repeated ataas.orders.Order orders = 1;
 }
 
+message GetRequest {
+	string id = 1;
+}
+
 message UpdateRequest {
 	string id = 1;
 	Strategy strategy = 2;
@@ -93,7 +97,7 @@ service StrategyService {
 	};
 	rpc History(HistoryRequest) returns (HistoryResponse) {
 		option (google.api.http) = {
-            get: "/v1/strategy/{id}"
+            get: "/v1/strategy/history/{id}"
 		};
 	};
 	rpc Create(CreateRequest) returns (CreateResponse) {
@@ -104,6 +108,11 @@ service StrategyService {
 	rpc Delete(DeleteRequest) returns (DeleteResponse) {
 		option (google.api.http) = {
             delete: "/v1/strategy/{id}"
+		};
+	};
+	rpc Get(GetRequest) returns (Strategy) {
+		option (google.api.http) = {
+			get: "/v1/strategy/{id}"
 		};
 	};
 	rpc Update(UpdateRequest) returns (Strategy) {

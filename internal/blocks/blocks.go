@@ -306,6 +306,34 @@ func (s *Server) ManualAction(ctx context.Context, req *blocksAPI.ManualRequest)
 	return &blocksAPI.ManualResponse{Order: order}, nil
 }
 
+func (s *Server) Update(ctx context.Context, req *blocksAPI.UpdateRequest) (*blocksAPI.Block, error) {
+	block, err := s.Get(ctx, &blocksAPI.GetRequest{Id: req.Id})
+	if err != nil {
+		return nil, err
+	}
+
+	block.StrategyId = req.Block.StrategyId
+	block.BaseUnits = req.Block.BaseUnits
+	block.Purchase = req.Block.Purchase
+	block.WatchDuration = req.Block.WatchDuration
+	block.BackoutPercentage = req.Block.BackoutPercentage
+
+	q := db.Build().Update(tblName).SetMap(sq.Eq{
+		"strategy_id":        block.StrategyId,
+		"base_units":         block.BaseUnits,
+		"purchase":           block.Purchase,
+		"watch_duration":     block.WatchDuration,
+		"backout_percentage": block.BackoutPercentage,
+	}).Where(sq.Eq{"id": block.Id}).Limit(1)
+
+	err = db.SimpleExec(ctx, q)
+	if err != nil {
+		return nil, err
+	}
+
+	return block, nil
+}
+
 func (s *Server) Delete(ctx context.Context, req *blocksAPI.DeleteRequest) (*blocksAPI.DeleteResponse, error) {
 	block, err := s.Get(ctx, &blocksAPI.GetRequest{Id: req.Id})
 	if err != nil {

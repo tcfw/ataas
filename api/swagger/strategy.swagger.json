@@ -86,7 +86,7 @@
         ]
       }
     },
-    "/v1/strategy/{id}": {
+    "/v1/strategy/history/{id}": {
       "get": {
         "operationId": "History",
         "responses": {
@@ -115,6 +115,30 @@
             "name": "page",
             "in": "query",
             "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "StrategyService"
+        ]
+      }
+    },
+    "/v1/strategy/{id}": {
+      "get": {
+        "operationId": "Get",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/strategyStrategy"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
             "type": "string"
           }
         ],

@@ -22,6 +22,7 @@ type StrategyServiceClient interface {
 	History(ctx context.Context, in *HistoryRequest, opts ...grpc.CallOption) (*HistoryResponse, error)
 	Create(ctx context.Context, in *CreateRequest, opts ...grpc.CallOption) (*CreateResponse, error)
 	Delete(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*DeleteResponse, error)
+	Get(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*Strategy, error)
 	Update(ctx context.Context, in *UpdateRequest, opts ...grpc.CallOption) (*Strategy, error)
 	BackTest(ctx context.Context, in *BacktestRequest, opts ...grpc.CallOption) (*BacktestResponse, error)
 }
@@ -70,6 +71,15 @@ func (c *strategyServiceClient) Delete(ctx context.Context, in *DeleteRequest, o
 	return out, nil
 }
 
+func (c *strategyServiceClient) Get(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*Strategy, error) {
+	out := new(Strategy)
+	err := c.cc.Invoke(ctx, "/ataas.strategy.StrategyService/Get", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *strategyServiceClient) Update(ctx context.Context, in *UpdateRequest, opts ...grpc.CallOption) (*Strategy, error) {
 	out := new(Strategy)
 	err := c.cc.Invoke(ctx, "/ataas.strategy.StrategyService/Update", in, out, opts...)
@@ -96,6 +106,7 @@ type StrategyServiceServer interface {
 	History(context.Context, *HistoryRequest) (*HistoryResponse, error)
 	Create(context.Context, *CreateRequest) (*CreateResponse, error)
 	Delete(context.Context, *DeleteRequest) (*DeleteResponse, error)
+	Get(context.Context, *GetRequest) (*Strategy, error)
 	Update(context.Context, *UpdateRequest) (*Strategy, error)
 	BackTest(context.Context, *BacktestRequest) (*BacktestResponse, error)
 	mustEmbedUnimplementedStrategyServiceServer()
@@ -116,6 +127,9 @@ func (UnimplementedStrategyServiceServer) Create(context.Context, *CreateRequest
 }
 func (UnimplementedStrategyServiceServer) Delete(context.Context, *DeleteRequest) (*DeleteResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
+}
+func (UnimplementedStrategyServiceServer) Get(context.Context, *GetRequest) (*Strategy, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
 }
 func (UnimplementedStrategyServiceServer) Update(context.Context, *UpdateRequest) (*Strategy, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Update not implemented")
@@ -208,6 +222,24 @@ func _StrategyService_Delete_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _StrategyService_Get_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(StrategyServiceServer).Get(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ataas.strategy.StrategyService/Get",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(StrategyServiceServer).Get(ctx, req.(*GetRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _StrategyService_Update_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(UpdateRequest)
 	if err := dec(in); err != nil {
@@ -266,6 +298,10 @@ var StrategyService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Delete",
 			Handler:    _StrategyService_Delete_Handler,
+		},
+		{
+			MethodName: "Get",
+			Handler:    _StrategyService_Get_Handler,
 		},
 		{
 			MethodName: "Update",

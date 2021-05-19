@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"math"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -148,10 +149,19 @@ func (c *Client) createOrder(symbol string, side bool, orderType OrderType, pric
 		return nil, err
 	}
 
+	if side { //buy
+		respQuantity = respQuantity * (1 - txFee)
+	}
+
 	res := &OrderResponse{
 		price: float32(respPrice),
-		units: respQuantity * (1 - txFee),
+		units: truncatePrecision(respQuantity, 5),
 	}
 
 	return res, nil
+}
+
+func truncatePrecision(f float64, pres int) float64 {
+	i := math.Pow10(pres)
+	return float64(int(f*i)) / i
 }

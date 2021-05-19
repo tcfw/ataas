@@ -115,12 +115,16 @@ func (s *Server) applyState(b *blocks.Block, ns blocks.BlockState, n int) (*orde
 		nUnits += order.Units
 
 	case blocks.BlockState_SOLD:
+		if b.Purchase > 0 {
+			unitDiff = b.CurrentUnits
+		}
+
 		//sell
 		resp, err := ordersSvc.Create(ctx, &orders.CreateRequest{
 			BlockID: b.Id,
 			Action:  orders.Action_SELL,
 			Units:   unitDiff,
-			Price:   price, //market
+			Price:   -1, //market
 		})
 		if err != nil {
 			return nil, err

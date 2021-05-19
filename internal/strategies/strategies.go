@@ -203,6 +203,63 @@ func (s *Server) Create(ctx context.Context, req *strategy.CreateRequest) (*stra
 	return &strategy.CreateResponse{Strategy: req.Strategy}, nil
 }
 
+func (s *Server) Get(ctx context.Context, req *strategy.GetRequest) (*strategy.Strategy, error) {
+	q := db.Build().Select("id", "market", "instrument", "strategy", "params", "duration", "next").From(tblName).Where(sq.Eq{"id": req.Id})
+	res, done, err := db.SimpleQuery(ctx, q)
+	if err != nil {
+		s.log.Errorf("failed to find blocks: %s", err)
+		return nil, err
+	}
+	defer done()
+
+	if !res.Next() {
+		return nil, status.Error(codes.NotFound, "strategy not found")
+	}
+
+	strategy := &strategy.Strategy{}
+	err = res.Scan(
+		&strategy.Id,
+		&strategy.Market,
+		&strategy.Instrument,
+		&strategy.Strategy,
+		&strategy.Params,
+		&strategy.Duration,
+		&strategy.Next,
+	)
+	if err != nil {
+		s.log.Errorf("failed to scan block: %s", err)
+		return nil, err
+	}
+
+	return strategy, nil
+}
+
+func (s *Server) Update(ctx context.Context, req *strategy.UpdateRequest) (*strategy.Strategy, error) {
+	strategy, err := s.Get(ctx, &strategy.GetRequest{Id: req.Id})
+	if err != nil {
+		return nil, err
+	}
+
+	strategy.Strategy = req.Strategy.Strategy
+	strategy.Params = req.Strategy.Params
+	strategy.Duration = req.Strategy.Duration
+	strategy.Next = req.Strategy.Next
+
+	q := db.Build().Update(tblName).SetMap(sq.Eq{
+		"strategy": strategy.Strategy,
+		"params":   strategy.Params,
+		"duration": strategy.Duration,
+		"next":     strategy.Next,
+	}).Where(sq.Eq{"id": req.Id}).Limit(1)
+
+	err = db.SimpleExec(ctx, q)
+	if err != nil {
+		return nil, err
+	}
+
+	return strategy, nil
+}
+
 func (s *Server) Delete(ctx context.Context, req *strategy.DeleteRequest) (*strategy.DeleteResponse, error) {
 	q := db.Build().Delete(tblName).Where(sq.Eq{"id": req.Id}).Limit(1)
 	err := db.SimpleExec(ctx, q)

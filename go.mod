@@ -34,6 +34,7 @@ require (
 	github.com/spf13/viper v1.7.1
 	github.com/stretchr/testify v1.7.0
 	github.com/tcfw/go-migrate v0.0.2
+	github.com/valyala/fastrand v1.0.0
 	github.com/vmihailenco/msgpack/v5 v5.3.1
 	golang.org/x/crypto v0.0.0-20210415154028-4f45737414dc
 	golang.org/x/net v0.0.0-20210410081132-afb366fc7cd1 // indirect
