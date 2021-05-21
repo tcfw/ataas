@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math"
 	"sort"
+	"strconv"
 	"time"
 
 	"pm.tcfw.com.au/source/ataas/api/pb/strategy"
@@ -23,7 +24,7 @@ func (w *Worker) handleMeanLog(job *strategy.Strategy) error {
 	var dur string
 	var ok bool
 	dur, ok = job.Params["duration"]
-	if ok {
+	if !ok {
 		dur = "5m"
 	}
 
@@ -50,7 +51,7 @@ func (w *Worker) handleMeanLog(job *strategy.Strategy) error {
 		return err
 	}
 
-	action := meanLog(tradesResp.Data)
+	action := meanLog(tradesResp.Data, job.Params)
 
 	err = w.storeSuggestedAction(action, job)
 	if err != nil {
@@ -66,13 +67,32 @@ func (a SortableTrades) Len() int           { return len(a) }
 func (a SortableTrades) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 func (a SortableTrades) Less(i, j int) bool { return a[i].Timestamp < a[j].Timestamp }
 
-func meanLog(trades []*ticks.Trade) strategy.Action {
+func meanLog(trades []*ticks.Trade, params map[string]string) strategy.Action {
 	if len(trades) < 2 {
 		return strategy.Action_STAY
 	}
 
 	//Ensure is sorted in ascending timestamp
 	sort.Sort(SortableTrades(trades))
+
+	buyPoint := 0.003
+	stayPoint := 0.001
+
+	bps, ok := params["buy"]
+	if ok {
+		bpsp, err := strconv.ParseFloat(bps, 64)
+		if err == nil {
+			buyPoint = bpsp
+		}
+	}
+
+	sps, ok := params["stay"]
+	if ok {
+		spsp, err := strconv.ParseFloat(sps, 64)
+		if err == nil {
+			stayPoint = spsp
+		}
+	}
 
 	sum := 0.0
 
@@ -88,9 +108,9 @@ func meanLog(trades []*ticks.Trade) strategy.Action {
 
 	fmt.Printf("ML: %+v\n", sum)
 
-	if sum > 0.004 {
+	if sum > buyPoint {
 		return strategy.Action_BUY
-	} else if sum > 0.001 {
+	} else if sum > stayPoint {
 		return strategy.Action_STAY
 	}
 

@@ -74,10 +74,12 @@ message HistoryResponse {
 message BacktestRequest {
 	Strategy strategy = 1;
 	string fromTimestamp = 2;
+	float amount = 3;
 }
 
 message BacktestResponse {
 	repeated ataas.orders.Order orders = 1;
+	float pnl = 2;
 }
 
 message GetRequest {
@@ -115,15 +117,15 @@ service StrategyService {
 			get: "/v1/strategy/{id}"
 		};
 	};
-	rpc Update(UpdateRequest) returns (Strategy) {
-		option (google.api.http) = {
-			post: "/v1/strategy/{id}"
-		};
-	};
 	rpc BackTest(BacktestRequest) returns (BacktestResponse) {
 		option (google.api.http) = {
 			post: "/v1/strategy/backtest"
 			body: "*"
+		};
+	};
+	rpc Update(UpdateRequest) returns (Strategy) {
+		option (google.api.http) = {
+			post: "/v1/strategy/{id}"
 		};
 	};
 }

@@ -24,7 +24,7 @@ func TestAdd(t *testing.T) {
 
 	trade := &ticks.Trade{
 		Market:     "atass.io",
-		Instrument: "TCFW/AUD",
+		Instrument: "TCFWAUD",
 		TradeID:    "0",
 		Direction:  ticks.TradeDirection_BUY,
 		Amount:     1234.567,
@@ -59,20 +59,33 @@ func TestGet(t *testing.T) {
 
 	defer os.Remove(fName)
 
-	market := "ataas.io"
-	instrument := "TCFW/AUD"
+	market := "staging.ataas.io"
+	instrument := "TCFWAUD"
 
 	trade := &ticks.Trade{
 		Market:     market,
 		Instrument: instrument,
-		TradeID:    "0",
+		TradeID:    "239",
 		Direction:  ticks.TradeDirection_BUY,
 		Amount:     1234.567,
 		Units:      0.001,
 		Timestamp:  time.Now().Unix(),
 	}
+	trade2 := &ticks.Trade{
+		Market:     market,
+		Instrument: instrument,
+		TradeID:    "2394237",
+		Direction:  ticks.TradeDirection_BUY,
+		Amount:     765.1324,
+		Units:      10.001,
+		Timestamp:  time.Now().Add(1 * time.Second).Unix(),
+	}
 
 	err = fs.Add(trade)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = fs.Add(trade2)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -83,6 +96,7 @@ func TestGet(t *testing.T) {
 	}
 
 	assert.Equal(t, trade, trades[0])
+	assert.Equal(t, trade2, trades[1])
 }
 
 func TestFindSL(t *testing.T) {

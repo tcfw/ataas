@@ -30,37 +30,12 @@ func (s *Server) work(id int) {
 }
 
 func (s *Server) handleApply(wid int, ap *apply) error {
-	desiredState := ap.block.State
-	n := 1
 
 	if ap.block.State == blocks.BlockState_ENDED {
 		return nil
 	}
 
-	switch ap.action {
-	case strategy.Action_BUY:
-		if ap.block.State == blocks.BlockState_NOTHING {
-			desiredState = blocks.BlockState_PURCHASED
-		} else if ap.block.State == blocks.BlockState_SOLD {
-			if ap.block.ShortSellAllowed {
-				n = 2
-			}
-			desiredState = blocks.BlockState_PURCHASED
-		}
-	case strategy.Action_SELL:
-		if ap.block.State == blocks.BlockState_PURCHASED {
-			if ap.block.ShortSellAllowed {
-				n = 2
-			}
-			desiredState = blocks.BlockState_SOLD
-		} else if ap.block.State == blocks.BlockState_NOTHING {
-			if ap.block.ShortSellAllowed {
-				desiredState = blocks.BlockState_SOLD
-			}
-		}
-	case strategy.Action_STAY:
-		//noop
-	}
+	desiredState, n := s.calcState(ap.block, ap.action)
 
 	_, err := s.applyState(ap.block, desiredState, n)
 	if err == ErrSameState {
@@ -68,6 +43,38 @@ func (s *Server) handleApply(wid int, ap *apply) error {
 	}
 
 	return err
+}
+
+func (s *Server) calcState(block *blocks.Block, action strategy.Action) (blocks.BlockState, int) {
+	desiredState := block.State
+	n := 1
+
+	switch action {
+	case strategy.Action_BUY:
+		if block.State == blocks.BlockState_NOTHING {
+			desiredState = blocks.BlockState_PURCHASED
+		} else if block.State == blocks.BlockState_SOLD {
+			if block.ShortSellAllowed {
+				n = 2
+			}
+			desiredState = blocks.BlockState_PURCHASED
+		}
+	case strategy.Action_SELL:
+		if block.State == blocks.BlockState_PURCHASED {
+			if block.ShortSellAllowed {
+				n = 2
+			}
+			desiredState = blocks.BlockState_SOLD
+		} else if block.State == blocks.BlockState_NOTHING {
+			if block.ShortSellAllowed {
+				desiredState = blocks.BlockState_SOLD
+			}
+		}
+	case strategy.Action_STAY:
+		//noop
+	}
+
+	return desiredState, n
 }
 
 func (s *Server) applyState(b *blocks.Block, ns blocks.BlockState, n int) (*orders.Order, error) {

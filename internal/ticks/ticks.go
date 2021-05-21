@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/sirupsen/logrus"
@@ -76,16 +77,28 @@ func (s *Server) TradesRange(ctx context.Context, req *ticks.RangeRequest) (*tic
 		return nil, status.Error(codes.InvalidArgument, "missing required arguments")
 	}
 
-	ts, err := time.ParseDuration(req.Since)
-	if err != nil {
-		return nil, err
+	var tsFrom time.Time
+
+	if strings.ContainsAny(req.Since, ":/.+") {
+		t, err := time.Parse(time.RFC3339, req.Since)
+		if err != nil {
+			return nil, err
+		}
+		tsFrom = t
+	} else {
+		ts, err := time.ParseDuration(req.Since)
+		if err != nil {
+			return nil, err
+		}
+
+		if ts > 24*time.Hour {
+			return nil, ErrDurationTooLong
+		}
+
+		tsFrom = time.Now().Add(-1 * ts)
 	}
 
-	if ts > 48*time.Hour {
-		return nil, ErrDurationTooLong
-	}
-
-	trades, err := s.library.GetSince(req.Market, req.Instrument, time.Now().Add(-ts))
+	trades, err := s.library.GetSince(req.Market, req.Instrument, tsFrom)
 	if err != nil {
 		return nil, err
 	}
@@ -133,16 +146,28 @@ func (s *Server) TradesRangeStream(req *ticks.RangeRequest, stream ticks.History
 		return status.Error(codes.InvalidArgument, "missing required arguments")
 	}
 
-	ts, err := time.ParseDuration(req.Since)
-	if err != nil {
-		return err
+	var tsFrom time.Time
+
+	if strings.ContainsAny(req.Since, ":/.+") {
+		t, err := time.Parse(time.RFC3339, req.Since)
+		if err != nil {
+			return err
+		}
+		tsFrom = t
+	} else {
+		ts, err := time.ParseDuration(req.Since)
+		if err != nil {
+			return err
+		}
+
+		if ts > 24*time.Hour {
+			return ErrDurationTooLong
+		}
+
+		tsFrom = time.Now().Add(-ts)
 	}
 
-	if ts > 48*time.Hour {
-		return ErrDurationTooLong
-	}
-
-	tradesCh, err := s.library.GetSinceStream(req.Market, req.Instrument, time.Now().Add(-1*time.Hour))
+	tradesCh, err := s.library.GetSinceStream(req.Market, req.Instrument, tsFrom)
 	if err != nil {
 		return err
 	}

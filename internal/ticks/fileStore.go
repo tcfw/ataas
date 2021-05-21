@@ -19,7 +19,7 @@ const (
 
 func NewFileStore(dir string, ts time.Time) (*FileStore, error) {
 	//Round down to closest hour
-	ts = ts.Truncate(time.Hour)
+	ts = ts.Truncate(time.Minute)
 
 	abs := fmt.Sprintf("%s/%s", dir, fileName(ts))
 
@@ -44,6 +44,7 @@ func NewFileStoreFromFile(file string) (*FileStore, error) {
 		lastTime:  time.Time{},
 		size:      fstat.Size(),
 		sk:        &skipList{},
+		encBuff:   make([]byte, encTradeSize),
 	}
 
 	if fStore.size != 0 {
@@ -102,9 +103,10 @@ type FileStore struct {
 	lastTime  time.Time
 	size      int64
 
-	writeMu sync.Mutex
-	cMu     sync.RWMutex
-	sk      *skipList
+	mu sync.RWMutex
+	sk *skipList
+
+	encBuff []byte
 }
 
 func (fs *FileStore) buildSK() {
@@ -141,8 +143,8 @@ func (fs *FileStore) buildSK() {
 }
 
 func (fs *FileStore) Add(trade *ticks.Trade) error {
-	fs.writeMu.Lock()
-	defer fs.writeMu.Unlock()
+	fs.mu.Lock()
+	defer fs.mu.Unlock()
 
 	valBuff := bytes.NewBuffer(nil)
 	err := fs.encode(valBuff, trade)
@@ -182,10 +184,8 @@ func (fs *FileStore) Add(trade *ticks.Trade) error {
 }
 
 func (fs *FileStore) Close() error {
-	fs.cMu.Lock()
-	defer fs.cMu.Unlock()
-	fs.writeMu.Lock()
-	defer fs.writeMu.Unlock()
+	fs.mu.Lock()
+	defer fs.mu.Unlock()
 
 	fs.f.Sync()
 
@@ -200,8 +200,8 @@ func (fs *FileStore) Close() error {
 }
 
 func (fs *FileStore) Open() error {
-	fs.cMu.Lock()
-	defer fs.cMu.Unlock()
+	fs.mu.Lock()
+	defer fs.mu.Unlock()
 
 	f, err := os.OpenFile(fs.f.Name(), os.O_RDWR|os.O_CREATE, 0644)
 	if err != nil {
@@ -213,9 +213,6 @@ func (fs *FileStore) Open() error {
 }
 
 func (fs *FileStore) GetAll(market, instrument string, after uint64) ([]*ticks.Trade, error) {
-	fs.cMu.RLock()
-	defer fs.cMu.RUnlock()
-
 	trades := make([]*ticks.Trade, 0, 200)
 	r := fs.newReader(time.Unix(int64(after), 0))
 
@@ -236,9 +233,6 @@ func (fs *FileStore) GetAll(market, instrument string, after uint64) ([]*ticks.T
 }
 
 func (fs *FileStore) GetStream(market, instrument string, after uint64) (<-chan *ticks.Trade, error) {
-	fs.cMu.RLock()
-	defer fs.cMu.RUnlock()
-
 	trades := make(chan *ticks.Trade)
 	r := fs.newReader(time.Unix(int64(after), 0))
 
@@ -263,13 +257,34 @@ func (fs *FileStore) GetStream(market, instrument string, after uint64) (<-chan 
 	return trades, nil
 }
 
+const (
+	encMarketLen     = 20
+	encInstrumentLen = 12
+	encTradeIDLen    = 20
+	encTradeInfoOff  = encMarketLen + encInstrumentLen + encTradeIDLen
+	encTradeSize     = encTradeInfoOff + 4 + 4 + 4 + 8 //direction+amount+units+ts
+)
+
 func (fs *FileStore) encode(w io.Writer, t *ticks.Trade) error {
+	// buf := fs.encBuff
+
+	// copy(buf[:], []byte(t.Market))
+	// copy(buf[encMarketLen:], []byte(t.Instrument))
+	// copy(buf[encMarketLen+encInstrumentLen:], []byte(t.TradeID))
+	// binary.LittleEndian.PutUint32(buf[encTradeInfoOff:], uint32(t.Direction))
+	// binary.LittleEndian.PutUint32(buf[encTradeInfoOff+4:], math.Float32bits(t.Amount))
+	// binary.LittleEndian.PutUint32(buf[encTradeInfoOff+4+4:], math.Float32bits(t.Units))
+	// binary.LittleEndian.PutUint64(buf[encTradeInfoOff+4+4+4:], uint64(t.Timestamp))
+
+	// _, err := w.Write(buf)
+	// return err
+
 	return msgpack.NewEncoder(w).Encode(t)
 }
 
 func (fs *FileStore) newReader(ts time.Time) *fsReader {
-	fs.writeMu.Lock()
-	defer fs.writeMu.Unlock()
+	fs.mu.RLock()
+	defer fs.mu.RUnlock()
 
 	var offset int64
 	n := fs.sk.search(ts)
@@ -302,6 +317,15 @@ func (fs *fsReader) decode(b []byte) (*ticks.Trade, error) {
 		return nil, err
 	}
 
+	// t.Market = string(bytes.Trim(b[:encMarketLen], "\x00"))
+	// t.Instrument = string(bytes.Trim(b[encMarketLen:encMarketLen+encInstrumentLen], "\x00"))
+	// t.TradeID = string(bytes.Trim(b[encMarketLen+encInstrumentLen:encTradeInfoOff], "\x00"))
+
+	// t.Direction = ticks.TradeDirection(binary.LittleEndian.Uint32(b[encTradeInfoOff:]))
+	// t.Amount = math.Float32frombits(binary.LittleEndian.Uint32(b[encTradeInfoOff+4:]))
+	// t.Units = math.Float32frombits(binary.LittleEndian.Uint32(b[encTradeInfoOff+4+4:]))
+	// t.Timestamp = int64(binary.LittleEndian.Uint64(b[encTradeInfoOff+4+4+4:]))
+
 	return t, nil
 }
 
@@ -321,12 +345,16 @@ func (fs *fsReader) next(after uint64) (*ticks.Trade, error) {
 		return fs.next(after)
 	}
 
-	n, err := fs.r.Read(fs.buf[:rl])
+	if rl > 150 {
+		return nil, fmt.Errorf("failed to read record: outside of standard bounds")
+	}
+
+	_, err = fs.r.Read(fs.buf[:rl])
 	if err != nil {
 		return nil, fmt.Errorf("failed to read record: %s", err)
 	}
 
-	trade, err := fs.decode(fs.buf[:n])
+	trade, err := fs.decode(fs.buf[:rl])
 	if err != nil {
 		return nil, fmt.Errorf("failed to decode record: %s", err)
 	}

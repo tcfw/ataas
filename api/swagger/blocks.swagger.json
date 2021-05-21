@@ -22,7 +22,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/blocksListResponse"
+              "$ref": "#/definitions/ataasblocksListResponse"
             }
           }
         },
@@ -84,7 +84,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/blocksDeleteResponse"
+              "$ref": "#/definitions/ataasblocksDeleteResponse"
             }
           }
         },
@@ -167,6 +167,37 @@
     }
   },
   "definitions": {
+    "ataasblocksDeleteResponse": {
+      "type": "object"
+    },
+    "ataasblocksListResponse": {
+      "type": "object",
+      "properties": {
+        "blocks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/blocksBlock"
+          }
+        }
+      }
+    },
+    "ataasordersAction": {
+      "type": "string",
+      "enum": [
+        "BUY",
+        "SELL"
+      ],
+      "default": "BUY"
+    },
+    "ataasstrategyAction": {
+      "type": "string",
+      "enum": [
+        "STAY",
+        "BUY",
+        "SELL"
+      ],
+      "default": "STAY"
+    },
     "blocksBlock": {
       "type": "object",
       "properties": {
@@ -221,17 +252,15 @@
       ],
       "default": "NOTHING"
     },
-    "blocksDeleteResponse": {
-      "type": "object"
-    },
-    "blocksListResponse": {
+    "blocksCalcResponse": {
       "type": "object",
       "properties": {
-        "blocks": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/blocksBlock"
-          }
+        "state": {
+          "$ref": "#/definitions/blocksBlockState"
+        },
+        "n": {
+          "type": "integer",
+          "format": "int32"
         }
       }
     },
@@ -242,7 +271,7 @@
           "type": "string"
         },
         "action": {
-          "$ref": "#/definitions/ordersAction"
+          "$ref": "#/definitions/ataasordersAction"
         }
       }
     },
@@ -254,14 +283,6 @@
         }
       }
     },
-    "ordersAction": {
-      "type": "string",
-      "enum": [
-        "BUY",
-        "SELL"
-      ],
-      "default": "BUY"
-    },
     "ordersOrder": {
       "type": "object",
       "properties": {
@@ -272,7 +293,7 @@
           "type": "string"
         },
         "action": {
-          "$ref": "#/definitions/ordersAction"
+          "$ref": "#/definitions/ataasordersAction"
         },
         "units": {
           "type": "number",

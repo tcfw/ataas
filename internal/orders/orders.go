@@ -81,12 +81,18 @@ func (s *Server) Create(ctx context.Context, req *ordersAPI.CreateRequest) (*ord
 
 	var exchangeRes exchanges.OrderResponse
 
-	currentMarketPrice, err := s.getMarketPrice(ctx, block.Market, block.Instrument)
+	bestPrice, err := s.getMarketPrice(ctx, block.Market, block.Instrument)
 	if err != nil {
 		return nil, err
 	}
+
 	if req.Price <= 0 {
-		req.Price = float32(float64(currentMarketPrice) * block.BaseUnits)
+		if block.BaseUnits != 0 {
+			req.Price = float32(float64(bestPrice) * block.BaseUnits)
+		} else {
+			//assume limit order
+			req.Price = bestPrice
+		}
 	}
 
 	switch req.Action {
@@ -104,7 +110,7 @@ func (s *Server) Create(ctx context.Context, req *ordersAPI.CreateRequest) (*ord
 
 	price := exchangeRes.Price()
 	if price == 0 {
-		price = currentMarketPrice
+		price = bestPrice
 	}
 
 	q := db.Build().Insert(tblName).Columns(allColumns...).Values(
@@ -195,4 +201,38 @@ func (s *Server) getMarketPrice(ctx context.Context, market, instrument string) 
 	}
 
 	return trades.Data[0].Amount, nil
+}
+
+func (s *Server) getBestMarketPrice(ctx context.Context, market, instrument string) (float32, error) {
+	ticks, err := ticksSvc()
+	if err != nil {
+		return 0, err
+	}
+
+	trades, err := ticks.TradesRange(ctx, &ticksAPI.RangeRequest{
+		Market:     market,
+		Instrument: instrument,
+		Since:      "5m",
+	})
+	if err != nil {
+		return 0, err
+	}
+
+	if len(trades.Data) == 0 {
+		return 0, fmt.Errorf("no data")
+	}
+
+	var p float32
+	// n := len(trades.Data)
+
+	for _, t := range trades.Data {
+		// p += t.Amount
+		if t.Amount > p {
+			p = t.Amount
+		}
+	}
+
+	// p = p / float32(n)
+
+	return p, nil
 }

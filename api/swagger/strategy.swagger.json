@@ -251,6 +251,10 @@
         },
         "fromTimestamp": {
           "type": "string"
+        },
+        "amount": {
+          "type": "number",
+          "format": "float"
         }
       }
     },
@@ -262,6 +266,10 @@
           "items": {
             "$ref": "#/definitions/ordersOrder"
           }
+        },
+        "pnl": {
+          "type": "number",
+          "format": "float"
         }
       }
     },

@@ -355,3 +355,9 @@ func (s *Server) Delete(ctx context.Context, req *blocksAPI.DeleteRequest) (*blo
 
 	return &blocksAPI.DeleteResponse{}, nil
 }
+
+func (s *Server) CalcState(ctx context.Context, req *blocksAPI.CalcRequest) (*blocksAPI.CalcResponse, error) {
+	d, n := s.calcState(req.Block, req.Action)
+
+	return &blocksAPI.CalcResponse{State: d, N: int32(n)}, nil
+}

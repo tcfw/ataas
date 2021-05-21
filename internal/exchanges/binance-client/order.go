@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	txFee = 0.0006
+	txFee = 0.001
 )
 
 type OrderResponse struct {
@@ -41,11 +41,11 @@ const (
 )
 
 func (c *Client) Buy(instrument string, price float32, units float64) (exchanges.OrderResponse, error) {
-	return c.createOrder(instrument, true, OrderTypeMarket, price, 0)
+	return c.createOrder(instrument, true, OrderTypeMarket, price, units)
 }
 
 func (c *Client) Sell(instrument string, price float32, units float64) (exchanges.OrderResponse, error) {
-	return c.createOrder(instrument, false, OrderTypeMarket, 0, units)
+	return c.createOrder(instrument, false, OrderTypeMarket, price, units)
 
 }
 
@@ -99,10 +99,20 @@ func (c *Client) createOrder(symbol string, side bool, orderType OrderType, pric
 	} else { //sell
 		switch orderType {
 		case OrderTypeMarket:
-			if quantity < 0 {
+			if quantity <= 0 {
 				return nil, status.Error(codes.FailedPrecondition, "quantity must be set")
 			}
 			vals["quantity"] = []string{strconv.FormatFloat(float64(quantity), 'f', -1, 32)}
+		case OrderTypeLimit:
+			if quantity <= 0 {
+				return nil, status.Error(codes.FailedPrecondition, "quantity must be set")
+			}
+			if price <= 0 {
+				return nil, status.Error(codes.FailedPrecondition, "quantity must be set")
+			}
+			vals["quantity"] = []string{strconv.FormatFloat(float64(quantity), 'f', -1, 32)}
+			vals["price"] = []string{strconv.FormatFloat(float64(price), 'f', -1, 32)}
+			vals["timeInForce"] = []string{"IOC"}
 		}
 	}
 

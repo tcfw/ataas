@@ -58,48 +58,48 @@ func (s *Server) collectFromCh(ctx context.Context, ch <-chan *ticks.Trade) {
 		panic(err)
 	}
 
-	var n int8 = 0
-	block := make([]*ticks.Trade, 30)
+	// var n int8 = 0
+	// block := make([]*ticks.Trade, 30)
 
 	for trade := range ch {
-		n++
+		// n++
 
-		block[n] = trade
+		// block[n] = trade
 
-		if n == 19 {
-			n = 0
+		// if n == 1 {
+		// n = 0
 
-			// 	q := db.Build().Insert("trades").Columns("market", "instrument", "tradeid", "ts", "direction", "amount", "units")
+		// 	q := db.Build().Insert("trades").Columns("market", "instrument", "tradeid", "ts", "direction", "amount", "units")
 
-			for _, b := range block {
-				if b == nil {
-					continue
-				}
+		// for _, b := range block {
+		// 	if b == nil {
+		// 		continue
+		// 	}
+		br.Publish(fmt.Sprintf("TRADE.%s.%s", trade.Market, trade.Instrument), trade)
 
-				if err := s.library.Add(b); err != nil {
-					s.log.Errorf("failed to record in library: %s", err)
-				}
-
-				// 		q = q.Values(b.Market, b.Instrument, b.TradeID, time.Unix(b.Timestamp/1000, 0), b.Direction == ticks.TradeDirection_SELL, b.Amount, b.Units)
-				br.Publish(fmt.Sprintf("TRADE.%s.%s", b.Market, b.Instrument), b)
-			}
-
-			// 	q = q.Suffix("ON CONFLICT DO NOTHING")
-
-			// 	tx, err := conn.Begin(ctx)
-			// 	if err != nil {
-			// 		panic(err)
-			// 	}
-
-			// 	if _, err = db.Exec(ctx, tx, q); err != nil {
-			// 		panic(err)
-			// 	}
-
-			// 	if err := tx.Commit(ctx); err != nil {
-			// 		panic(err)
-			// 	}
-
+		if err := s.library.Add(trade); err != nil {
+			s.log.Errorf("failed to record in library: %s", err)
 		}
+
+		// 		q = q.Values(b.Market, b.Instrument, b.TradeID, time.Unix(b.Timestamp/1000, 0), b.Direction == ticks.TradeDirection_SELL, b.Amount, b.Units)
+		// }
+
+		// 	q = q.Suffix("ON CONFLICT DO NOTHING")
+
+		// 	tx, err := conn.Begin(ctx)
+		// 	if err != nil {
+		// 		panic(err)
+		// 	}
+
+		// 	if _, err = db.Exec(ctx, tx, q); err != nil {
+		// 		panic(err)
+		// 	}
+
+		// 	if err := tx.Commit(ctx); err != nil {
+		// 		panic(err)
+		// 	}
+
+		// }
 	}
 }
 

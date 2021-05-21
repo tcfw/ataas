@@ -35,7 +35,7 @@ require (
 	github.com/stretchr/testify v1.7.0
 	github.com/tcfw/go-migrate v0.0.2
 	github.com/valyala/fastrand v1.0.0
-	github.com/vmihailenco/msgpack/v5 v5.3.1
+	github.com/vmihailenco/msgpack/v5 v5.3.2
 	golang.org/x/crypto v0.0.0-20210415154028-4f45737414dc
 	golang.org/x/net v0.0.0-20210410081132-afb366fc7cd1 // indirect
 	golang.org/x/sys v0.0.0-20210403161142-5e06dd20ab57 // indirect

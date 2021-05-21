@@ -24,6 +24,7 @@ type BlocksServiceClient interface {
 	Update(ctx context.Context, in *UpdateRequest, opts ...grpc.CallOption) (*Block, error)
 	ManualAction(ctx context.Context, in *ManualRequest, opts ...grpc.CallOption) (*ManualResponse, error)
 	Delete(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*DeleteResponse, error)
+	CalcState(ctx context.Context, in *CalcRequest, opts ...grpc.CallOption) (*CalcResponse, error)
 }
 
 type blocksServiceClient struct {
@@ -88,6 +89,15 @@ func (c *blocksServiceClient) Delete(ctx context.Context, in *DeleteRequest, opt
 	return out, nil
 }
 
+func (c *blocksServiceClient) CalcState(ctx context.Context, in *CalcRequest, opts ...grpc.CallOption) (*CalcResponse, error) {
+	out := new(CalcResponse)
+	err := c.cc.Invoke(ctx, "/ataas.blocks.BlocksService/CalcState", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // BlocksServiceServer is the server API for BlocksService service.
 // All implementations must embed UnimplementedBlocksServiceServer
 // for forward compatibility
@@ -98,6 +108,7 @@ type BlocksServiceServer interface {
 	Update(context.Context, *UpdateRequest) (*Block, error)
 	ManualAction(context.Context, *ManualRequest) (*ManualResponse, error)
 	Delete(context.Context, *DeleteRequest) (*DeleteResponse, error)
+	CalcState(context.Context, *CalcRequest) (*CalcResponse, error)
 	mustEmbedUnimplementedBlocksServiceServer()
 }
 
@@ -122,6 +133,9 @@ func (UnimplementedBlocksServiceServer) ManualAction(context.Context, *ManualReq
 }
 func (UnimplementedBlocksServiceServer) Delete(context.Context, *DeleteRequest) (*DeleteResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
+}
+func (UnimplementedBlocksServiceServer) CalcState(context.Context, *CalcRequest) (*CalcResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CalcState not implemented")
 }
 func (UnimplementedBlocksServiceServer) mustEmbedUnimplementedBlocksServiceServer() {}
 
@@ -244,6 +258,24 @@ func _BlocksService_Delete_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
+func _BlocksService_CalcState_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CalcRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BlocksServiceServer).CalcState(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ataas.blocks.BlocksService/CalcState",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BlocksServiceServer).CalcState(ctx, req.(*CalcRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // BlocksService_ServiceDesc is the grpc.ServiceDesc for BlocksService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -274,6 +306,10 @@ var BlocksService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Delete",
 			Handler:    _BlocksService_Delete_Handler,
+		},
+		{
+			MethodName: "CalcState",
+			Handler:    _BlocksService_CalcState_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
