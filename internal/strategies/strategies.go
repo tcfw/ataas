@@ -375,7 +375,7 @@ func (s *Server) BackTest(ctx context.Context, req *strategy.BacktestRequest) (*
 					tradeTs = tradeTs / 1000
 				}
 
-				if !time.Unix(tradeTs, 0).After(afterTs) {
+				if time.Unix(tradeTs, 0).Before(afterTs) {
 					break
 				}
 
@@ -392,6 +392,7 @@ func (s *Server) BackTest(ctx context.Context, req *strategy.BacktestRequest) (*
 			}
 
 			if resp.State != block.State {
+				block.BaseUnits = float64(req.Amount / marketPrice)
 				order, err := s.backtestChange(ctx, block, resp.State, marketPrice, nextLook)
 				if err != nil {
 					return nil, err
@@ -434,7 +435,6 @@ func (s *Server) BackTest(ctx context.Context, req *strategy.BacktestRequest) (*
 }
 
 func (s *Server) backtestChange(ctx context.Context, block *blocksAPI.Block, ns blocksAPI.BlockState, marketPrice float32, ts time.Time) (*ordersAPI.Order, error) {
-
 	if block.State != ns {
 		fmt.Printf("BTO: %+v %+v %+v", ns, marketPrice, ts.Format(time.RFC3339))
 		if math.IsNaN(float64(marketPrice)) {
