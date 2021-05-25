@@ -8,7 +8,6 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"pm.tcfw.com.au/source/ataas/api/pb/ticks"
-	"pm.tcfw.com.au/source/ataas/common"
 	"pm.tcfw.com.au/source/ataas/internal/exchanges"
 )
 
@@ -37,7 +36,7 @@ func NewClientWithEndpoint(key, secret, endpoint string) *Client {
 	}
 }
 
-func (c *Client) GetTicker(instrument string) (*common.TickerData, error) {
+func (c *Client) GetTicker(instrument string) (*TickerData, error) {
 	params := map[string]interface{}{
 		"instrument_name": instrument,
 	}

@@ -13,3 +13,6 @@ run:
 .PHONY: protos
 protos:
 	@./scripts/genproto.sh
+
+docker:
+	docker build -t tcfw/ataas .

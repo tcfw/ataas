@@ -1,4 +1,4 @@
-package common
+package client
 
 type TickerData struct {
 	Instrument          string  `json:"i"`

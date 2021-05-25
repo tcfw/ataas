@@ -2,8 +2,6 @@ package client
 
 import (
 	"encoding/json"
-
-	"pm.tcfw.com.au/source/ataas/common"
 )
 
 type CryptoComResponse struct {
@@ -23,7 +21,7 @@ type SubscriptionEvent struct {
 
 type TickerSubscriptionEvent struct {
 	SubscriptionEvent
-	Data []*common.TickerData `json:"data"`
+	Data []*TickerData `json:"data"`
 }
 
 type TradeSubscriptionEvent struct {
@@ -83,12 +81,12 @@ type OrderDetailsInfo struct {
 }
 
 type TickerResponse struct {
-	Data []*common.TickerData `json:"data"`
+	Data []*TickerData `json:"data"`
 }
 
 type SingleTick struct {
-	InstrumentName string             `json:"instrument_name,omitempty"`
-	Data           *common.TickerData `json:"data"`
+	InstrumentName string      `json:"instrument_name,omitempty"`
+	Data           *TickerData `json:"data"`
 }
 
 func (tr *TickerResponse) Instruments() []string {
@@ -101,7 +99,7 @@ func (tr *TickerResponse) Instruments() []string {
 	return instruments
 }
 
-func (tr *TickerResponse) Instrument(in string) *common.TickerData {
+func (tr *TickerResponse) Instrument(in string) *TickerData {
 	for _, tick := range tr.Data {
 		if tick.Instrument == in {
 			return tick

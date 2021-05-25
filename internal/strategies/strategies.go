@@ -221,6 +221,8 @@ func (s *Server) Get(ctx context.Context, req *strategy.GetRequest) (*strategy.S
 		return nil, status.Error(codes.NotFound, "strategy not found")
 	}
 
+	var next time.Time
+
 	strategy := &strategy.Strategy{}
 	err = res.Scan(
 		&strategy.Id,
@@ -229,8 +231,11 @@ func (s *Server) Get(ctx context.Context, req *strategy.GetRequest) (*strategy.S
 		&strategy.Strategy,
 		&strategy.Params,
 		&strategy.Duration,
-		&strategy.Next,
+		&next,
 	)
+
+	strategy.Next = next.Format(time.RFC3339)
+
 	if err != nil {
 		s.log.Errorf("failed to scan block: %s", err)
 		return nil, err
