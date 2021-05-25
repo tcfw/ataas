@@ -392,7 +392,9 @@ func (s *Server) BackTest(ctx context.Context, req *strategy.BacktestRequest) (*
 			}
 
 			if resp.State != block.State {
-				block.BaseUnits = float64(req.Amount / marketPrice)
+				if resp.State == blocks.BlockState_PURCHASED {
+					block.BaseUnits = float64(req.Amount / marketPrice)
+				}
 				order, err := s.backtestChange(ctx, block, resp.State, marketPrice, nextLook)
 				if err != nil {
 					return nil, err
@@ -417,8 +419,10 @@ func (s *Server) BackTest(ctx context.Context, req *strategy.BacktestRequest) (*
 
 	var purOrder *ordersAPI.Order
 	var pnl float32
+	var fees float32
 
 	for _, order := range orders {
+		fees += order.Price * float32(order.Units) * 0.001
 		if order.Action == ordersAPI.Action_BUY {
 			purOrder = order
 		} else {
@@ -427,8 +431,12 @@ func (s *Server) BackTest(ctx context.Context, req *strategy.BacktestRequest) (*
 	}
 
 	resp := &strategy.BacktestResponse{
-		Orders: orders,
-		Pnl:    pnl,
+		Pnl:  pnl,
+		Fees: fees,
+	}
+
+	if req.ShowOrders {
+		resp.Orders = orders
 	}
 
 	return resp, nil

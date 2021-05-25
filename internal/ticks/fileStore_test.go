@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/valyala/fastrand"
 	"pm.tcfw.com.au/source/ataas/api/pb/ticks"
 )
 
@@ -190,6 +191,7 @@ func BenchmarkAdd(b *testing.B) {
 
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
+		trade.Timestamp += 1
 		err := fs.Add(trade)
 		if err != nil {
 			b.Fatal(err)
@@ -238,5 +240,60 @@ func BenchmarkGet(b *testing.B) {
 		if err != nil {
 			b.Fatal(err)
 		}
+	}
+}
+
+func BenchmarkRandGet100(b *testing.B)     { benchmarkRandGet(100, b) }
+func BenchmarkRandGet1000(b *testing.B)    { benchmarkRandGet(1000, b) }
+func BenchmarkRandGet10000(b *testing.B)   { benchmarkRandGet(10000, b) }
+func BenchmarkRandGet100000(b *testing.B)  { benchmarkRandGet(100000, b) }
+func BenchmarkRandGet500000(b *testing.B)  { benchmarkRandGet(500000, b) }
+func BenchmarkRandGet1000000(b *testing.B) { benchmarkRandGet(1000000, b) }
+
+func benchmarkRandGet(t int64, b *testing.B) {
+	b.StopTimer()
+
+	dir := os.TempDir()
+	ts := time.Now()
+
+	fs, err := NewFileStore(dir, ts)
+	if err != nil {
+		b.Fatal(err)
+	}
+
+	fName := fs.f.Name()
+
+	defer os.Remove(fName)
+
+	market := "ataas.io"
+	instrument := "TCFW/AUD"
+
+	for i := int64(1); i < t; i++ {
+		trade := &ticks.Trade{
+			Market:     market,
+			Instrument: instrument,
+			TradeID:    "0",
+			Direction:  ticks.TradeDirection_BUY,
+			Amount:     1234.567,
+			Units:      0.001,
+			Timestamp:  i,
+		}
+		err := fs.Add(trade)
+		if err != nil {
+			b.Fatal(err)
+		}
+	}
+
+	b.StartTimer()
+	for i := 0; i < b.N; i++ {
+		a := uint64(fastrand.Uint32n(uint32(t)))
+		trades, err := fs.GetN(market, instrument, a, 1)
+		if err != nil {
+			b.Fatal(err)
+		}
+		if trades[0].Amount != 1234.567 {
+			b.Fatal("unexpected amount")
+		}
+
 	}
 }

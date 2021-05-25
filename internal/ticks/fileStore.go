@@ -1,6 +1,7 @@
 package ticks
 
 import (
+	"bufio"
 	"bytes"
 	"encoding/binary"
 	"fmt"
@@ -48,7 +49,7 @@ func NewFileStoreFromFile(file string) (*FileStore, error) {
 	}
 
 	if fStore.size != 0 {
-		// go fStore.buildSK()
+		fStore.buildSK()
 
 		s, l, err := findSLTimestamps(fStore)
 		if err != nil {
@@ -117,7 +118,7 @@ func (fs *FileStore) buildSK() {
 
 	for {
 		rowN := 0
-		n, err := r.r.Read(buf[:10])
+		n, err := io.ReadFull(r.r, buf[:10])
 		if err == io.EOF {
 			return
 		} else if err != nil {
@@ -128,7 +129,7 @@ func (fs *FileStore) buildSK() {
 		rl := binary.LittleEndian.Uint16(buf[:2])
 		ts := binary.LittleEndian.Uint64(buf[2:10])
 
-		no, err := r.r.Seek(int64(rl), io.SeekCurrent)
+		no, err := r.r.Discard(int(rl))
 		if err != nil {
 			return
 		}
@@ -157,9 +158,7 @@ func (fs *FileStore) Add(trade *ticks.Trade) error {
 		tradeTs = tradeTs / 1000
 	}
 
-	if fs.sk.coinFlip() {
-		fs.sk.insert(time.Unix(tradeTs, 0), uint64(fs.size))
-	}
+	fs.sk.insert(time.Unix(tradeTs, 0), uint64(fs.size))
 
 	buff := make([]byte, 10+valBuff.Len())
 	binary.LittleEndian.PutUint16(buff[:2], uint16(valBuff.Len()))
@@ -185,7 +184,7 @@ func (fs *FileStore) Add(trade *ticks.Trade) error {
 
 func (fs *FileStore) Close() error {
 	fs.mu.Lock()
-	defer fs.mu.Unlock()
+	// defer fs.mu.Unlock()
 
 	fs.f.Sync()
 
@@ -203,7 +202,7 @@ func (fs *FileStore) Open() error {
 	fs.mu.Lock()
 	defer fs.mu.Unlock()
 
-	f, err := os.OpenFile(fs.f.Name(), os.O_RDWR|os.O_CREATE, 0644)
+	f, err := os.OpenFile(fs.f.Name(), os.O_RDWR|os.O_CREATE|os.O_SYNC, 0644)
 	if err != nil {
 		return err
 	}
@@ -229,6 +228,29 @@ func (fs *FileStore) GetAll(market, instrument string, after uint64) ([]*ticks.T
 		}
 	}
 
+	return trades, nil
+}
+
+func (fs *FileStore) GetN(market, instrument string, after uint64, n int) ([]*ticks.Trade, error) {
+	trades := make([]*ticks.Trade, 0, n)
+
+	r := fs.newReader(time.Unix(int64(after), 0))
+
+	for {
+		trade, err := r.next(after)
+		if err == io.EOF {
+			break
+		} else if err != nil {
+			return nil, err
+		}
+
+		if trade.Market == market && trade.Instrument == instrument {
+			trades = append(trades, trade)
+			if len(trades) == n {
+				break
+			}
+		}
+	}
 	return trades, nil
 }
 
@@ -294,18 +316,18 @@ func (fs *FileStore) newReader(ts time.Time) *fsReader {
 
 	roff := io.NewSectionReader(fs.f, offset, fs.size)
 
-	// r := bufio.NewReader(roff)
+	r := bufio.NewReaderSize(roff, 4096)
 
 	reader := &fsReader{
-		r:   roff,
-		buf: make([]byte, 1024),
+		r:   r,
+		buf: make([]byte, 256),
 	}
 
 	return reader
 }
 
 type fsReader struct {
-	r   io.ReadSeeker
+	r   *bufio.Reader
 	buf []byte
 }
 
@@ -330,7 +352,7 @@ func (fs *fsReader) decode(b []byte) (*ticks.Trade, error) {
 }
 
 func (fs *fsReader) next(after uint64) (*ticks.Trade, error) {
-	_, err := fs.r.Read(fs.buf[:10])
+	_, err := io.ReadFull(fs.r, fs.buf[:10])
 	if err == io.EOF {
 		return nil, err
 	} else if err != nil {
@@ -341,7 +363,7 @@ func (fs *fsReader) next(after uint64) (*ticks.Trade, error) {
 	ts := binary.LittleEndian.Uint64(fs.buf[2:10])
 
 	if ts < after {
-		fs.r.Seek(int64(rl), io.SeekCurrent)
+		fs.r.Discard(int(rl))
 		return fs.next(after)
 	}
 
@@ -349,7 +371,7 @@ func (fs *fsReader) next(after uint64) (*ticks.Trade, error) {
 		return nil, fmt.Errorf("failed to read record: outside of standard bounds")
 	}
 
-	_, err = fs.r.Read(fs.buf[:rl])
+	_, err = io.ReadFull(fs.r, fs.buf[:rl])
 	if err != nil {
 		return nil, fmt.Errorf("failed to read record: %s", err)
 	}
@@ -363,7 +385,7 @@ func (fs *fsReader) next(after uint64) (*ticks.Trade, error) {
 }
 
 func (fs *fsReader) nextTs(after uint64) (uint64, error) {
-	_, err := fs.r.Read(fs.buf[:10])
+	_, err := io.ReadFull(fs.r, fs.buf[:10])
 	if err == io.EOF {
 		return 0, err
 	} else if err != nil {
@@ -373,7 +395,7 @@ func (fs *fsReader) nextTs(after uint64) (uint64, error) {
 	rl := binary.LittleEndian.Uint16(fs.buf[:2])
 	ts := binary.LittleEndian.Uint64(fs.buf[2:10])
 
-	_, err = fs.r.Read(fs.buf[:rl])
+	_, err = io.ReadFull(fs.r, fs.buf[:rl])
 	if err != nil {
 		return 0, fmt.Errorf("failed to read record: %s", err)
 	}

@@ -75,11 +75,13 @@ message BacktestRequest {
 	Strategy strategy = 1;
 	string fromTimestamp = 2;
 	float amount = 3;
+	bool showOrders = 4;
 }
 
 message BacktestResponse {
 	repeated ataas.orders.Order orders = 1;
 	float pnl = 2;
+	float fees = 3;
 }
 
 message GetRequest {

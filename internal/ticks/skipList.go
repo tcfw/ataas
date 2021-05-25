@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	maxL = 10
+	maxL = 16
 )
 
 type skipListLink struct {

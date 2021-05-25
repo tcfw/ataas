@@ -163,9 +163,14 @@ func (c *Client) createOrder(symbol string, side bool, orderType OrderType, pric
 		respQuantity = respQuantity * (1 - txFee)
 	}
 
+	respQStepScale, ok := stepScale[bResp.Symbol]
+	if !ok {
+		respQStepScale = 2
+	}
+
 	res := &OrderResponse{
 		price: float32(respPrice),
-		units: truncatePrecision(respQuantity, 5),
+		units: truncatePrecision(respQuantity, respQStepScale),
 	}
 
 	return res, nil

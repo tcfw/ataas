@@ -91,7 +91,7 @@ func (s *Server) TradesRange(ctx context.Context, req *ticks.RangeRequest) (*tic
 			return nil, err
 		}
 
-		if ts > 24*time.Hour {
+		if ts > 336*time.Hour {
 			return nil, ErrDurationTooLong
 		}
 
@@ -160,7 +160,7 @@ func (s *Server) TradesRangeStream(req *ticks.RangeRequest, stream ticks.History
 			return err
 		}
 
-		if ts > 24*time.Hour {
+		if ts > 336*time.Hour {
 			return ErrDurationTooLong
 		}
 

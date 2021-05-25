@@ -45,7 +45,7 @@ func NewLibrary(dir string, log *logrus.Logger) (*TradeLibrary, error) {
 		return nil, err
 	}
 
-	go l.gc()
+	// go l.gc()
 
 	return l, nil
 }
@@ -99,7 +99,6 @@ func (tl *TradeLibrary) findFileStores() error {
 
 func (tl *TradeLibrary) Close() error {
 	tl.mu.Lock()
-	defer tl.mu.Unlock()
 
 	for _, f := range tl.refs {
 		err := f.Close()

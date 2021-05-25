@@ -69,7 +69,7 @@ func (s *Server) RunOnce() error {
 		}
 
 		q := db.Build().Update(tblName).
-			SetMap(sq.Eq{"next": ts.Add(duration).Round(time.Minute)}).
+			SetMap(sq.Eq{"next": ts.Add(duration).Round(2 * time.Second)}).
 			Where(sq.Eq{"id": job.Id}).
 			Limit(1)
 
