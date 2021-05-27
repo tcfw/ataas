@@ -2,8 +2,10 @@ package users
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"net/http"
+	"time"
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/gogo/status"
@@ -62,7 +64,7 @@ func (s *Server) Migrate(ctx context.Context) error {
 }
 
 func (s *Server) Me(ctx context.Context, req *usersAPI.Empty) (*usersAPI.User, error) {
-	uid, err := utils.UserIDFromContent(ctx)
+	uid, err := utils.UserIDFromContext(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -130,15 +132,19 @@ func (s *Server) Find(ctx context.Context, req *usersAPI.UserRequest) (*usersAPI
 func scanUser(res pgx.Row) (*usersAPI.User, error) {
 	u := &usersAPI.User{}
 
+	var createdAt time.Time
+	var updatedAt time.Time
+	var deletedAt sql.NullTime
+
 	err := res.Scan(
 		&u.Id,
 		&u.Status,
 		&u.Email,
 		&u.FirstName,
 		&u.LastName,
-		&u.CreatedAt,
-		&u.UpdatedAt,
-		&u.DeletedAt,
+		&createdAt,
+		&updatedAt,
+		&deletedAt,
 		&u.Mfa,
 		&u.Password,
 		&u.Metadata,
@@ -146,6 +152,12 @@ func scanUser(res pgx.Row) (*usersAPI.User, error) {
 	)
 	if err != nil {
 		return nil, err
+	}
+
+	u.CreatedAt = createdAt.Unix()
+	u.UpdatedAt = updatedAt.Unix()
+	if deletedAt.Valid {
+		u.DeletedAt = deletedAt.Time.Unix()
 	}
 
 	return u, nil

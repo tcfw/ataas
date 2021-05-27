@@ -24,7 +24,7 @@ var (
 )
 
 func addSessionCookie(ctx context.Context, tokenString string, token *jwt.Token) {
-	if d := viper.GetString("cookie-domain"); d != "" {
+	if d := viper.GetString("cookie_domain"); d != "" {
 		cookieDomain = d
 	}
 
@@ -69,11 +69,11 @@ func addSessionCookie(ctx context.Context, tokenString string, token *jwt.Token)
 		Path:     cookiePath,
 		SameSite: http.SameSiteNoneMode,
 	}
-	grpc.SendHeader(ctx, metadata.Pairs("Grpc-Metadata-Set-Cookie", sessionCookie.String(), "Grpc-Metadata-Set-Cookie", authOKCookie.String()))
+	grpc.SendHeader(ctx, metadata.Pairs("Set-Cookie", sessionCookie.String(), "Set-Cookie", authOKCookie.String()))
 }
 
 func clearSessionCookie(ctx context.Context) {
-	if d := viper.GetString("cookie-domain"); d != "" {
+	if d := viper.GetString("cookie_domain"); d != "" {
 		cookieDomain = d
 	}
 
@@ -111,5 +111,5 @@ func clearSessionCookie(ctx context.Context) {
 		Path:     cookiePath,
 		SameSite: http.SameSiteNoneMode,
 	}
-	grpc.SendHeader(ctx, metadata.Pairs("Grpc-Metadata-Set-Cookie", sessionCookie.String(), "Grpc-Metadata-Set-Cookie", authOKCookie.String()))
+	grpc.SendHeader(ctx, metadata.Pairs("Set-Cookie", sessionCookie.String(), "Set-Cookie", authOKCookie.String()))
 }

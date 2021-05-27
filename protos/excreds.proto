@@ -1,0 +1,60 @@
+syntax="proto3";
+
+package ataas.excreds;
+option go_package = "pm.tcfw.com.au/source/ataas/api/pb/excreds";
+
+import "google/api/annotations.proto";
+import "gogo.proto";
+
+option (gogoproto.marshaler_all) = true;
+option (gogoproto.sizer_all) = true;
+option (gogoproto.unmarshaler_all) = true;
+
+message ExchangeCreds {
+	string id = 1;
+	string account = 2;
+	string exchange = 3;
+	string key = 4;
+	string secret = 5;
+	string createdAt = 6;
+}
+
+message ListRequest {}
+
+message ListResponse {
+	repeated ExchangeCreds creds = 1;
+}
+
+message GetRequest {
+	string account = 1;
+	string exchange = 2;
+	bool decrypt = 3;
+}
+
+message DeleteRequest {
+	string id = 1;
+}
+message DeleteResponse {}
+
+service ExCredsService {
+	rpc New(ExchangeCreds) returns (ExchangeCreds) {
+		option (google.api.http) = {
+            post: "/v1/excreds"
+            body: "*"
+		};
+	};
+
+	rpc List(ListRequest) returns (ListResponse) {
+		option (google.api.http) = {
+			get: "/v1/excreds"
+		};
+	};
+
+	rpc Delete(DeleteRequest) returns (DeleteResponse) {
+		option (google.api.http) = {
+			delete: "/v1/excreds/{id}"
+		};
+	}
+
+	rpc Get(GetRequest) returns (ExchangeCreds);
+}

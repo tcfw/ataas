@@ -7,6 +7,7 @@ import (
 	"google.golang.org/grpc"
 
 	ticksAPI "pm.tcfw.com.au/source/ataas/api/pb/ticks"
+	rpcUtils "pm.tcfw.com.au/source/ataas/internal/utils/rpc"
 )
 
 var (
@@ -20,7 +21,7 @@ func ticksSvc() (ticksAPI.HistoryServiceClient, error) {
 			userEndpoint = viper.GetString("grpc.addr")
 		}
 
-		conn, err := grpc.Dial(userEndpoint, grpc.WithInsecure())
+		conn, err := grpc.Dial(userEndpoint, rpcUtils.InternalClientOptions()...)
 		if err != nil {
 			return nil, err
 		}

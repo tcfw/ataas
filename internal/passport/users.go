@@ -7,6 +7,7 @@ import (
 	"google.golang.org/grpc"
 
 	usersAPI "pm.tcfw.com.au/source/ataas/api/pb/users"
+	rpcUtils "pm.tcfw.com.au/source/ataas/internal/utils/rpc"
 )
 
 var (
@@ -20,7 +21,7 @@ func usersSvc() (usersAPI.UserServiceClient, error) {
 			usersEndpoint = viper.GetString("grpc.addr")
 		}
 
-		conn, err := grpc.Dial(usersEndpoint, grpc.WithInsecure())
+		conn, err := grpc.Dial(usersEndpoint, rpcUtils.InternalClientOptions()...)
 		if err != nil {
 			return nil, err
 		}

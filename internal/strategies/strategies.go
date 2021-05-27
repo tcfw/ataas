@@ -3,9 +3,6 @@ package strategies
 import (
 	"context"
 	"fmt"
-	"io"
-	"math"
-	"strings"
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
@@ -13,12 +10,9 @@ import (
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
-	"pm.tcfw.com.au/source/ataas/api/pb/blocks"
-	blocksAPI "pm.tcfw.com.au/source/ataas/api/pb/blocks"
-	ordersAPI "pm.tcfw.com.au/source/ataas/api/pb/orders"
 	"pm.tcfw.com.au/source/ataas/api/pb/strategy"
-	"pm.tcfw.com.au/source/ataas/api/pb/ticks"
 	"pm.tcfw.com.au/source/ataas/db"
+	passportUtils "pm.tcfw.com.au/source/ataas/internal/passport/utils"
 	migrate "pm.tcfw.com.au/source/ataas/internal/strategies/db"
 )
 
@@ -78,8 +72,13 @@ func (s *Server) List(ctx context.Context, req *strategy.ListRequest) (*strategy
 		req.Limit = 10
 	}
 
+	acn, err := passportUtils.AccountFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
 	q := db.Build().Select("id", "market", "instrument", "strategy", "params", "duration", "next").
-		From(tblName).OrderBy("id ASC").Limit(uint64(req.Limit))
+		From(tblName).Where(sq.Eq{"account": acn}).OrderBy("id ASC").Limit(uint64(req.Limit))
 
 	if req.Page != "" {
 		q.Where(sq.Gt{"id": req.Page})
@@ -114,9 +113,13 @@ func (s *Server) History(ctx context.Context, req *strategy.HistoryRequest) (*st
 	if req.Limit == 0 {
 		req.Limit = 10
 	}
+	acn, err := passportUtils.AccountFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
 
 	q := db.Build().Select("id", "action", "ts").
-		From(historyTblName).OrderBy("ts DESC").Where(sq.Eq{"strategy_id": req.Id}).Limit(uint64(req.Limit))
+		From(historyTblName).Where(sq.Eq{"account": acn}).OrderBy("ts DESC").Where(sq.Eq{"strategy_id": req.Id}).Limit(uint64(req.Limit))
 
 	if req.Page != "" {
 		q.Where(sq.Lt{"ts": req.Page})
@@ -148,7 +151,13 @@ func (s *Server) History(ctx context.Context, req *strategy.HistoryRequest) (*st
 }
 
 func (s *Server) Create(ctx context.Context, req *strategy.CreateRequest) (*strategy.CreateResponse, error) {
+	acn, err := passportUtils.AccountFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
 	existQ := db.Build().Select("id").From(tblName).Where(sq.Eq{
+		"account":    acn,
 		"market":     req.Strategy.Market,
 		"instrument": req.Strategy.Instrument,
 		"strategy":   req.Strategy.Strategy,
@@ -174,7 +183,7 @@ func (s *Server) Create(ctx context.Context, req *strategy.CreateRequest) (*stra
 	id, _ := uuid.NewRandom()
 	req.Strategy.Id = id.String()
 
-	q := db.Build().Insert(tblName).Columns("id", "market", "instrument", "strategy", "params", "duration", "next").Values(
+	q := db.Build().Insert(tblName).Columns("id", "market", "instrument", "strategy", "params", "duration", "next", "account").Values(
 		req.Strategy.Id,
 		req.Strategy.Market,
 		req.Strategy.Instrument,
@@ -182,6 +191,7 @@ func (s *Server) Create(ctx context.Context, req *strategy.CreateRequest) (*stra
 		req.Strategy.Params,
 		req.Strategy.Duration,
 		time.Now().Add(5*time.Minute),
+		acn,
 	)
 
 	conn, err := db.Conn(ctx)
@@ -209,7 +219,12 @@ func (s *Server) Create(ctx context.Context, req *strategy.CreateRequest) (*stra
 }
 
 func (s *Server) Get(ctx context.Context, req *strategy.GetRequest) (*strategy.Strategy, error) {
-	q := db.Build().Select("id", "market", "instrument", "strategy", "params", "duration", "next").From(tblName).Where(sq.Eq{"id": req.Id})
+	acn, err := passportUtils.AccountFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	q := db.Build().Select("id", "market", "instrument", "strategy", "params", "duration", "next").From(tblName).Where(sq.Eq{"id": req.Id, "account": acn})
 	res, done, err := db.SimpleQuery(ctx, q)
 	if err != nil {
 		s.log.Errorf("failed to find blocks: %s", err)
@@ -271,206 +286,16 @@ func (s *Server) Update(ctx context.Context, req *strategy.UpdateRequest) (*stra
 }
 
 func (s *Server) Delete(ctx context.Context, req *strategy.DeleteRequest) (*strategy.DeleteResponse, error) {
+	_, err := s.Get(ctx, &strategy.GetRequest{Id: req.Id})
+	if err != nil {
+		return nil, err
+	}
+
 	q := db.Build().Delete(tblName).Where(sq.Eq{"id": req.Id}).Limit(1)
-	err := db.SimpleExec(ctx, q)
+	err = db.SimpleExec(ctx, q)
 	if err != nil {
 		return nil, err
 	}
 
 	return &strategy.DeleteResponse{}, nil
-}
-
-func (s *Server) BackTest(ctx context.Context, req *strategy.BacktestRequest) (*strategy.BacktestResponse, error) {
-	t, err := ticksSvc()
-	if err != nil {
-		return nil, err
-	}
-
-	b, err := blocksSvc()
-	if err != nil {
-		return nil, err
-	}
-
-	var tsFrom time.Time
-
-	if strings.ContainsAny(req.FromTimestamp, ":/.+") {
-		t, err := time.Parse(time.RFC3339, req.FromTimestamp)
-		if err != nil {
-			return nil, err
-		}
-		tsFrom = t
-	} else {
-		ts, err := time.ParseDuration(req.FromTimestamp)
-		if err != nil {
-			return nil, err
-		}
-
-		tsFrom = time.Now().Add(-ts)
-	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
-	defer cancel()
-
-	nextLook := tsFrom.Add(time.Duration(req.Strategy.Duration))
-
-	block := &blocksAPI.Block{
-		Purchase:  req.Amount,
-		BaseUnits: 1,
-	}
-
-	orders := []*ordersAPI.Order{}
-
-	curBlock := []*ticks.Trade{}
-
-	var calc func([]*ticks.Trade, map[string]string) strategy.Action
-
-	switch req.Strategy.Strategy {
-	case strategy.StrategyAlgo_MeanLog:
-		calc = meanLog
-	default:
-		return nil, fmt.Errorf("unknown strategy")
-	}
-
-	dur, ok := req.Strategy.Params["duration"]
-	if !ok {
-		dur = "5m"
-	}
-
-	duration, err := time.ParseDuration(dur)
-	if err != nil {
-		return nil, err
-	}
-
-	tradesResp, err := t.TradesRangeStream(ctx, &ticks.RangeRequest{Market: req.Strategy.Market, Instrument: req.Strategy.Instrument, Since: req.FromTimestamp})
-	if err != nil {
-		return nil, err
-	}
-
-	var marketPrice float32
-
-	for {
-		trade, err := tradesResp.Recv()
-		if err == io.EOF {
-			break
-		} else if err != nil {
-			return nil, err
-		}
-
-		tradeTs := trade.Timestamp
-		if tradeTs > 9999999999 {
-			tradeTs = tradeTs / 1000
-		}
-		ts := time.Unix(tradeTs, 0)
-
-		curBlock = append(curBlock, trade)
-
-		if len(curBlock) > 10000 {
-			curBlock = curBlock[1:]
-		}
-
-		if ts.After(nextLook) {
-			//execute order
-
-			iTh := len(curBlock) - 1
-			afterTs := nextLook.Add(-duration)
-
-			for iTh > 0 {
-				tradeTs := curBlock[iTh].Timestamp
-				if tradeTs > 9999999999 {
-					tradeTs = tradeTs / 1000
-				}
-
-				if time.Unix(tradeTs, 0).Before(afterTs) {
-					break
-				}
-
-				iTh--
-			}
-
-			marketPrice = curBlock[len(curBlock)-1].Amount
-
-			sugg := calc(curBlock[iTh:], req.Strategy.Params)
-
-			resp, err := b.CalcState(ctx, &blocksAPI.CalcRequest{Block: block, Action: sugg})
-			if err != nil {
-				return nil, err
-			}
-
-			if resp.State != block.State {
-				if resp.State == blocks.BlockState_PURCHASED {
-					block.BaseUnits = float64(req.Amount / marketPrice)
-				}
-				order, err := s.backtestChange(ctx, block, resp.State, marketPrice, nextLook)
-				if err != nil {
-					return nil, err
-				}
-				if order != nil {
-					orders = append(orders, order)
-				}
-			}
-
-			nextLook = nextLook.Add(time.Duration(req.Strategy.Duration))
-		}
-	}
-
-	if len(orders) > 0 && orders[len(orders)-1].Action == 0 {
-		orders = append(orders, &ordersAPI.Order{
-			Action:    ordersAPI.Action_SELL,
-			Price:     marketPrice,
-			Units:     block.BaseUnits,
-			Timestamp: nextLook.Format(time.RFC3339),
-		})
-	}
-
-	var purOrder *ordersAPI.Order
-	var pnl float32
-	var fees float32
-
-	for _, order := range orders {
-		fees += order.Price * float32(order.Units) * 0.001
-		if order.Action == ordersAPI.Action_BUY {
-			purOrder = order
-		} else {
-			pnl += (purOrder.Price - order.Price) * float32(order.Units)
-		}
-	}
-
-	resp := &strategy.BacktestResponse{
-		Pnl:  pnl,
-		Fees: fees,
-	}
-
-	if req.ShowOrders {
-		resp.Orders = orders
-	}
-
-	return resp, nil
-}
-
-func (s *Server) backtestChange(ctx context.Context, block *blocksAPI.Block, ns blocksAPI.BlockState, marketPrice float32, ts time.Time) (*ordersAPI.Order, error) {
-	if block.State != ns {
-		fmt.Printf("BTO: %+v %+v %+v", ns, marketPrice, ts.Format(time.RFC3339))
-		if math.IsNaN(float64(marketPrice)) {
-			return nil, nil
-		}
-		block.State = ns
-		switch ns {
-		case blocks.BlockState_PURCHASED:
-			return &ordersAPI.Order{
-				Action:    ordersAPI.Action_BUY,
-				Price:     marketPrice,
-				Units:     block.BaseUnits,
-				Timestamp: ts.Format(time.RFC3339),
-			}, nil
-		case blocks.BlockState_SOLD:
-			return &ordersAPI.Order{
-				Action:    ordersAPI.Action_SELL,
-				Price:     marketPrice,
-				Units:     block.BaseUnits,
-				Timestamp: ts.Format(time.RFC3339),
-			}, nil
-		}
-	}
-
-	return nil, nil
 }

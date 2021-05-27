@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math"
 	"strings"
 	"time"
 
@@ -217,6 +218,7 @@ func (s *Server) Candles(ctx context.Context, req *ticks.CandlesRequest) (*ticks
 				Market:     trade.Market,
 				Instrument: trade.Instrument,
 				Open:       trade.Amount,
+				Low:        math.MaxFloat32,
 				Timestamp:  ts.Unix(),
 			}
 			data = append(data, current)

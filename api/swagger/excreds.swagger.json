@@ -1,0 +1,122 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "excreds.proto",
+    "version": "version not set"
+  },
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v1/excreds": {
+      "get": {
+        "operationId": "List",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/excredsListResponse"
+            }
+          }
+        },
+        "tags": [
+          "ExCredsService"
+        ]
+      },
+      "post": {
+        "operationId": "New",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/excredsExchangeCreds"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/excredsExchangeCreds"
+            }
+          }
+        ],
+        "tags": [
+          "ExCredsService"
+        ]
+      }
+    },
+    "/v1/excreds/{id}": {
+      "delete": {
+        "operationId": "Delete",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/excredsDeleteResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "ExCredsService"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "excredsDeleteResponse": {
+      "type": "object"
+    },
+    "excredsExchangeCreds": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "account": {
+          "type": "string"
+        },
+        "exchange": {
+          "type": "string"
+        },
+        "key": {
+          "type": "string"
+        },
+        "secret": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string"
+        }
+      }
+    },
+    "excredsListResponse": {
+      "type": "object",
+      "properties": {
+        "creds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/excredsExchangeCreds"
+          }
+        }
+      }
+    }
+  }
+}

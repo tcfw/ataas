@@ -4,6 +4,7 @@ go 1.16
 
 require (
 	github.com/Masterminds/squirrel v1.5.0
+	github.com/andybalholm/brotli v1.0.3
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/drand/drand v1.2.7
 	github.com/duo-labs/webauthn v0.0.0-20200714211715-1daaee874e43
@@ -14,6 +15,8 @@ require (
 	github.com/google/uuid v1.1.2
 	github.com/gorilla/mux v1.8.0
 	github.com/gorilla/websocket v1.4.2
+	github.com/grpc-ecosystem/go-grpc-middleware v1.2.0
+	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0
 	github.com/huandu/facebook/v2 v2.5.3
 	github.com/jackc/pgconn v1.8.1
@@ -36,6 +39,11 @@ require (
 	github.com/tcfw/go-migrate v0.0.2
 	github.com/valyala/fastrand v1.0.0
 	github.com/vmihailenco/msgpack/v5 v5.3.2
+	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.20.0
+	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.20.0
+	go.opentelemetry.io/otel v0.20.0
+	go.opentelemetry.io/otel/exporters/trace/jaeger v0.20.0
+	go.opentelemetry.io/otel/sdk v0.20.0
 	golang.org/x/crypto v0.0.0-20210415154028-4f45737414dc
 	golang.org/x/net v0.0.0-20210410081132-afb366fc7cd1 // indirect
 	golang.org/x/sys v0.0.0-20210403161142-5e06dd20ab57 // indirect

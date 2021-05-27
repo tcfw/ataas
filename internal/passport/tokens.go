@@ -22,6 +22,11 @@ import (
 	"pm.tcfw.com.au/source/ataas/db"
 )
 
+func init() {
+	viper.SetDefault("passport.token.key", "passport.key")
+	viper.SetDefault("passport.token.cert", "passport.cert")
+}
+
 func (s *Server) verifyToken(ctx context.Context, request *passportAPI.VerifyTokenRequest) (*passportAPI.VerifyTokenResponse, error) {
 	if request.Token == "" {
 		return nil, fmt.Errorf("Invalid token format")
@@ -75,7 +80,10 @@ func UserClaims(user *users.User) map[string]interface{} {
 
 //GetKeyPrivate reads a private PEM formatted RSA cert
 func GetKeyPrivate() (*ecdsa.PrivateKey, error) {
-	dat, _ := ioutil.ReadFile(viper.GetString("token_key"))
+	dat, err := ioutil.ReadFile(viper.GetString("passport.token.key"))
+	if err != nil {
+		return nil, err
+	}
 	key, err := jwt.ParseECPrivateKeyFromPEM(dat)
 	if err != nil {
 		log.Printf("Err: %s", err)
@@ -87,7 +95,10 @@ func GetKeyPrivate() (*ecdsa.PrivateKey, error) {
 
 //GetKeyPublic reads a public PEM formatted RSA cert
 func GetKeyPublic() (*ecdsa.PublicKey, error) {
-	dat, _ := ioutil.ReadFile(viper.GetString("token_cert"))
+	dat, err := ioutil.ReadFile(viper.GetString("passport.token.cert"))
+	if err != nil {
+		return nil, err
+	}
 	key, err := jwt.ParseECPublicKeyFromPEM(dat)
 	if err != nil {
 		log.Printf("Err: %s", err)
@@ -125,7 +136,7 @@ func (s *Server) makeNewToken(ctx context.Context, extraClaims map[string]interf
 
 	key, err := GetKeyPrivate()
 	if err != nil {
-		return "", nil, fmt.Errorf("Error extracting the key")
+		return "", nil, fmt.Errorf("error extracting the key")
 	}
 	signer.Header["kid"] = "03c56b083c89ade910b54300e09a3afe"
 

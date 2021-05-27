@@ -7,6 +7,7 @@ import (
 	"google.golang.org/grpc"
 
 	blocksAPI "pm.tcfw.com.au/source/ataas/api/pb/blocks"
+	rpcUtils "pm.tcfw.com.au/source/ataas/internal/utils/rpc"
 )
 
 var (
@@ -20,7 +21,7 @@ func blocksSvc() (blocksAPI.BlocksServiceClient, error) {
 			blocksEndpoint = viper.GetString("grpc.addr")
 		}
 
-		conn, err := grpc.Dial(blocksEndpoint, grpc.WithInsecure())
+		conn, err := grpc.Dial(blocksEndpoint, rpcUtils.InternalClientOptions()...)
 		if err != nil {
 			return nil, err
 		}

@@ -1,5 +1,5 @@
-bin/
+*.yaml
 *.cert
 *.key
 trades/
-*.yaml
+bin/

@@ -147,7 +147,7 @@ func (l *limiter) ReachedResp(ctx context.Context, remoteIP net.IP, ttl time.Dur
 		return nil, err
 	}
 
-	grpc.SendHeader(ctx, metadata.Pairs("Grpc-Metadata-X-RateLimit-Reset", fmt.Sprintf("%d", time.Now().Add(ttl).Unix())))
+	grpc.SendHeader(ctx, metadata.Pairs("X-RateLimit-Reset", fmt.Sprintf("%d", time.Now().Add(ttl).Unix())))
 	b.Publish("passport", broadcast.AuthenticateEvent{Event: &broadcast.Event{Type: "vanga.passport.limit_reached"}, Err: "limit reached: ip", IP: remoteIP.String()})
 	return nil, status.Errorf(codes.ResourceExhausted, "IP rate limit exceeded. Wait %s before making another request", ttl)
 }
@@ -158,7 +158,7 @@ func (l *limiter) IncreaseResp(ctx context.Context, remaining int, remoteIP net.
 		return nil, err
 	}
 
-	grpc.SendHeader(ctx, metadata.Pairs("Grpc-Metadata-X-RateLimit-Remaining", fmt.Sprintf("%d", remaining+1)))
+	grpc.SendHeader(ctx, metadata.Pairs("X-RateLimit-Remaining", fmt.Sprintf("%d", remaining+1)))
 	b.Publish("passport", broadcast.AuthenticateEvent{Event: &broadcast.Event{Type: "io.evntsrc.passport.limite_increased"}, Err: "limit increased", IP: remoteIP.String(), User: username})
 	l.Inc(ctx, username, remoteIP)
 	l.log.Printf("%s %s @ %s", reason, username, remoteIP)

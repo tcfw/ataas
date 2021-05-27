@@ -68,12 +68,15 @@ func (s *Server) Create(ctx context.Context, req *ordersAPI.CreateRequest) (*ord
 		return nil, err
 	}
 
-	block, err := blocksSvc.Get(ctx, &blocks.GetRequest{Id: req.BlockID})
+	block, err := blocksSvc.Find(ctx, &blocks.GetRequest{Id: req.BlockID})
 	if err != nil {
 		return nil, err
 	}
 
-	markets := initForUser(ctx)
+	markets, err := initForUser(ctx, block.Account)
+	if err != nil {
+		return nil, err
+	}
 	market, exists := markets[block.Market]
 	if !exists {
 		return nil, status.Error(codes.FailedPrecondition, "market not supported")
@@ -140,7 +143,18 @@ func (s *Server) Create(ctx context.Context, req *ordersAPI.CreateRequest) (*ord
 }
 
 func (s *Server) Get(ctx context.Context, req *ordersAPI.GetRequest) (*ordersAPI.GetResponse, error) {
-	q := db.Build().Select(allColumns...).From(tblName).Where(sq.Eq{"block_id": req.BlockID}).OrderBy("ts")
+	blocksSvc, err := blocksSvc()
+	if err != nil {
+		return nil, err
+	}
+
+	//Make sure we have access to the block
+	block, err := blocksSvc.Get(ctx, &blocks.GetRequest{Id: req.BlockID})
+	if err != nil {
+		return nil, err
+	}
+
+	q := db.Build().Select(allColumns...).From(tblName).Where(sq.Eq{"block_id": block.Id}).OrderBy("ts")
 
 	res, done, err := db.SimpleQuery(ctx, q)
 	if err != nil {

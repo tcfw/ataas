@@ -6,12 +6,14 @@ import (
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"pm.tcfw.com.au/source/ataas/api/pb/blocks"
+	"pm.tcfw.com.au/source/ataas/api/pb/excreds"
 	"pm.tcfw.com.au/source/ataas/api/pb/orders"
 	"pm.tcfw.com.au/source/ataas/api/pb/passport"
 	"pm.tcfw.com.au/source/ataas/api/pb/strategy"
 	"pm.tcfw.com.au/source/ataas/api/pb/ticks"
 	"pm.tcfw.com.au/source/ataas/api/pb/users"
 	blocksImpl "pm.tcfw.com.au/source/ataas/internal/blocks"
+	excredsImpl "pm.tcfw.com.au/source/ataas/internal/excreds"
 	ordersImpl "pm.tcfw.com.au/source/ataas/internal/orders"
 	passportImpl "pm.tcfw.com.au/source/ataas/internal/passport"
 	strategyImpl "pm.tcfw.com.au/source/ataas/internal/strategies"
@@ -52,12 +54,18 @@ func newGRPCServer(ctx context.Context, opts ...grpc.ServerOption) (func(), func
 		panic(err)
 	}
 
+	excredsServer, err := excredsImpl.NewServer(ctx)
+	if err != nil {
+		panic(err)
+	}
+
 	blocks.RegisterBlocksServiceServer(grpcServer, blockServer)
 	orders.RegisterOrdersServiceServer(grpcServer, ordersServer)
 	ticks.RegisterHistoryServiceServer(grpcServer, ticksServer)
 	strategy.RegisterStrategyServiceServer(grpcServer, stratServer)
 	users.RegisterUserServiceServer(grpcServer, usersServer)
 	passport.RegisterPassportSeviceServer(grpcServer, passportServer)
+	excreds.RegisterExCredsServiceServer(grpcServer, excredsServer)
 
 	startServices := func() {
 		blockServer.Listen()

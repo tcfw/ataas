@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math"
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
@@ -161,7 +162,7 @@ func (s *Server) applyState(b *blocks.Block, ns blocks.BlockState, n int) (*orde
 	//Store state
 	q := db.Build().Update(tblName).SetMap(sq.Eq{
 		"state":         ns,
-		"current_units": nUnits,
+		"current_units": truncatePrecision(nUnits, 6),
 	}).Where(sq.Eq{"id": b.Id}).Limit(1)
 
 	if err := db.SimpleExec(ctx, q); err != nil {
@@ -169,4 +170,9 @@ func (s *Server) applyState(b *blocks.Block, ns blocks.BlockState, n int) (*orde
 	}
 
 	return order, nil
+}
+
+func truncatePrecision(f float64, pres int) float64 {
+	i := math.Pow10(pres)
+	return float64(int(f*i)) / i
 }

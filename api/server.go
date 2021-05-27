@@ -10,6 +10,8 @@ import (
 	"github.com/lucas-clemente/quic-go/http3"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+
+	rpcUtils "pm.tcfw.com.au/source/ataas/internal/utils/rpc"
 )
 
 type APIServer struct {
@@ -63,7 +65,7 @@ func (s *APIServer) serveGRPC(ctx context.Context) error {
 		return err
 	}
 
-	start, stop, grpc := newGRPCServer(ctx)
+	start, stop, grpc := newGRPCServer(ctx, rpcUtils.DefaultServerOptions()...)
 
 	s.Stop = stop
 
@@ -85,7 +87,10 @@ func (s *APIServer) serveHTTPS(ctx context.Context) error {
 	h3Serv := &http3.Server{Server: httpServ}
 
 	s.router.Use(h3Headers(h3Serv))
-	// s.router.Use(authHandler)
+
+	if viper.GetBool("gw.enableAuth") {
+		s.router.Use(authHandler)
+	}
 
 	httpServ.Handler = s.router
 

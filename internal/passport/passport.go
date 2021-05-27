@@ -112,7 +112,7 @@ func (s *Server) Authenticate(ctx context.Context, request *passportAPI.AuthRequ
 		user, err := usersSvc.Find(withAuthContext(ctx), &users.UserRequest{Query: &users.UserRequest_Email{Email: username}, Status: users.UserRequest_ACTIVE}, grpc.Header(&md))
 		if err != nil {
 			if serr, ok := status.FromError(err); ok && serr.Code() <= 16 {
-				s.log.WithField("status", serr.Code().String()).Error("failed to find user")
+				s.log.WithField("status", serr.Code().String()).WithField("err", err).Error("failed to find user")
 				return nil, fmt.Errorf("RPC failed: %s", serr.Code().String())
 
 			}

@@ -239,6 +239,9 @@
         },
         "instrument": {
           "type": "string"
+        },
+        "account": {
+          "type": "string"
         }
       }
     },

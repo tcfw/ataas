@@ -6,8 +6,8 @@ import (
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
-	"pm.tcfw.com.au/source/ataas/api/marshalers"
 	"pm.tcfw.com.au/source/ataas/api/pb/blocks"
+	"pm.tcfw.com.au/source/ataas/api/pb/excreds"
 	"pm.tcfw.com.au/source/ataas/api/pb/orders"
 	"pm.tcfw.com.au/source/ataas/api/pb/passport"
 	"pm.tcfw.com.au/source/ataas/api/pb/strategy"
@@ -17,7 +17,8 @@ import (
 
 func newRouter(ctx context.Context) (*runtime.ServeMux, error) {
 	r := runtime.NewServeMux(
-		runtime.WithMarshalerOption("application/json", &marshalers.JSONMarshaler{}),
+		// runtime.WithMarshalerOption("application/json", &marshalers.JSONMarshaler{}),
+		runtime.WithOutgoingHeaderMatcher(httpHeaderMatch),
 	)
 
 	conn, err := grpc.DialContext(
@@ -53,6 +54,10 @@ func newRouter(ctx context.Context) (*runtime.ServeMux, error) {
 		return nil, err
 	}
 
+	if err := registerLocalExcreds(ctx, r, conn); err != nil {
+		return nil, err
+	}
+
 	return r, nil
 }
 
@@ -78,4 +83,8 @@ func registerLocalUsers(ctx context.Context, mux *runtime.ServeMux, conn *grpc.C
 
 func registerLocalStrategy(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error {
 	return strategy.RegisterStrategyServiceHandler(ctx, mux, conn)
+}
+
+func registerLocalExcreds(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error {
+	return excreds.RegisterExCredsServiceHandler(ctx, mux, conn)
 }

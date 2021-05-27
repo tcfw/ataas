@@ -121,8 +121,8 @@ func HasAuthToken(ctx context.Context) (bool, error) {
 	return false, nil
 }
 
-//UserIDFromContent provides the user ID from the auth found in the given context
-func UserIDFromContent(ctx context.Context) (string, error) {
+//UserIDFromContext provides the user ID from the auth found in the given context
+func UserIDFromContext(ctx context.Context) (string, error) {
 	claims, err := TokenClaimsFromContext(ctx)
 	if err != nil {
 		return "", err
@@ -131,8 +131,8 @@ func UserIDFromContent(ctx context.Context) (string, error) {
 	return claims["sub"].(string), nil
 }
 
-//AccountFromContent provides the current account from the auth found in the given context
-func AccountFromContent(ctx context.Context) (string, error) {
+//AccountFromContext provides the current account from the auth found in the given context
+func AccountFromContext(ctx context.Context) (string, error) {
 	claims, err := TokenClaimsFromContext(ctx)
 	if err != nil {
 		return "", err

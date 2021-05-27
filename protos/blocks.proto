@@ -33,6 +33,7 @@ message Block {
 
 	string market = 12;
 	string instrument = 13;
+	string account = 14;
 }
 
 message GetRequest {
@@ -110,4 +111,5 @@ service BlocksService {
 	};
 
 	rpc CalcState(CalcRequest) returns (CalcResponse);
+	rpc Find(GetRequest) returns (Block);
 }

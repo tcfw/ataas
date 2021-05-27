@@ -14,11 +14,6 @@ import (
 	crypto_com_client "pm.tcfw.com.au/source/ataas/internal/exchanges/crypto-com-client"
 )
 
-func init() {
-	viper.SetDefault("collector.crypto_com.key", "w3UzTQv1nhXCtXtSHTm1FW")
-	viper.SetDefault("collector.crypto_com.secret", "UVD8aG5L7FX3asR6qeQD7p")
-}
-
 func (s *Server) Collect(ctx context.Context) {
 	ch := make(chan *ticks.Trade, 100)
 

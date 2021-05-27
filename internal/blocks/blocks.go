@@ -16,6 +16,7 @@ import (
 	"pm.tcfw.com.au/source/ataas/db"
 	migrate "pm.tcfw.com.au/source/ataas/internal/blocks/db"
 	"pm.tcfw.com.au/source/ataas/internal/broadcast"
+	passportUtils "pm.tcfw.com.au/source/ataas/internal/passport/utils"
 	"pm.tcfw.com.au/source/ataas/internal/strategies"
 )
 
@@ -37,6 +38,7 @@ var (
 		"backout_percentage",
 		"market",
 		"instrument",
+		"account",
 	}
 )
 
@@ -135,6 +137,7 @@ func (s *Server) handleAction(data *strategies.ActionEvent) {
 			&block.BackoutPercentage,
 			&block.Market,
 			&block.Instrument,
+			&block.Account,
 		)
 		if err != nil {
 			s.log.Errorf("failed to scan block: %s", err)
@@ -148,13 +151,18 @@ func (s *Server) handleAction(data *strategies.ActionEvent) {
 }
 
 func (s *Server) New(ctx context.Context, req *blocksAPI.Block) (*blocksAPI.Block, error) {
+	acn, err := passportUtils.AccountFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
 	if req.BackoutPercentage == 0 {
 		req.BackoutPercentage = defaultBackoutPercentage
 	}
 
 	req.Id = uuid.New().String()
 
-	err := s.validateBlock(req)
+	err = s.validateBlock(req)
 	if err != nil {
 		return nil, err
 	}
@@ -171,6 +179,7 @@ func (s *Server) New(ctx context.Context, req *blocksAPI.Block) (*blocksAPI.Bloc
 		req.BackoutPercentage,
 		req.Market,
 		req.Instrument,
+		acn,
 	)
 
 	if err := db.SimpleExec(ctx, q); err != nil {
@@ -210,7 +219,12 @@ func (s *Server) validateBlock(b *blocksAPI.Block) error {
 }
 
 func (s *Server) List(ctx context.Context, req *blocksAPI.ListRequest) (*blocksAPI.ListResponse, error) {
-	q := db.Build().Select(allColumns...).From(tblName)
+	acn, err := passportUtils.AccountFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	q := db.Build().Select(allColumns...).From(tblName).Where(sq.Eq{"account": acn})
 	res, done, err := db.SimpleQuery(ctx, q)
 	if err != nil {
 		s.log.Errorf("failed to find blocks: %s", err)
@@ -235,6 +249,7 @@ func (s *Server) List(ctx context.Context, req *blocksAPI.ListRequest) (*blocksA
 			&block.BackoutPercentage,
 			&block.Market,
 			&block.Instrument,
+			&block.Account,
 		)
 		if err != nil {
 			return nil, err
@@ -247,6 +262,47 @@ func (s *Server) List(ctx context.Context, req *blocksAPI.ListRequest) (*blocksA
 }
 
 func (s *Server) Get(ctx context.Context, req *blocksAPI.GetRequest) (*blocksAPI.Block, error) {
+	acn, err := passportUtils.AccountFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	q := db.Build().Select(allColumns...).From(tblName).Where(sq.Eq{"id": req.Id, "account": acn})
+	res, done, err := db.SimpleQuery(ctx, q)
+	if err != nil {
+		s.log.Errorf("failed to find blocks: %s", err)
+		return nil, err
+	}
+	defer done()
+
+	if !res.Next() {
+		return nil, status.Error(codes.NotFound, "block not found")
+	}
+
+	block := &blocksAPI.Block{}
+	err = res.Scan(
+		&block.Id,
+		&block.StrategyId,
+		&block.State,
+		&block.BaseUnits,
+		&block.CurrentUnits,
+		&block.Purchase,
+		&block.WatchDuration,
+		&block.ShortSellAllowed,
+		&block.BackoutPercentage,
+		&block.Market,
+		&block.Instrument,
+		&block.Account,
+	)
+	if err != nil {
+		s.log.Errorf("failed to scan block: %s", err)
+		return nil, err
+	}
+
+	return block, nil
+}
+
+func (s *Server) Find(ctx context.Context, req *blocksAPI.GetRequest) (*blocksAPI.Block, error) {
 	q := db.Build().Select(allColumns...).From(tblName).Where(sq.Eq{"id": req.Id})
 	res, done, err := db.SimpleQuery(ctx, q)
 	if err != nil {
@@ -272,6 +328,7 @@ func (s *Server) Get(ctx context.Context, req *blocksAPI.GetRequest) (*blocksAPI
 		&block.BackoutPercentage,
 		&block.Market,
 		&block.Instrument,
+		&block.Account,
 	)
 	if err != nil {
 		s.log.Errorf("failed to scan block: %s", err)
