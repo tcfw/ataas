@@ -12,6 +12,7 @@ import (
 	"github.com/spf13/viper"
 	"pm.tcfw.com.au/source/ataas/api"
 	"pm.tcfw.com.au/source/ataas/db"
+	"pm.tcfw.com.au/source/ataas/internal/utils/tracing"
 )
 
 func init() {
@@ -48,6 +49,8 @@ func main() {
 			log.Fatalf("Failed to init config: %s", err)
 		}
 	}
+
+	tracing.InitTracer("gw")
 
 	if err := db.Init(ctx, viper.GetString("db.url")); err != nil {
 		log.Fatal(err)

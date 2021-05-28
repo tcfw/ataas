@@ -86,6 +86,7 @@ func (s *APIServer) serveHTTPS(ctx context.Context) error {
 
 	h3Serv := &http3.Server{Server: httpServ}
 
+	s.router.Use(registerTelemetryMiddleware)
 	s.router.Use(h3Headers(h3Serv))
 
 	if viper.GetBool("gw.enableAuth") {

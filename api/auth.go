@@ -10,6 +10,7 @@ import (
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
 	"pm.tcfw.com.au/source/ataas/api/pb/passport"
+	rpcUtils "pm.tcfw.com.au/source/ataas/internal/utils/rpc"
 )
 
 var (
@@ -47,7 +48,7 @@ func authHandler(next http.Handler) http.Handler {
 				if !envExists {
 					passportEndpoint = viper.GetString("grpc.addr")
 				}
-				conn, err := grpc.Dial(passportEndpoint, grpc.WithInsecure())
+				conn, err := grpc.Dial(passportEndpoint, rpcUtils.InternalClientOptions()...)
 				if err != nil {
 					http.Error(w, "Failed to validate token", http.StatusInternalServerError)
 					panic(err)

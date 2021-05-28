@@ -13,6 +13,7 @@ import (
 	"pm.tcfw.com.au/source/ataas/api/pb/strategy"
 	"pm.tcfw.com.au/source/ataas/api/pb/ticks"
 	"pm.tcfw.com.au/source/ataas/api/pb/users"
+	rpcUtils "pm.tcfw.com.au/source/ataas/internal/utils/rpc"
 )
 
 func newRouter(ctx context.Context) (*runtime.ServeMux, error) {
@@ -24,7 +25,7 @@ func newRouter(ctx context.Context) (*runtime.ServeMux, error) {
 	conn, err := grpc.DialContext(
 		ctx,
 		viper.GetString("grpc.addr"),
-		grpc.WithInsecure(),
+		rpcUtils.InternalClientOptions()...,
 	)
 	if err != nil {
 		return nil, err
