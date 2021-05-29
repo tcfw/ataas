@@ -10,11 +10,6 @@ import (
 
 type MarketList map[string]exchanges.Exchange
 
-// const (
-// 	binanceKey    = "6eYb30dkibfkdNI7FasPBOWIU85GywLktejWaY4PtkefS4KFiGwilbUNygMoP3wp"
-// 	binanceSecret = "QJPQEhHO6Cfz7uLdUv6lcPSoLBTtovuhgEb4Vf4LsuxmyEGcDBWt9swlbVanhsQx"
-// )
-
 func initForUser(ctx context.Context, account string) (MarketList, error) {
 	ml := MarketList{}
 
