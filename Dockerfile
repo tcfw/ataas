@@ -15,8 +15,8 @@ RUN make build
 
 FROM ubuntu:latest 
 
-WORKDIR /bin
+WORKDIR /
 
 COPY --from=builder /builder/bin/ataas .
 
-CMD ["/bin/ataas"]
+CMD ["/ataas"]
