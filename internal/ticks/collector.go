@@ -41,60 +41,17 @@ func (s *Server) Collect(ctx context.Context) {
 }
 
 func (s *Server) collectFromCh(ctx context.Context, ch <-chan *ticks.Trade) {
-	conn, err := db.Conn(ctx)
-	if err != nil {
-		panic(err)
-	}
-
-	defer conn.Release()
-
 	br, err := broadcast.Driver()
 	if err != nil {
 		panic(err)
 	}
 
-	// var n int8 = 0
-	// block := make([]*ticks.Trade, 30)
-
 	for trade := range ch {
-		// n++
-
-		// block[n] = trade
-
-		// if n == 1 {
-		// n = 0
-
-		// 	q := db.Build().Insert("trades").Columns("market", "instrument", "tradeid", "ts", "direction", "amount", "units")
-
-		// for _, b := range block {
-		// 	if b == nil {
-		// 		continue
-		// 	}
 		br.Publish(fmt.Sprintf("TRADE.%s.%s", trade.Market, trade.Instrument), trade)
 
 		if err := s.library.Add(trade); err != nil {
 			s.log.Errorf("failed to record in library: %s", err)
 		}
-
-		// 		q = q.Values(b.Market, b.Instrument, b.TradeID, time.Unix(b.Timestamp/1000, 0), b.Direction == ticks.TradeDirection_SELL, b.Amount, b.Units)
-		// }
-
-		// 	q = q.Suffix("ON CONFLICT DO NOTHING")
-
-		// 	tx, err := conn.Begin(ctx)
-		// 	if err != nil {
-		// 		panic(err)
-		// 	}
-
-		// 	if _, err = db.Exec(ctx, tx, q); err != nil {
-		// 		panic(err)
-		// 	}
-
-		// 	if err := tx.Commit(ctx); err != nil {
-		// 		panic(err)
-		// 	}
-
-		// }
 	}
 }
 

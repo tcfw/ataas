@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/spf13/viper"
 
 	nats "github.com/nats-io/nats.go"
 )
@@ -95,7 +96,7 @@ type AuthenticateEvent struct {
 //ListenForBroadcast creates a new NATS connection and watches for internal events
 //based on a channel & type using ListenForBroadcastOnNC
 func ListenForBroadcast(serviceName string, eventType string, channel string) (<-chan []byte, func(), error) {
-	nc, err := nats.Connect(os.Getenv("NATS_HOST"))
+	nc, err := nats.Connect(viper.GetString("nats.url"))
 	if err != nil {
 		log.Printf("Failed to connect to nats: %s", err)
 		return nil, func() {}, err
@@ -116,7 +117,7 @@ func ListenForBroadcast(serviceName string, eventType string, channel string) (<
 
 //MultiListenForBroadcast listens for multiple events
 func MultiListenForBroadcast(serviceName string, eventTypes ...string) (<-chan []byte, func(), error) {
-	nc, err := nats.Connect(os.Getenv("NATS_HOST"))
+	nc, err := nats.Connect(viper.GetString("nats.url"))
 	if err != nil {
 		log.Printf("Failed to connect to nats: %s", err)
 		return nil, func() {}, err
@@ -193,7 +194,7 @@ func ListenForBroadcastOnNC(nc *nats.Conn, serviceName, eventType, channel strin
 //BroadcastEvent attempts to connect to nats server to pub any event and saves to stream
 func BroadcastEvent(ctx context.Context, event EventInterface) error {
 	hostname, _ := os.Hostname()
-	nc, err := nats.Connect(os.Getenv("NATS_HOST"))
+	nc, err := nats.Connect(viper.GetString("nats.url"))
 	if err != nil {
 		log.Printf("Failed to broadcast event: %s", err)
 		return err
@@ -222,7 +223,7 @@ func BroadcastEvent(ctx context.Context, event EventInterface) error {
 
 //BroadcastNonStreamingEvent broadcasts an event like BroadcastEvent but uses the non-streaming engine
 func BroadcastNonStreamingEvent(ctx context.Context, event EventInterface) error {
-	nc, err := nats.Connect(os.Getenv("NATS_HOST"))
+	nc, err := nats.Connect(viper.GetString("nats.url"))
 	if err != nil {
 		log.Printf("Failed to broadcast event: %s", err)
 		return err

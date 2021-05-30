@@ -15,6 +15,8 @@ RUN make build
 
 FROM ubuntu:latest 
 
+RUN apt update && apt install ca-certificates -y && rm -rf /var/lib/{apt,dpkg,cache,log}/
+
 WORKDIR /bin
 
 COPY --from=builder /builder/bin/ataas /bin/ataas-bin
