@@ -19,4 +19,4 @@ WORKDIR /bin
 
 COPY --from=builder /builder/bin/ataas /bin/ataas-bin
 
-CMD ["/ataas-bin"]
+CMD ["/bin/ataas-bin"]
