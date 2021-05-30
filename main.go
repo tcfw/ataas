@@ -17,7 +17,7 @@ import (
 
 func init() {
 	viper.SetConfigName("ataas")
-	viper.SetConfigType("yaml")
+	viper.SetConfigType("json")
 	viper.SetEnvPrefix("ataas")
 	viper.AutomaticEnv()
 
@@ -29,7 +29,7 @@ func init() {
 }
 
 const (
-	appVersion = "v0.0.0"
+	appVersion = "v0.0.1"
 )
 
 func main() {

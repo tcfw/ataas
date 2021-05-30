@@ -15,4 +15,4 @@ protos:
 	@./scripts/genproto.sh
 
 docker:
-	docker build -t tcfw/ataas .
+	docker build -t tcfw/ataas:latest .
