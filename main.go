@@ -25,6 +25,7 @@ func init() {
 	viper.SetDefault("services.start", true)
 
 	viper.AddConfigPath(".")
+	viper.AddConfigPath("/etc/ataas")
 }
 
 const (

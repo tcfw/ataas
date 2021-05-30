@@ -69,7 +69,7 @@ func (s *APIServer) serveGRPC(ctx context.Context) error {
 
 	s.Stop = stop
 
-	if viper.GetBool("services.start") {
+	if viper.GetBool("gw.services.start") {
 		start()
 	}
 
@@ -78,7 +78,7 @@ func (s *APIServer) serveGRPC(ctx context.Context) error {
 
 func (s *APIServer) serveHTTPS(ctx context.Context) error {
 	httpServ := &http.Server{
-		Addr:           viper.GetString("https.addr"),
+		Addr:           viper.GetString("gw.https.addr"),
 		ReadTimeout:    10 * time.Second,
 		WriteTimeout:   10 * time.Second,
 		MaxHeaderBytes: 1 << 20,
@@ -96,13 +96,13 @@ func (s *APIServer) serveHTTPS(ctx context.Context) error {
 	httpServ.Handler = s.router
 
 	go func() {
-		err := h3Serv.ListenAndServeTLS(viper.GetString("tls.cert"), viper.GetString("tls.key"))
+		err := h3Serv.ListenAndServeTLS(viper.GetString("gw.https.cert"), viper.GetString("gw.https.key"))
 		if err != nil {
 			logrus.New().Errorf("[http3] %s", err)
 		}
 	}()
 
-	err := httpServ.ListenAndServeTLS(viper.GetString("tls.cert"), viper.GetString("tls.key"))
+	err := httpServ.ListenAndServeTLS(viper.GetString("gw.https.cert"), viper.GetString("gw.https.key"))
 
 	return err
 }

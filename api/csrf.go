@@ -87,7 +87,7 @@ func generateCSRFTokenFromRequest(w http.ResponseWriter, r *http.Request) {
 }
 
 func _validateCSRFToken(token string, uid string, sid string) bool {
-	key := []byte(viper.GetString("csrf.key"))
+	key := []byte(viper.GetString("gw.csrf.key"))
 
 	tokenBytes, err := hex.DecodeString(token)
 	if err != nil {
@@ -126,7 +126,7 @@ func _validateCSRFToken(token string, uid string, sid string) bool {
 }
 
 func generateCSRFToken(uid string, sid string) (string, error) {
-	key := []byte(viper.GetString("csrf.key"))
+	key := []byte(viper.GetString("gw.csrf.key"))
 
 	if randClient == nil {
 		c, err := client.New(

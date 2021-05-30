@@ -9,9 +9,9 @@ import (
 
 func init() {
 	viper.SetDefault("grpc.addr", ":19283")
-	viper.SetDefault("https.addr", ":8443")
-	viper.SetDefault("tls.cert", "tls.cert")
-	viper.SetDefault("tls.key", "tls.key")
+	viper.SetDefault("gw.https.addr", ":8443")
+	viper.SetDefault("gw.https.cert", "tls.cert")
+	viper.SetDefault("gw.https.key", "tls.key")
 
 	viper.SetDefault("gw.enableAuth", true)
 

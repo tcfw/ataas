@@ -24,7 +24,7 @@ var (
 )
 
 func addSessionCookie(ctx context.Context, tokenString string, token *jwt.Token) {
-	if d := viper.GetString("cookie_domain"); d != "" {
+	if d := viper.GetString("passport.cookie_domain"); d != "" {
 		cookieDomain = d
 	}
 
@@ -73,7 +73,7 @@ func addSessionCookie(ctx context.Context, tokenString string, token *jwt.Token)
 }
 
 func clearSessionCookie(ctx context.Context) {
-	if d := viper.GetString("cookie_domain"); d != "" {
+	if d := viper.GetString("passport.cookie_domain"); d != "" {
 		cookieDomain = d
 	}
 
