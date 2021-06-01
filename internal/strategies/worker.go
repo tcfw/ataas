@@ -110,6 +110,8 @@ func (w *Worker) HandleJob(job *strategy.Strategy) error {
 	switch strat := job.Strategy; strat {
 	case strategy.StrategyAlgo_MeanLog:
 		return w.handleMeanLog(job)
+	case strategy.StrategyAlgo_JSRuntime:
+		return w.handleJSRuntime(job)
 	default:
 		return fmt.Errorf("unknown strategy %s", strat)
 	}

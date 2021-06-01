@@ -20,6 +20,7 @@ enum Action {
 
 enum StrategyAlgo {
 	MeanLog = 0;
+	JSRuntime = 1;
 }
 
 message Strategy {

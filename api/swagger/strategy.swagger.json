@@ -353,7 +353,8 @@
     "strategyStrategyAlgo": {
       "type": "string",
       "enum": [
-        "MeanLog"
+        "MeanLog",
+        "JSRuntime"
       ],
       "default": "MeanLog"
     }
