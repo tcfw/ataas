@@ -79,6 +79,7 @@ message RangeRequest {
 	string market = 1;
 	string instrument = 2;
 	string since = 3;
+	string until = 4;
 }
 
 message CompareRequest {

@@ -124,6 +124,12 @@
             "in": "query",
             "required": false,
             "type": "string"
+          },
+          {
+            "name": "until",
+            "in": "query",
+            "required": false,
+            "type": "string"
           }
         ],
         "tags": [

@@ -96,6 +96,7 @@ service BlocksService {
 	rpc Update(UpdateRequest) returns (Block) {
 		option (google.api.http) = {
 			post: "/v1/blocks/{id}"
+			body: "*"
 		};
 	};
 	rpc ManualAction(ManualRequest) returns (ManualResponse) {

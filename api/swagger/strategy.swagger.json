@@ -55,6 +55,16 @@
             }
           }
         },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ataasstrategyCreateRequest"
+            }
+          }
+        ],
         "tags": [
           "StrategyService"
         ]
@@ -184,6 +194,14 @@
             "in": "path",
             "required": true,
             "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/strategyUpdateRequest"
+            }
           }
         ],
         "tags": [
@@ -209,6 +227,14 @@
         "SELL"
       ],
       "default": "STAY"
+    },
+    "ataasstrategyCreateRequest": {
+      "type": "object",
+      "properties": {
+        "strategy": {
+          "$ref": "#/definitions/strategyStrategy"
+        }
+      }
     },
     "ataasstrategyCreateResponse": {
       "type": "object",
@@ -357,6 +383,17 @@
         "JSRuntime"
       ],
       "default": "MeanLog"
+    },
+    "strategyUpdateRequest": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "strategy": {
+          "$ref": "#/definitions/strategyStrategy"
+        }
+      }
     }
   }
 }

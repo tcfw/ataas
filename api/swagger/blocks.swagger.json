@@ -116,6 +116,14 @@
             "in": "path",
             "required": true,
             "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ataasblocksUpdateRequest"
+            }
           }
         ],
         "tags": [
@@ -178,6 +186,17 @@
           "items": {
             "$ref": "#/definitions/blocksBlock"
           }
+        }
+      }
+    },
+    "ataasblocksUpdateRequest": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "block": {
+          "$ref": "#/definitions/blocksBlock"
         }
       }
     },

@@ -48,6 +48,7 @@ service OrdersService {
 	rpc Create(CreateRequest) returns (CreateResponse) {
 		option (google.api.http) = {
 			post: "/v1/orders",
+			body: "*"
 		};
 	};
 	rpc Get(GetRequest) returns (GetResponse) {

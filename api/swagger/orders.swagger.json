@@ -26,6 +26,16 @@
             }
           }
         },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ordersCreateRequest"
+            }
+          }
+        ],
         "tags": [
           "OrdersService"
         ]
@@ -64,6 +74,25 @@
         "SELL"
       ],
       "default": "BUY"
+    },
+    "ordersCreateRequest": {
+      "type": "object",
+      "properties": {
+        "blockID": {
+          "type": "string"
+        },
+        "action": {
+          "$ref": "#/definitions/ordersAction"
+        },
+        "price": {
+          "type": "number",
+          "format": "float"
+        },
+        "units": {
+          "type": "number",
+          "format": "double"
+        }
+      }
     },
     "ordersCreateResponse": {
       "type": "object",
