@@ -113,13 +113,14 @@ func (s *Server) History(ctx context.Context, req *strategy.HistoryRequest) (*st
 	if req.Limit == 0 {
 		req.Limit = 10
 	}
-	acn, err := passportUtils.AccountFromContext(ctx)
+
+	strat, err := s.Get(ctx, &strategy.GetRequest{Id: req.Id})
 	if err != nil {
 		return nil, err
 	}
 
 	q := db.Build().Select("id", "action", "ts").
-		From(historyTblName).Where(sq.Eq{"account": acn}).OrderBy("ts DESC").Where(sq.Eq{"strategy_id": req.Id}).Limit(uint64(req.Limit))
+		From(historyTblName).Where(sq.Eq{"strategy_id": strat.Id}).OrderBy("ts DESC").Limit(uint64(req.Limit))
 
 	if req.Page != "" {
 		q.Where(sq.Lt{"ts": req.Page})
