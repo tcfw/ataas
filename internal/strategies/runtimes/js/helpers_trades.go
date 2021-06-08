@@ -2,7 +2,9 @@ package js
 
 import (
 	"context"
+	"fmt"
 	"os"
+	"time"
 
 	"github.com/dop251/goja"
 
@@ -12,6 +14,31 @@ import (
 	ticksAPI "pm.tcfw.com.au/source/ataas/api/pb/ticks"
 	rpcUtils "pm.tcfw.com.au/source/ataas/internal/utils/rpc"
 )
+
+type LimitedGetTrades struct {
+	Until time.Time
+}
+
+func (lgt *LimitedGetTrades) GetTrades(exchange, symbol, duration string) []*ticksAPI.Trade {
+	svc, err := tradesClient()
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Printf("TSF: %+v %+v", duration, lgt.Until.Format(time.RFC3339))
+
+	trades, err := svc.TradesRange(context.Background(), &ticksAPI.RangeRequest{
+		Market:     exchange,
+		Instrument: symbol,
+		Since:      duration,
+		Until:      lgt.Until.Format(time.RFC3339),
+	})
+	if err != nil {
+		panic(err)
+	}
+
+	return trades.Data
+}
 
 func GetTrades(exchange, symbol, duration string) []*ticksAPI.Trade {
 	svc, err := tradesClient()

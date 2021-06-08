@@ -13,6 +13,11 @@ import (
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/semconv"
+	"go.opentelemetry.io/otel/trace"
+)
+
+var (
+	gtp *sdktrace.TracerProvider
 )
 
 //InitTracer creates a new trace provider instance and registers it as global trace provider.
@@ -35,8 +40,13 @@ func InitTracer(serviceName string) func() {
 	)
 	otel.SetTracerProvider(tp)
 	otel.SetTextMapPropagator(&prop.Jaeger{})
+	gtp = tp
 
 	return func() {
 		tp.Shutdown(context.Background())
 	}
+}
+
+func StartSpan(ctx context.Context, name string) (context.Context, trace.Span) {
+	return gtp.Tracer("").Start(ctx, name)
 }

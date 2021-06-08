@@ -113,7 +113,8 @@ func (s *Server) Listen() error {
 }
 
 func (s *Server) handleAction(data *strategies.ActionEvent) {
-	q := db.Build().Select(allColumns...).From(tblName).Where(sq.Eq{"strategy_id": data.StrategyID})
+	q := db.Build().Select(allColumns...).From(tblName).
+		Where(sq.And{sq.Eq{"strategy_id": data.StrategyID}, sq.NotEq{"state": blocksAPI.BlockState_ENDED}})
 	res, done, err := db.SimpleQuery(context.Background(), q)
 	if err != nil {
 		s.log.Errorf("failed to find blocks: %s", err)

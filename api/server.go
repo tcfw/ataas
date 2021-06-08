@@ -71,6 +71,8 @@ func (s *APIServer) serveGRPC(ctx context.Context) error {
 
 	if viper.GetBool("gw.services.start") {
 		start()
+	} else {
+		logrus.New().Warnln("Not running core trading services")
 	}
 
 	return grpc.Serve(lis)

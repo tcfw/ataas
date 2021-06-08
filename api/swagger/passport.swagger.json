@@ -359,6 +359,10 @@
         },
         "recaptcha": {
           "type": "string"
+        },
+        "next": {
+          "type": "boolean",
+          "format": "boolean"
         }
       }
     },

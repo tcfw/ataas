@@ -11,6 +11,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"golang.org/x/crypto/bcrypt"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 
@@ -93,15 +94,15 @@ func (s *Server) Authenticate(ctx context.Context, request *passportAPI.AuthRequ
 			return s.limiter.IncreaseResp(ctx, remaining, remoteIP, username, "bad request")
 		}
 
-		if creds.Recaptcha != "" {
-			valid, err := validateReCAPTCHA(ctx, creds.Recaptcha, remoteIP.String())
-			if err != nil {
-				return nil, err
-			}
-			if !valid {
-				return s.limiter.IncreaseResp(ctx, remaining, remoteIP, username, "bad request")
-			}
-		}
+		// if creds.Recaptcha != "" {
+		// 	valid, err := validateReCAPTCHA(ctx, creds.Recaptcha, remoteIP.String())
+		// 	if err != nil {
+		// 		return nil, err
+		// 	}
+		// 	if !valid {
+		// 		return s.limiter.IncreaseResp(ctx, remaining, remoteIP, username, "bad request")
+		// 	}
+		// }
 
 		//Find User
 		usersSvc, err := usersSvc()
@@ -116,7 +117,18 @@ func (s *Server) Authenticate(ctx context.Context, request *passportAPI.AuthRequ
 				return nil, fmt.Errorf("RPC failed: %s", serr.Code().String())
 
 			}
+			if creds.Next {
+				grpc.SendHeader(ctx, metadata.Pairs("x-http-code", "201"))
+				return nil, status.Error(codes.FailedPrecondition, "auth required")
+			}
 			return s.limiter.IncreaseResp(ctx, remaining, remoteIP, username, "Unknown user")
+		}
+
+		if creds.Next {
+			if user.GetMfa() == nil {
+				grpc.SendHeader(ctx, metadata.Pairs("x-http-code", "201"))
+				return nil, status.Error(codes.FailedPrecondition, "auth required")
+			}
 		}
 
 		//TODO(tcfw): Check blocked devFP+UID
@@ -127,6 +139,10 @@ func (s *Server) Authenticate(ctx context.Context, request *passportAPI.AuthRequ
 				return s.limiter.IncreaseResp(ctx, remaining, remoteIP, username, "Password mismatch")
 			}
 		} else {
+			if user.Mfa == nil {
+				return nil, status.Error(codes.FailedPrecondition, "bad request")
+			}
+
 			//MFA
 			if creds.GetMFA() == "" {
 				return s.mfaChallenge(ctx, user)

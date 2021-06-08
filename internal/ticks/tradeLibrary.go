@@ -164,7 +164,7 @@ func (tl FileStoreList) Len() int           { return len(tl) }
 func (tl FileStoreList) Swap(i, j int)      { tl[i], tl[j] = tl[j], tl[i] }
 func (tl FileStoreList) Less(i, j int) bool { return tl[i].startTime.Before(tl[j].startTime) }
 
-func (tl *TradeLibrary) GetSince(market, instrument string, since time.Time) (TradeList, error) {
+func (tl *TradeLibrary) GetSince(market, instrument string, since, until time.Time) (TradeList, error) {
 	if since.IsZero() {
 		return nil, fmt.Errorf("since must not be zero")
 	}
@@ -184,14 +184,14 @@ func (tl *TradeLibrary) GetSince(market, instrument string, since time.Time) (Tr
 	sort.Sort(fsList)
 
 	for _, fs := range fsList {
-		ch, err := fs.GetStream(market, instrument, uint64(since.Unix()))
+		ch, err := fs.GetStream(market, instrument, uint64(since.Unix()), uint64(until.Unix()))
 		if err != nil {
 			return nil, fmt.Errorf("failed to read trade stream: %s", err)
 		}
 
 		for trade := range ch {
 			ts := time.Unix(trade.Timestamp/1000, 0)
-			if ts.After(since) {
+			if ts.After(since) && ts.Before(until) {
 				trades = append(trades, trade)
 			}
 		}
@@ -200,7 +200,7 @@ func (tl *TradeLibrary) GetSince(market, instrument string, since time.Time) (Tr
 	return trades, nil
 }
 
-func (tl *TradeLibrary) GetSinceStream(market, instrument string, since time.Time) (<-chan *ticks.Trade, error) {
+func (tl *TradeLibrary) GetSinceStream(market, instrument string, since, until time.Time) (<-chan *ticks.Trade, error) {
 	if since.IsZero() {
 		return nil, fmt.Errorf("since must not be zero")
 	}
@@ -223,7 +223,7 @@ func (tl *TradeLibrary) GetSinceStream(market, instrument string, since time.Tim
 		defer close(trades)
 
 		for _, fs := range fsList {
-			s, err := fs.GetStream(market, instrument, uint64(since.Unix()))
+			s, err := fs.GetStream(market, instrument, uint64(since.Unix()), uint64(until.Unix()))
 			if err != nil {
 				close(trades)
 				fmt.Printf("failed to stream trades: %s\n", err)

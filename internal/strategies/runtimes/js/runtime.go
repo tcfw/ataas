@@ -102,6 +102,10 @@ func (jsr *JSRuntime) initParams() error {
 	return nil
 }
 
+func (jsr *JSRuntime) SetLimitedTrades(lgt *LimitedGetTrades) error {
+	return jsr.vm.Set("GetTrades", lgt.GetTrades)
+}
+
 func (jsr *JSRuntime) Run() (strat strategy.Action, err error) {
 	defer func() {
 		if caught := recover(); caught != nil {

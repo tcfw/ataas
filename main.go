@@ -22,7 +22,6 @@ func init() {
 	viper.AutomaticEnv()
 
 	viper.SetDefault("db.url", "postgres://root@localhost:26257/trader_ticks?pool_max_conns=20")
-	viper.SetDefault("services.start", true)
 
 	viper.AddConfigPath(".")
 	viper.AddConfigPath("/etc/ataas")

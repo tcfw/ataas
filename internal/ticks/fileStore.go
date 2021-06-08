@@ -254,20 +254,29 @@ func (fs *FileStore) GetN(market, instrument string, after uint64, n int) ([]*ti
 	return trades, nil
 }
 
-func (fs *FileStore) GetStream(market, instrument string, after uint64) (<-chan *ticks.Trade, error) {
+func (fs *FileStore) GetStream(market, instrument string, from, until uint64) (<-chan *ticks.Trade, error) {
 	trades := make(chan *ticks.Trade)
-	r := fs.newReader(time.Unix(int64(after), 0))
+	r := fs.newReader(time.Unix(int64(from), 0))
 
 	go func() {
 		defer close(trades)
 
 		for {
-			trade, err := r.next(after)
+			trade, err := r.next(from)
 			if err == io.EOF {
 				break
 			} else if err != nil {
 				fmt.Printf("FSTORE ERR: %s\n", err)
 				break
+			}
+
+			tradeTs := trade.Timestamp
+			if tradeTs > 9999999999 {
+				tradeTs = tradeTs / 1000
+			}
+
+			if uint64(tradeTs) > until {
+				return
 			}
 
 			if trade.Market == market && trade.Instrument == instrument {

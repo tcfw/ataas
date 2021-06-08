@@ -78,28 +78,30 @@ func (s *Server) TradesRange(ctx context.Context, req *ticks.RangeRequest) (*tic
 		return nil, status.Error(codes.InvalidArgument, "missing required arguments")
 	}
 
-	var tsFrom time.Time
+	tsUntil := time.Now()
 
-	if strings.ContainsAny(req.Since, ":/.+") {
-		t, err := time.Parse(time.RFC3339, req.Since)
+	tsFrom, wasDuration, err := parseTime(req.Since)
+	if err != nil {
+		return nil, err
+	}
+
+	if req.Until != "" {
+		t, _, err := parseTime(req.Until)
 		if err != nil {
 			return nil, err
 		}
-		tsFrom = t
-	} else {
+		tsUntil = t
+	}
+
+	if wasDuration && req.Until != "" {
 		ts, err := time.ParseDuration(req.Since)
 		if err != nil {
 			return nil, err
 		}
-
-		if ts > 336*time.Hour {
-			return nil, ErrDurationTooLong
-		}
-
-		tsFrom = time.Now().Add(-1 * ts)
+		tsFrom = tsUntil.Add(-ts)
 	}
 
-	trades, err := s.library.GetSince(req.Market, req.Instrument, tsFrom)
+	trades, err := s.library.GetSince(req.Market, req.Instrument, tsFrom, tsUntil)
 	if err != nil {
 		return nil, err
 	}
@@ -123,7 +125,7 @@ func (s *Server) Trades(ctx context.Context, req *ticks.GetRequest) (*ticks.Trad
 		req.Depth = 100
 	}
 
-	trades, err := s.library.GetSince(req.Market, req.Instrument, time.Now().Add(-time.Duration(req.Depth+60)*time.Second))
+	trades, err := s.library.GetSince(req.Market, req.Instrument, time.Now().Add(-time.Duration(req.Depth+60)*time.Second), time.Now())
 	if err != nil {
 		return nil, err
 	}
@@ -147,28 +149,30 @@ func (s *Server) TradesRangeStream(req *ticks.RangeRequest, stream ticks.History
 		return status.Error(codes.InvalidArgument, "missing required arguments")
 	}
 
-	var tsFrom time.Time
+	tsUntil := time.Now()
 
-	if strings.ContainsAny(req.Since, ":/.+") {
-		t, err := time.Parse(time.RFC3339, req.Since)
+	tsFrom, wasDuration, err := parseTime(req.Since)
+	if err != nil {
+		return err
+	}
+
+	if req.Until != "" {
+		t, _, err := parseTime(req.Until)
 		if err != nil {
 			return err
 		}
-		tsFrom = t
-	} else {
+		tsUntil = t
+	}
+
+	if wasDuration && req.Until != "" {
 		ts, err := time.ParseDuration(req.Since)
 		if err != nil {
 			return err
 		}
-
-		if ts > 336*time.Hour {
-			return ErrDurationTooLong
-		}
-
-		tsFrom = time.Now().Add(-ts)
+		tsFrom = tsUntil.Add(-ts)
 	}
 
-	tradesCh, err := s.library.GetSinceStream(req.Market, req.Instrument, tsFrom)
+	tradesCh, err := s.library.GetSinceStream(req.Market, req.Instrument, tsFrom, tsUntil)
 	if err != nil {
 		return err
 	}
@@ -196,7 +200,7 @@ func (s *Server) Candles(ctx context.Context, req *ticks.CandlesRequest) (*ticks
 
 	startingPoint := time.Now().Add(-time.Duration(req.Depth) * interval).Round(interval)
 
-	trades, err := s.library.GetSinceStream(req.Market, req.Instrument, startingPoint)
+	trades, err := s.library.GetSinceStream(req.Market, req.Instrument, startingPoint, time.Now())
 	if err != nil {
 		return nil, err
 	}
@@ -233,4 +237,25 @@ func (s *Server) Candles(ctx context.Context, req *ticks.CandlesRequest) (*ticks
 	}
 
 	return &ticks.CandlesResponse{Data: data}, nil
+}
+
+func parseTime(ts string) (time.Time, bool, error) {
+	if strings.ContainsAny(ts, ":/.+") {
+		t, err := time.Parse(time.RFC3339, ts)
+		if err != nil {
+			return time.Time{}, true, err
+		}
+		return t, true, nil
+	} else {
+		ts, err := time.ParseDuration(ts)
+		if err != nil {
+			return time.Time{}, false, err
+		}
+
+		if ts > 336*time.Hour {
+			return time.Time{}, false, ErrDurationTooLong
+		}
+
+		return time.Now().Add(-ts), false, nil
+	}
 }

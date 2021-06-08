@@ -19,6 +19,7 @@ import (
 func newRouter(ctx context.Context) (*runtime.ServeMux, error) {
 	r := runtime.NewServeMux(
 		// runtime.WithMarshalerOption("application/json", &marshalers.JSONMarshaler{}),
+		runtime.WithForwardResponseOption(httpResponseModifier),
 		runtime.WithOutgoingHeaderMatcher(httpHeaderMatch),
 	)
 

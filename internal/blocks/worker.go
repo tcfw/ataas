@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"math"
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
@@ -95,10 +94,10 @@ func (s *Server) applyState(b *blocks.Block, ns blocks.BlockState, n int) (*orde
 	defer cancel()
 
 	nUnits := b.CurrentUnits
-	unitDiff := b.BaseUnits * float64(n)
-	if b.CurrentUnits < unitDiff {
-		unitDiff = b.CurrentUnits
-	}
+	// unitDiff := b.BaseUnits * float64(n)
+	// if b.CurrentUnits < unitDiff {
+	unitDiff := b.CurrentUnits
+	// }
 
 	var price float32 = -1
 	var order *orders.Order
@@ -139,6 +138,9 @@ func (s *Server) applyState(b *blocks.Block, ns blocks.BlockState, n int) (*orde
 		}
 		order = resp.Order
 		nUnits -= order.Units
+		if nUnits < 0 && !b.ShortSellAllowed {
+			nUnits = 0
+		}
 
 	case blocks.BlockState_ENDED:
 		if b.State == blocks.BlockState_PURCHASED {
@@ -162,7 +164,7 @@ func (s *Server) applyState(b *blocks.Block, ns blocks.BlockState, n int) (*orde
 	//Store state
 	q := db.Build().Update(tblName).SetMap(sq.Eq{
 		"state":         ns,
-		"current_units": truncatePrecision(nUnits, 6),
+		"current_units": nUnits,
 	}).Where(sq.Eq{"id": b.Id}).Limit(1)
 
 	if err := db.SimpleExec(ctx, q); err != nil {
@@ -170,9 +172,4 @@ func (s *Server) applyState(b *blocks.Block, ns blocks.BlockState, n int) (*orde
 	}
 
 	return order, nil
-}
-
-func truncatePrecision(f float64, pres int) float64 {
-	i := math.Pow10(pres)
-	return float64(int(f*i)) / i
 }

@@ -36,6 +36,7 @@ message UserCreds {
     string devFP = 4;
     bool insecureLogin = 5;
     string recaptcha = 6;
+    bool next = 7;
 }
 
 message OAuthClientSecretCreds {

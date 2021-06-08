@@ -51,7 +51,10 @@ func (w *Worker) handleMeanLog(job *strategy.Strategy) error {
 		return err
 	}
 
-	action := meanLog(tradesResp.Data, job.Params)
+	action, err := meanLog(tradesResp.Data, job.Params)
+	if err != nil {
+		return err
+	}
 
 	err = w.storeSuggestedAction(action, job)
 	if err != nil {
@@ -67,9 +70,9 @@ func (a SortableTrades) Len() int           { return len(a) }
 func (a SortableTrades) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 func (a SortableTrades) Less(i, j int) bool { return a[i].Timestamp < a[j].Timestamp }
 
-func meanLog(trades []*ticks.Trade, params map[string]string) strategy.Action {
+func meanLog(trades []*ticks.Trade, params map[string]string) (strategy.Action, error) {
 	if len(trades) < 2 {
-		return strategy.Action_STAY
+		return strategy.Action_STAY, nil
 	}
 
 	//Ensure is sorted in ascending timestamp
@@ -109,10 +112,10 @@ func meanLog(trades []*ticks.Trade, params map[string]string) strategy.Action {
 	fmt.Printf("ML: %+v\n", sum)
 
 	if sum > buyPoint {
-		return strategy.Action_BUY
+		return strategy.Action_BUY, nil
 	} else if sum > stayPoint {
-		return strategy.Action_STAY
+		return strategy.Action_STAY, nil
 	}
 
-	return strategy.Action_SELL
+	return strategy.Action_SELL, nil
 }
