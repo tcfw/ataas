@@ -2,6 +2,7 @@ package strategies
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"math"
@@ -12,6 +13,7 @@ import (
 	ordersAPI "pm.tcfw.com.au/source/ataas/api/pb/orders"
 	"pm.tcfw.com.au/source/ataas/api/pb/strategy"
 	"pm.tcfw.com.au/source/ataas/api/pb/ticks"
+	"pm.tcfw.com.au/source/ataas/internal/strategies/runtimes/js"
 )
 
 func (s *Server) BackTest(ctx context.Context, req *strategy.BacktestRequest) (*strategy.BacktestResponse, error) {
@@ -53,14 +55,15 @@ func (s *Server) BackTest(ctx context.Context, req *strategy.BacktestRequest) (*
 	}
 
 	orders := []*ordersAPI.Order{}
-
 	curBlock := []*ticks.Trade{}
 
-	var calc func([]*ticks.Trade, map[string]string) strategy.Action
+	var calc func([]*ticks.Trade, map[string]string) (strategy.Action, error)
 
 	switch req.Strategy.Strategy {
 	case strategy.StrategyAlgo_MeanLog:
 		calc = meanLog
+	case strategy.StrategyAlgo_JSRuntime:
+		calc = limitedJSRuntime
 	default:
 		return nil, fmt.Errorf("unknown strategy")
 	}
@@ -123,7 +126,10 @@ func (s *Server) BackTest(ctx context.Context, req *strategy.BacktestRequest) (*
 
 			marketPrice = curBlock[len(curBlock)-1].Amount
 
-			sugg := calc(curBlock[iTh:], req.Strategy.Params)
+			sugg, err := calc(curBlock[iTh:], req.Strategy.Params)
+			if err != nil {
+				return nil, err
+			}
 
 			resp, err := b.CalcState(ctx, &blocksAPI.CalcRequest{Block: block, Action: sugg})
 			if err != nil {
@@ -207,4 +213,40 @@ func (s *Server) backtestChange(ctx context.Context, block *blocksAPI.Block, ns 
 	}
 
 	return nil, nil
+}
+
+func limitedJSRuntime(t []*ticks.Trade, p map[string]string) (strategy.Action, error) {
+	ts := t[len(t)-1].Timestamp
+	if ts > 9999999999 {
+		ts = ts / 1000
+	}
+	lgt := &js.LimitedGetTrades{Until: time.Unix(ts, 0)}
+
+	jsparams := map[string]string{}
+	if p, ok := p["params"]; ok {
+		err := json.Unmarshal([]byte(p), &jsparams)
+		if err != nil {
+			return strategy.Action_STAY, err
+		}
+	}
+
+	code, ok := p["code"]
+	if !ok {
+		panic(fmt.Errorf("no code in strategy"))
+	}
+
+	jsr := &js.JSRuntime{}
+	err := jsr.Init([]byte(code), jsparams)
+	if err != nil {
+		return strategy.Action_STAY, err
+	}
+
+	jsr.SetLimitedTrades(lgt)
+
+	action, err := jsr.Run()
+	if err != nil {
+		return strategy.Action_STAY, err
+	}
+
+	return action, nil
 }
