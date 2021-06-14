@@ -104,7 +104,34 @@ func (s *Server) New(ctx context.Context, req *excredsAPI.ExchangeCreds) (*excre
 }
 
 func (s *Server) List(ctx context.Context, req *excredsAPI.ListRequest) (*excredsAPI.ListResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method List not implemented")
+	acn, err := passportUtils.AccountFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	q := db.Build().Select("exchange", "key").From(tblName).Where(sq.Eq{"account": acn})
+
+	res, done, err := db.SimpleQuery(ctx, q)
+	if err != nil {
+		return nil, err
+	}
+	defer done()
+
+	creds := []*excredsAPI.ExchangeCreds{}
+
+	for res.Next() {
+		cred := &excredsAPI.ExchangeCreds{}
+		err := res.Scan(
+			&cred.Exchange,
+			&cred.Key,
+		)
+		if err != nil {
+			return nil, err
+		}
+		creds = append(creds, cred)
+	}
+
+	return &excredsAPI.ListResponse{Creds: creds}, nil
 }
 
 func (s *Server) Delete(ctx context.Context, req *excredsAPI.DeleteRequest) (*excredsAPI.DeleteResponse, error) {
