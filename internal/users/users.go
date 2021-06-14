@@ -11,6 +11,7 @@ import (
 	"github.com/gogo/status"
 	"github.com/jackc/pgx/v4"
 	"github.com/sirupsen/logrus"
+	"google.golang.org/grpc/codes"
 	usersAPI "pm.tcfw.com.au/source/ataas/api/pb/users"
 	"pm.tcfw.com.au/source/ataas/db"
 	"pm.tcfw.com.au/source/ataas/internal/passport/utils"
@@ -76,10 +77,16 @@ func (s *Server) Me(ctx context.Context, req *usersAPI.Empty) (*usersAPI.User, e
 	}
 	defer done()
 
+	if !res.Next() {
+		return nil, status.Error(codes.Internal, "failed to find you")
+	}
+
 	user, err := scanUser(res)
 	if err != nil {
 		return nil, err
 	}
+
+	user.Password = ""
 
 	return user, nil
 }

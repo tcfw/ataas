@@ -157,11 +157,16 @@ func (s *Server) New(ctx context.Context, req *blocksAPI.Block) (*blocksAPI.Bloc
 		return nil, err
 	}
 
+	s.log.Printf("REQ: %+v", req)
+
 	if req.BackoutPercentage == 0 {
 		req.BackoutPercentage = defaultBackoutPercentage
 	}
 
 	req.Id = uuid.New().String()
+	req.Account = acn
+	req.State = blocksAPI.BlockState_NOTHING
+	req.ShortSellAllowed = false
 
 	err = s.validateBlock(req)
 	if err != nil {
@@ -171,16 +176,16 @@ func (s *Server) New(ctx context.Context, req *blocksAPI.Block) (*blocksAPI.Bloc
 	q := db.Build().Insert(tblName).Columns(allColumns...).Values(
 		req.Id,
 		req.StrategyId,
-		blocksAPI.BlockState_NOTHING,
+		req.State,
 		req.BaseUnits,
-		0,
-		0,
+		req.CurrentUnits,
+		req.Purchase,
 		req.WatchDuration,
-		false,
+		req.ShortSellAllowed,
 		req.BackoutPercentage,
 		req.Market,
 		req.Instrument,
-		acn,
+		req.Account,
 	)
 
 	if err := db.SimpleExec(ctx, q); err != nil {
@@ -192,6 +197,7 @@ func (s *Server) New(ctx context.Context, req *blocksAPI.Block) (*blocksAPI.Bloc
 
 func (s *Server) validateBlock(b *blocksAPI.Block) error {
 	//TODO(tcfw): check if strategy exists
+
 	if b.StrategyId == "" {
 		return status.Error(codes.FailedPrecondition, "strategy required")
 	}
@@ -208,8 +214,8 @@ func (s *Server) validateBlock(b *blocksAPI.Block) error {
 		return status.Error(codes.FailedPrecondition, "market required")
 	}
 
-	if b.BaseUnits <= 0 {
-		return status.Error(codes.FailedPrecondition, "base units required")
+	if b.BaseUnits <= 0 && b.Purchase <= 0 {
+		return status.Error(codes.FailedPrecondition, "base units or purchase required")
 	}
 
 	if b.BackoutPercentage <= 0 {
