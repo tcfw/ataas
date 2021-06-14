@@ -31,7 +31,7 @@ func validateReCAPTCHA(ctx context.Context, token, remoteIP string) (bool, error
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
-	secret := viper.GetString("recpatcha.secret")
+	secret := viper.GetString("recaptcha.secret")
 
 	reqVals := url.Values{
 		"secret":   {secret},
