@@ -9,6 +9,7 @@ import (
 	sq "github.com/Masterminds/squirrel"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 	"golang.org/x/crypto/bcrypt"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -94,15 +95,15 @@ func (s *Server) Authenticate(ctx context.Context, request *passportAPI.AuthRequ
 			return s.limiter.IncreaseResp(ctx, remaining, remoteIP, username, "bad request")
 		}
 
-		// if creds.Recaptcha != "" {
-		// 	valid, err := validateReCAPTCHA(ctx, creds.Recaptcha, remoteIP.String())
-		// 	if err != nil {
-		// 		return nil, err
-		// 	}
-		// 	if !valid {
-		// 		return s.limiter.IncreaseResp(ctx, remaining, remoteIP, username, "bad request")
-		// 	}
-		// }
+		if viper.GetBool("recaptcha.enable") && creds.Recaptcha != "" {
+			valid, err := validateReCAPTCHA(ctx, creds.Recaptcha, remoteIP.String())
+			if err != nil {
+				return nil, err
+			}
+			if !valid {
+				return s.limiter.IncreaseResp(ctx, remaining, remoteIP, username, "bad request")
+			}
+		}
 
 		//Find User
 		usersSvc, err := usersSvc()
