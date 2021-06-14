@@ -36,10 +36,14 @@ func validateReCAPTCHA(ctx context.Context, token, remoteIP string) (bool, error
 	reqVals := url.Values{
 		"secret":   {secret},
 		"response": {token},
-		"remoteip": {remoteIP},
 	}
 
-	span.AddEvent(fmt.Sprintf("%+v", reqVals))
+	if remoteIP != "" && remoteIP != "<nil>" {
+		reqVals["remoteip"] = []string{remoteIP}
+
+	}
+
+	span.AddEvent(fmt.Sprintf("REQ_PARAMS: %+v", reqVals))
 
 	httpResp, err := http.PostForm(reCAPTCHALink, reqVals)
 	if err != nil {
