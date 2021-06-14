@@ -43,7 +43,7 @@ func validateReCAPTCHA(ctx context.Context, token, remoteIP string) (bool, error
 
 	}
 
-	span.AddEvent(fmt.Sprintf("REQ_PARAMS: %+v", reqVals))
+	span.AddEvent(fmt.Sprintf("REQ_PARAMS: %s", reqVals.Encode()))
 
 	httpResp, err := http.PostForm(reCAPTCHALink, reqVals)
 	if err != nil {
