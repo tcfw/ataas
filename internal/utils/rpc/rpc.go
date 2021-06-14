@@ -14,7 +14,7 @@ func RemoteIPFromContext(ctx context.Context) net.IP {
 	peer, _ := peer.FromContext(ctx)
 
 	remoteIP := net.ParseIP(peer.Addr.String())
-	if remoteIP == nil && len(md.Get("x-forwarded-for")) > 0 {
+	if remoteIP == nil || len(md.Get("x-forwarded-for")) > 0 {
 		remoteIP = net.ParseIP(md.Get("x-forwarded-for")[0])
 	}
 
