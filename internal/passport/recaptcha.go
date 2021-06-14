@@ -33,14 +33,14 @@ func validateReCAPTCHA(ctx context.Context, token, remoteIP string) (bool, error
 
 	secret := viper.GetString("recaptcha.secret")
 
+	if remoteIP == "<nil>" {
+		remoteIP = ""
+	}
+
 	reqVals := url.Values{
 		"secret":   {secret},
 		"response": {token},
-	}
-
-	if remoteIP != "" && remoteIP != "<nil>" {
-		reqVals["remoteip"] = []string{remoteIP}
-
+		"remoteip": {remoteIP},
 	}
 
 	span.AddEvent(fmt.Sprintf("REQ_PARAMS: %s", reqVals.Encode()))
