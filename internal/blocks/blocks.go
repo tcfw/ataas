@@ -126,12 +126,13 @@ func (s *Server) handleAction(data *strategies.ActionEvent) {
 
 	for res.Next() {
 		block := &blocksAPI.Block{}
+		var blockCurrentUnits int
 		err := res.Scan(
 			&block.Id,
 			&block.StrategyId,
 			&block.State,
 			&block.BaseUnits,
-			&block.CurrentUnits,
+			&blockCurrentUnits,
 			&block.Purchase,
 			&block.WatchDuration,
 			&block.ShortSellAllowed,
@@ -141,9 +142,12 @@ func (s *Server) handleAction(data *strategies.ActionEvent) {
 			&block.Account,
 		)
 		if err != nil {
-			s.log.Errorf("failed to scan block: %s", err)
+			s.log.Errorf("failed to scan block [action]: %s", err)
 			continue
 		}
+
+		block.CurrentUnits = float64(blockCurrentUnits) / 1000000
+
 		s.applyCh <- &apply{data.Action, block}
 		n++
 	}
@@ -167,6 +171,7 @@ func (s *Server) New(ctx context.Context, req *blocksAPI.Block) (*blocksAPI.Bloc
 	req.Account = acn
 	req.State = blocksAPI.BlockState_NOTHING
 	req.ShortSellAllowed = false
+	req.CurrentUnits = 0
 
 	err = s.validateBlock(req)
 	if err != nil {
@@ -263,7 +268,7 @@ func (s *Server) List(ctx context.Context, req *blocksAPI.ListRequest) (*blocksA
 			return nil, err
 		}
 
-		block.CurrentUnits = float64(blockCurrentUnits / 1000000)
+		block.CurrentUnits = float64(blockCurrentUnits) / 1000000
 
 		blocks = append(blocks, block)
 	}
@@ -291,6 +296,7 @@ func (s *Server) Get(ctx context.Context, req *blocksAPI.GetRequest) (*blocksAPI
 
 	block := &blocksAPI.Block{}
 	var blockCurrentUnits int
+
 	err = res.Scan(
 		&block.Id,
 		&block.StrategyId,
@@ -306,7 +312,7 @@ func (s *Server) Get(ctx context.Context, req *blocksAPI.GetRequest) (*blocksAPI
 		&block.Account,
 	)
 	if err != nil {
-		s.log.Errorf("failed to scan block: %s", err)
+		s.log.Errorf("failed to scan block [get]: %s", err)
 		return nil, err
 	}
 
@@ -330,6 +336,7 @@ func (s *Server) Find(ctx context.Context, req *blocksAPI.GetRequest) (*blocksAP
 
 	block := &blocksAPI.Block{}
 	var blockCurrentUnits int
+
 	err = res.Scan(
 		&block.Id,
 		&block.StrategyId,
@@ -345,7 +352,7 @@ func (s *Server) Find(ctx context.Context, req *blocksAPI.GetRequest) (*blocksAP
 		&block.Account,
 	)
 	if err != nil {
-		s.log.Errorf("failed to scan block: %s", err)
+		s.log.Errorf("failed to scan block [find]: %s", err)
 		return nil, err
 	}
 
