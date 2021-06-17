@@ -219,17 +219,19 @@ func (s *Server) Candles(ctx context.Context, req *ticks.CandlesRequest) (*ticks
 		if current == nil || ts != currentTs {
 			currentTs = ts
 			current = &ticks.OHLCV{
-				Market:     trade.Market,
-				Instrument: trade.Instrument,
-				Open:       trade.Amount,
-				Low:        math.MaxFloat32,
-				Timestamp:  ts.Unix(),
+				// Market:     trade.Market,
+				// Instrument: trade.Instrument,
+				Open:      trade.Amount,
+				High:      0,
+				Low:       math.MaxFloat32,
+				Timestamp: ts.Unix(),
 			}
 			data = append(data, current)
 		}
 		if trade.Amount < current.Low {
 			current.Low = trade.Amount
-		} else if trade.Amount > current.High {
+		}
+		if trade.Amount > current.High {
 			current.High = trade.Amount
 		}
 		current.Close = trade.Amount

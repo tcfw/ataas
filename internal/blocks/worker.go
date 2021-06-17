@@ -164,7 +164,7 @@ func (s *Server) applyState(b *blocks.Block, ns blocks.BlockState, n int) (*orde
 	//Store state
 	q := db.Build().Update(tblName).SetMap(sq.Eq{
 		"state":         ns,
-		"current_units": nUnits,
+		"current_units": int(nUnits * 1000000),
 	}).Where(sq.Eq{"id": b.Id}).Limit(1)
 
 	if err := db.SimpleExec(ctx, q); err != nil {

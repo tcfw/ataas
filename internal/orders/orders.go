@@ -120,8 +120,8 @@ func (s *Server) Create(ctx context.Context, req *ordersAPI.CreateRequest) (*ord
 		id,
 		req.BlockID,
 		req.Action == ordersAPI.Action_BUY,
-		price,
-		exchangeRes.Units(),
+		int(price*1000000),
+		int(exchangeRes.Units()*1000000),
 		t,
 	)
 
@@ -170,17 +170,23 @@ func (s *Server) Get(ctx context.Context, req *ordersAPI.GetRequest) (*ordersAPI
 		var side bool
 		var t time.Time
 
+		var orderPrice int
+		var orderUnits int
+
 		err := res.Scan(
 			&order.Id,
 			&order.BlockID,
 			&side,
-			&order.Price,
-			&order.Units,
+			&orderPrice,
+			&orderUnits,
 			&t,
 		)
 		if err != nil {
 			return nil, err
 		}
+
+		order.Price = float32(orderPrice) / 1000000
+		order.Units = float64(orderUnits) / 1000000
 
 		order.Action = ordersAPI.Action_SELL
 		if side {

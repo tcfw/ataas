@@ -243,13 +243,14 @@ func (s *Server) List(ctx context.Context, req *blocksAPI.ListRequest) (*blocksA
 
 	for res.Next() {
 		block := &blocksAPI.Block{}
+		var blockCurrentUnits int
 
 		err := res.Scan(
 			&block.Id,
 			&block.StrategyId,
 			&block.State,
 			&block.BaseUnits,
-			&block.CurrentUnits,
+			&blockCurrentUnits,
 			&block.Purchase,
 			&block.WatchDuration,
 			&block.ShortSellAllowed,
@@ -261,6 +262,8 @@ func (s *Server) List(ctx context.Context, req *blocksAPI.ListRequest) (*blocksA
 		if err != nil {
 			return nil, err
 		}
+
+		block.CurrentUnits = float64(blockCurrentUnits / 1000000)
 
 		blocks = append(blocks, block)
 	}
@@ -287,12 +290,13 @@ func (s *Server) Get(ctx context.Context, req *blocksAPI.GetRequest) (*blocksAPI
 	}
 
 	block := &blocksAPI.Block{}
+	var blockCurrentUnits int
 	err = res.Scan(
 		&block.Id,
 		&block.StrategyId,
 		&block.State,
 		&block.BaseUnits,
-		&block.CurrentUnits,
+		&blockCurrentUnits,
 		&block.Purchase,
 		&block.WatchDuration,
 		&block.ShortSellAllowed,
@@ -305,6 +309,8 @@ func (s *Server) Get(ctx context.Context, req *blocksAPI.GetRequest) (*blocksAPI
 		s.log.Errorf("failed to scan block: %s", err)
 		return nil, err
 	}
+
+	block.CurrentUnits = float64(blockCurrentUnits) / 1000000
 
 	return block, nil
 }
@@ -323,12 +329,13 @@ func (s *Server) Find(ctx context.Context, req *blocksAPI.GetRequest) (*blocksAP
 	}
 
 	block := &blocksAPI.Block{}
+	var blockCurrentUnits int
 	err = res.Scan(
 		&block.Id,
 		&block.StrategyId,
 		&block.State,
 		&block.BaseUnits,
-		&block.CurrentUnits,
+		&blockCurrentUnits,
 		&block.Purchase,
 		&block.WatchDuration,
 		&block.ShortSellAllowed,
@@ -341,6 +348,8 @@ func (s *Server) Find(ctx context.Context, req *blocksAPI.GetRequest) (*blocksAP
 		s.log.Errorf("failed to scan block: %s", err)
 		return nil, err
 	}
+
+	block.CurrentUnits = float64(blockCurrentUnits) / 1000000
 
 	return block, nil
 }

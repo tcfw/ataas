@@ -67,9 +67,9 @@ func newGRPCServer(ctx context.Context, opts ...grpc.ServerOption) (func(), func
 	passport.RegisterPassportSeviceServer(grpcServer, passportServer)
 	excreds.RegisterExCredsServiceServer(grpcServer, excredsServer)
 
+	go ticksServer.Collect(ctx)
 	startServices := func() {
 		blockServer.Listen()
-		go ticksServer.Collect(ctx)
 		go stratServer.Start(ctx)
 
 		logrus.New().Infoln("Started services")
