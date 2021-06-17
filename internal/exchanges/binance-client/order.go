@@ -160,7 +160,7 @@ func (c *Client) createOrder(symbol string, side bool, orderType OrderType, pric
 	}
 
 	if side { //buy
-		respQuantity = respQuantity * (1 - txFee)
+		respQuantity = respQuantity * (1 + txFee)
 	}
 
 	respQStepScale, ok := stepScale[bResp.Symbol]
