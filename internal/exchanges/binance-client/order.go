@@ -160,6 +160,8 @@ func (c *Client) createOrder(symbol string, side bool, orderType OrderType, pric
 	}
 
 	if side { //buy
+		respQuantity = respQuantity * (1 - txFee)
+	} else {
 		respQuantity = respQuantity * (1 + txFee)
 	}
 
