@@ -161,6 +161,10 @@ func (s *Server) Create(ctx context.Context, req *strategy.CreateRequest) (*stra
 		return nil, status.Error(codes.FailedPrecondition, "bad request: strategy required")
 	}
 
+	if req.Strategy.Duration < 1000000000 {
+		req.Strategy.Duration *= 1000000000
+	}
+
 	existQ := db.Build().Select("id").From(tblName).Where(sq.Eq{
 		"account":    acn,
 		"market":     req.Strategy.Market,
