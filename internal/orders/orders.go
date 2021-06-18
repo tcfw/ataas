@@ -210,7 +210,7 @@ func (s *Server) getMarketPrice(ctx context.Context, market, instrument string) 
 	trades, err := ticks.Trades(ctx, &ticksAPI.GetRequest{
 		Market:     market,
 		Instrument: instrument,
-		Depth:      1,
+		Depth:      50,
 	})
 	if err != nil {
 		return 0, err
@@ -220,7 +220,7 @@ func (s *Server) getMarketPrice(ctx context.Context, market, instrument string) 
 		return 0, fmt.Errorf("no data")
 	}
 
-	return trades.Data[0].Amount, nil
+	return trades.Data[len(trades.Data)-1].Amount, nil
 }
 
 func (s *Server) getBestMarketPrice(ctx context.Context, market, instrument string) (float32, error) {
@@ -232,7 +232,7 @@ func (s *Server) getBestMarketPrice(ctx context.Context, market, instrument stri
 	trades, err := ticks.TradesRange(ctx, &ticksAPI.RangeRequest{
 		Market:     market,
 		Instrument: instrument,
-		Since:      "5m",
+		Since:      "10m",
 	})
 	if err != nil {
 		return 0, err
@@ -243,16 +243,16 @@ func (s *Server) getBestMarketPrice(ctx context.Context, market, instrument stri
 	}
 
 	var p float32
-	// n := len(trades.Data)
+	n := len(trades.Data)
 
 	for _, t := range trades.Data {
-		// p += t.Amount
-		if t.Amount > p {
-			p = t.Amount
-		}
+		p += t.Amount
+		// if t.Amount > p {
+		// p = t.Amount
+		// }
 	}
 
-	// p = p / float32(n)
+	p = p / float32(n)
 
 	return p, nil
 }
