@@ -210,13 +210,14 @@ func (s *Server) getMarketPrice(ctx context.Context, market, instrument string) 
 	trades, err := ticks.Trades(ctx, &ticksAPI.GetRequest{
 		Market:     market,
 		Instrument: instrument,
-		Depth:      50,
+		Depth:      100,
 	})
 	if err != nil {
 		return 0, err
 	}
 
 	if len(trades.Data) == 0 {
+		s.log.Errorf("no market data available")
 		return 0, fmt.Errorf("no data")
 	}
 
@@ -232,13 +233,14 @@ func (s *Server) getBestMarketPrice(ctx context.Context, market, instrument stri
 	trades, err := ticks.TradesRange(ctx, &ticksAPI.RangeRequest{
 		Market:     market,
 		Instrument: instrument,
-		Since:      "10m",
+		Since:      "20m",
 	})
 	if err != nil {
 		return 0, err
 	}
 
 	if len(trades.Data) == 0 {
+		s.log.Errorf("no best market data available")
 		return 0, fmt.Errorf("no data")
 	}
 
