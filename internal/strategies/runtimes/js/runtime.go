@@ -84,8 +84,17 @@ func (jsr *JSRuntime) initParams() error {
 		if err != nil {
 			return err
 		}
+		err = jsr.vm.Set("GetCandles", GetTestCandles)
+		if err != nil {
+			return err
+		}
 	} else {
 		err := jsr.vm.Set("GetTrades", GetTrades)
+		if err != nil {
+			return err
+		}
+
+		err = jsr.vm.Set("GetCandles", GetCandles)
 		if err != nil {
 			return err
 		}
