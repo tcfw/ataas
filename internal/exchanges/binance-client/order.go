@@ -86,14 +86,19 @@ func (c *Client) createOrder(symbol string, side bool, orderType OrderType, pric
 		"newOrderRespType": {"RESULT"},
 	}
 
+	respQStepScale, ok := stepScale[symbol]
+	if !ok {
+		respQStepScale = 2
+	}
+
 	if side { //buy
 		switch orderType {
 		case OrderTypeMarket:
 			if price < -1 {
 				return nil, status.Error(codes.FailedPrecondition, "price must be set")
 			}
-			vals["quoteOrderQty"] = []string{strconv.FormatFloat(float64(price*(1+txFee)), 'f', -1, 32)}
-			// vals["quantity"] = []string{strconv.FormatFloat(float64(quantity), 'f', -1, 32)}
+			buyQuantity := float64(price * (1 + txFee))
+			vals["quoteOrderQty"] = []string{strconv.FormatFloat(truncatePrecision(buyQuantity, respQStepScale), 'f', -1, 32)}
 			vals["side"] = []string{"BUY"}
 		}
 	} else { //sell
@@ -161,13 +166,6 @@ func (c *Client) createOrder(symbol string, side bool, orderType OrderType, pric
 
 	if side { //buy
 		respQuantity = respQuantity * (1 - txFee)
-		// } else {
-		// respQuantity = respQuantity * (1 - txFee)
-	}
-
-	respQStepScale, ok := stepScale[bResp.Symbol]
-	if !ok {
-		respQStepScale = 2
 	}
 
 	res := &OrderResponse{
