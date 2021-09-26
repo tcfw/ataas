@@ -159,6 +159,8 @@ func (c *Client) createOrder(symbol string, side bool, orderType OrderType, pric
 		return nil, err
 	}
 
+	fmt.Printf("RESPQ: %+v", respQStepScale)
+
 	if side { //buy
 		respQuantity = respQuantity * (1 - txFee)
 	}
