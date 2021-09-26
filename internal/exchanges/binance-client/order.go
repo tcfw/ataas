@@ -160,14 +160,16 @@ func (c *Client) createOrder(symbol string, side bool, orderType OrderType, pric
 		return nil, err
 	}
 
-	fmt.Printf("RESPQ: %+v", respQStepScale)
-
 	if side { //buy
 		respQuantity = respQuantity * (1 - txFee)
 	}
 
+	quoteQty, _ := strconv.ParseFloat(bResp.CummulativeQuoteQty, 64)
+
+	orderPrice := quoteQty / respQuantity
+
 	res := &OrderResponse{
-		price: bResp.Price,
+		price: strconv.FormatFloat(orderPrice, 'f', respQStepScale, 64),
 		units: strconv.FormatFloat(respQuantity, 'f', respQStepScale, 64),
 	}
 

@@ -127,17 +127,12 @@ func (s *Server) Create(ctx context.Context, req *ordersAPI.CreateRequest) (*ord
 		price = float64(bestPrice)
 	}
 
-	storedPrice := int64(price * 1000000)
-	storedUnits := int64(units * 1000000)
-
-	s.log.Printf("STORED ORDER: P(%+v) Q(%+v) pP(%+v) pQ(%+v) eQ(%+v)", storedPrice, storedUnits, price, units, exchangeRes.Units())
-
 	q := db.Build().Insert(tblName).Columns(allColumns...).Values(
 		id,
 		req.BlockID,
 		req.Action == ordersAPI.Action_BUY,
-		storedPrice,
-		storedUnits,
+		int64(price*1000000),
+		int64(units*1000000),
 		t,
 	)
 
