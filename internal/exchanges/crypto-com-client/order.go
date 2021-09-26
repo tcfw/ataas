@@ -2,6 +2,7 @@ package client
 
 import (
 	"encoding/json"
+	"strconv"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -20,12 +21,12 @@ const (
 )
 
 type OrderResponse struct {
-	price float32
-	units float64
+	price string
+	units string
 }
 
-func (or *OrderResponse) Price() float32 { return or.price }
-func (or *OrderResponse) Units() float64 { return or.units }
+func (or *OrderResponse) Price() string { return or.price }
+func (or *OrderResponse) Units() string { return or.units }
 
 func (c *Client) Buy(instrument string, price float32, units float64) (exchanges.OrderResponse, error) {
 	return c.createImmediateOrder(instrument, true, OrderTypeMarket, price, units)
@@ -91,8 +92,8 @@ func (c *Client) createImmediateOrder(instrument string, side bool, orderType Or
 	}
 
 	fnResp := &OrderResponse{
-		price: order.TradeList[0].TradedPrice,
-		units: float64(order.TradeList[0].TradedQuantity),
+		price: strconv.FormatFloat(float64(order.TradeList[0].TradedPrice), 'f', 10, 64),
+		units: strconv.FormatFloat(float64(order.TradeList[0].TradedQuantity), 'f', 10, 64),
 	}
 
 	return fnResp, nil

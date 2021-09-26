@@ -21,12 +21,12 @@ const (
 )
 
 type OrderResponse struct {
-	price float32
-	units float64
+	price string
+	units string
 }
 
-func (or *OrderResponse) Price() float32 { return or.price }
-func (or *OrderResponse) Units() float64 { return or.units }
+func (or *OrderResponse) Price() string { return or.price }
+func (or *OrderResponse) Units() string { return or.units }
 
 type OrderType string
 
@@ -154,12 +154,7 @@ func (c *Client) createOrder(symbol string, side bool, orderType OrderType, pric
 		return nil, err
 	}
 
-	respPrice, err := strconv.ParseFloat(bResp.Price, 32)
-	if err != nil {
-		return nil, err
-	}
-
-	respQuantity, err := strconv.ParseFloat(bResp.ExecutedQty, 32)
+	respQuantity, err := strconv.ParseFloat(bResp.ExecutedQty, 64)
 	if err != nil {
 		return nil, err
 	}
@@ -169,8 +164,8 @@ func (c *Client) createOrder(symbol string, side bool, orderType OrderType, pric
 	}
 
 	res := &OrderResponse{
-		price: float32(respPrice),
-		units: truncatePrecision(respQuantity, respQStepScale),
+		price: bResp.Price,
+		units: strconv.FormatFloat(respQuantity, 'f', respQStepScale, 64),
 	}
 
 	return res, nil

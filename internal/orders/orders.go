@@ -3,6 +3,7 @@ package orders
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
@@ -111,9 +112,19 @@ func (s *Server) Create(ctx context.Context, req *ordersAPI.CreateRequest) (*ord
 	id := uuid.New().String()
 	t := time.Now()
 
-	price := exchangeRes.Price()
+	pricefstr, err := strconv.ParseFloat(exchangeRes.Price(), 64)
+	if err != nil {
+		return nil, err
+	}
+
+	units, err := strconv.ParseFloat(exchangeRes.Units(), 64)
+	if err != nil {
+		return nil, err
+	}
+
+	price := pricefstr
 	if price == 0 {
-		price = bestPrice
+		price = float64(bestPrice)
 	}
 
 	q := db.Build().Insert(tblName).Columns(allColumns...).Values(
@@ -121,7 +132,7 @@ func (s *Server) Create(ctx context.Context, req *ordersAPI.CreateRequest) (*ord
 		req.BlockID,
 		req.Action == ordersAPI.Action_BUY,
 		int(price*1000000),
-		int(exchangeRes.Units()*1000000),
+		int(units*1000000),
 		t,
 	)
 
@@ -134,8 +145,8 @@ func (s *Server) Create(ctx context.Context, req *ordersAPI.CreateRequest) (*ord
 		Id:        id,
 		BlockID:   req.BlockID,
 		Action:    req.Action,
-		Units:     exchangeRes.Units(),
-		Price:     exchangeRes.Price(),
+		Units:     units,
+		Price:     float32(price),
 		Timestamp: t.Format(time.RFC3339),
 	}
 

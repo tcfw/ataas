@@ -6,6 +6,6 @@ type Exchange interface {
 }
 
 type OrderResponse interface {
-	Price() float32
-	Units() float64
+	Price() string
+	Units() string
 }

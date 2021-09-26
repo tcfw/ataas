@@ -1,6 +1,7 @@
 package binance
 
 import (
+	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -16,4 +17,12 @@ func TestGetFees(t *testing.T) {
 
 	assert.NotZero(t, make)
 	assert.NotZero(t, take)
+}
+
+func TestTrunc(t *testing.T) {
+	f, _ := strconv.ParseFloat("0.0123456789", 32)
+
+	assert.Equal(t, truncatePrecision(f, 3), 0.012)
+	assert.Equal(t, truncatePrecision(f, 4), 0.0123)
+	assert.Equal(t, truncatePrecision(f, 8), 0.01234567)
 }
