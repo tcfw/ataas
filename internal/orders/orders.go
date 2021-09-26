@@ -130,7 +130,7 @@ func (s *Server) Create(ctx context.Context, req *ordersAPI.CreateRequest) (*ord
 	storedPrice := int64(price * 1000000)
 	storedUnits := int64(units * 1000000)
 
-	s.log.Printf("STORED ORDER: P(%+v) Q(%+v)", storedPrice, storedUnits)
+	s.log.Printf("STORED ORDER: P(%+v) Q(%+v) pP(%+v) pQ(%+v)", storedPrice, storedUnits, price, units)
 
 	q := db.Build().Insert(tblName).Columns(allColumns...).Values(
 		id,
