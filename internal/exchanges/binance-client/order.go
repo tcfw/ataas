@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gogo/status"
@@ -86,7 +87,7 @@ func (c *Client) createOrder(symbol string, side bool, orderType OrderType, pric
 		"newOrderRespType": {"RESULT"},
 	}
 
-	respQStepScale, ok := stepScale[symbol]
+	respQStepScale, ok := stepScale[strings.ToLower(symbol)]
 	if !ok {
 		respQStepScale = 2
 	}
