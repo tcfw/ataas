@@ -160,9 +160,15 @@ func (c *Client) createOrder(symbol string, side bool, orderType OrderType, pric
 		return nil, err
 	}
 
-	// if side { //buy
-	// 	respQuantity = respQuantity * (1 - txFee)
-	// }
+	if side { //buy
+		// 	respQuantity = respQuantity * (1 - txFee)
+
+		//If we have less balance than what we just orderd, assume fees...
+		bal, err := c.balance(symbol[:3])
+		if err != nil && bal > 0 && bal < respQuantity {
+			respQuantity = bal
+		}
+	}
 
 	quoteQty, _ := strconv.ParseFloat(bResp.CummulativeQuoteQty, 64)
 

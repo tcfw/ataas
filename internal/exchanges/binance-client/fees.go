@@ -12,13 +12,9 @@ import (
 )
 
 type Fee struct {
-	Symbol string  `json:"symbol"`
-	Marker float64 `json:"makerCommission"`
-	Taker  float64 `json:"takerCommission"`
-}
-
-type FeesResp struct {
-	Data []Fee `json:""`
+	Symbol string `json:"symbol"`
+	Marker string `json:"makerCommission"`
+	Taker  string `json:"takerCommission"`
 }
 
 func (c *Client) fees(symbol string) (float64, float64, error) {
@@ -29,7 +25,7 @@ func (c *Client) fees(symbol string) (float64, float64, error) {
 
 	pl := c.sign(vals, []byte(c.secret))
 
-	req, err := http.NewRequest(http.MethodGet, c.httpEndpoint+"/sapi/v1/asset/tradeFee", bytes.NewReader([]byte(pl)))
+	req, err := http.NewRequest(http.MethodGet, c.httpEndpoint+"/sapi/v1/asset/tradeFee?"+pl, nil)
 	if err != nil {
 		return 0, 0, err
 	}
@@ -45,8 +41,8 @@ func (c *Client) fees(symbol string) (float64, float64, error) {
 
 	r := io.TeeReader(rResp.Body, buf)
 
-	bResp := &FeesResp{}
-	err = json.NewDecoder(io.LimitReader(r, 10<<20)).Decode(bResp)
+	bResp := []Fee{}
+	err = json.NewDecoder(io.LimitReader(r, 10<<20)).Decode(&bResp)
 
 	if rResp.StatusCode != 200 {
 		return 0, 0, fmt.Errorf("unexpected http resp %s: %s", rResp.Status, buf)
@@ -56,9 +52,11 @@ func (c *Client) fees(symbol string) (float64, float64, error) {
 		return 0, 0, err
 	}
 
-	for _, fee := range bResp.Data {
+	for _, fee := range bResp {
 		if fee.Symbol == symbol {
-			return fee.Marker, fee.Taker, nil
+			maker, _ := strconv.ParseFloat(fee.Marker, 64)
+			taker, _ := strconv.ParseFloat(fee.Taker, 64)
+			return maker, taker, nil
 		}
 	}
 
