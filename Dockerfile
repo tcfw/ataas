@@ -15,7 +15,7 @@ RUN make build
 
 FROM ubuntu:latest 
 
-RUN apt update && apt install ca-certificates -y && rm -rf /var/lib/{apt,dpkg,cache,log}/
+RUN apt update && apt install ca-certificates tzdata -y && rm -rf /var/lib/{apt,dpkg,cache,log}/
 
 WORKDIR /bin
 
