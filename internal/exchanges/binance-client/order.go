@@ -162,7 +162,7 @@ func (c *Client) createOrder(symbol string, side bool, orderType OrderType, pric
 
 	if side { //buy
 		feeMaker, feeTaker, err := c.fees(symbol)
-		if err != nil && feeTaker != 0 {
+		if err == nil && feeTaker != 0 {
 			respQuantity = respQuantity * (1 - feeTaker)
 		}
 
