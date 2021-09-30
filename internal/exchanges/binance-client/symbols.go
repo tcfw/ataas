@@ -17,7 +17,7 @@ var (
 var (
 	stepScale = map[string]int{
 		"adaaud":  3,
-		"bnbaud":  4,
+		"bnbaud":  3,
 		"btcaud":  6,
 		"dogeaud": 1,
 		"ethaud":  5,
