@@ -173,6 +173,8 @@ func (c *Client) createOrder(symbol string, side bool, orderType OrderType, pric
 		if err != nil && bal > 0 && bal < respQuantity {
 			respQuantity = bal
 		}
+
+		respQuantity = truncatePrecision(respQuantity, respQStepScale)
 	}
 
 	quoteQty, _ := strconv.ParseFloat(bResp.CummulativeQuoteQty, 64)
