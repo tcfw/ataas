@@ -16,14 +16,14 @@ var (
 
 var (
 	stepScale = map[string]int{
-		"adaaud":  3,
+		"adaaud":  1,
 		"bnbaud":  3,
-		"btcaud":  6,
-		"dogeaud": 1,
-		"ethaud":  5,
-		"linkaud": 3,
-		"sxpaud":  3,
+		"btcaud":  5,
+		"dogeaud": 0,
+		"ethaud":  4,
+		"linkaud": 2,
+		"sxpaud":  1,
 		"trxaud":  0,
-		"xrpaud":  2,
+		"xrpaud":  0,
 	}
 )
