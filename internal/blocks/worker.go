@@ -141,6 +141,12 @@ func (s *Server) applyState(b *blocks.Block, ns blocks.BlockState, n int) (*orde
 		if nUnits < 0 && !b.ShortSellAllowed {
 			nUnits = 0
 		}
+		if b.Purchase > 0 {
+			b.Purchase = float32(resp.Order.Units * float64(resp.Order.Price))
+		} else {
+			//This is mainly to account for fees
+			b.BaseUnits = resp.Order.Units
+		}
 
 	case blocks.BlockState_ENDED:
 		if b.State == blocks.BlockState_PURCHASED {
@@ -165,6 +171,8 @@ func (s *Server) applyState(b *blocks.Block, ns blocks.BlockState, n int) (*orde
 	q := db.Build().Update(tblName).SetMap(sq.Eq{
 		"state":         ns,
 		"current_units": int(nUnits * 1000000),
+		"purchase":      b.Purchase,
+		"base_units":    b.BaseUnits,
 	}).Where(sq.Eq{"id": b.Id}).Limit(1)
 
 	if err := db.SimpleExec(ctx, q); err != nil {
