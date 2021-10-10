@@ -8,6 +8,7 @@ import (
 
 	sq "github.com/Masterminds/squirrel"
 	"pm.tcfw.com.au/source/ataas/api/pb/blocks"
+	"pm.tcfw.com.au/source/ataas/api/pb/notify"
 	"pm.tcfw.com.au/source/ataas/api/pb/orders"
 	"pm.tcfw.com.au/source/ataas/api/pb/strategy"
 	"pm.tcfw.com.au/source/ataas/db"
@@ -116,6 +117,7 @@ func (s *Server) applyState(b *blocks.Block, ns blocks.BlockState, n int) (*orde
 			Price:   price,
 		})
 		if err != nil {
+			notifyFail(ctx, b, ns, err)
 			return nil, err
 		}
 		order = resp.Order
@@ -134,6 +136,7 @@ func (s *Server) applyState(b *blocks.Block, ns blocks.BlockState, n int) (*orde
 			Price:   -1, //market
 		})
 		if err != nil {
+			notifyFail(ctx, b, ns, err)
 			return nil, err
 		}
 		order = resp.Order
@@ -157,6 +160,7 @@ func (s *Server) applyState(b *blocks.Block, ns blocks.BlockState, n int) (*orde
 				Price:   -1, //market
 			})
 			if err != nil {
+				notifyFail(ctx, b, ns, err)
 				return nil, err
 			}
 			order = resp.Order
@@ -179,5 +183,34 @@ func (s *Server) applyState(b *blocks.Block, ns blocks.BlockState, n int) (*orde
 		return nil, err
 	}
 
+	notifyOrder(ctx, b, ns, order)
+
 	return order, nil
+}
+
+func notifyFail(ctx context.Context, block *blocks.Block, state blocks.BlockState, errStr error) {
+	nSvc, err := notifySvc()
+	if err != nil {
+		return
+	}
+
+	nSvc.Send(ctx, &notify.SendRequest{
+		Uid:   block.Account,
+		Type:  notify.SendRequest_BLOCK,
+		Title: fmt.Sprintf("Error attempting order on %s", block.Instrument),
+		Body:  fmt.Sprintf("Failed to create order on %s - %s<br/><br/>%s", block.Instrument, state, errStr.Error()),
+	})
+}
+
+func notifyOrder(ctx context.Context, block *blocks.Block, state blocks.BlockState, order *orders.Order) {
+	nSvc, err := notifySvc()
+	if err != nil {
+		return
+	}
+	nSvc.Send(ctx, &notify.SendRequest{
+		Uid:   block.Account,
+		Type:  notify.SendRequest_BLOCK,
+		Title: fmt.Sprintf("New Order - %s %s", block.Instrument, state),
+		Body:  fmt.Sprintf("%v %v", order.Price, order.Units),
+	})
 }

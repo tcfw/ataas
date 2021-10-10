@@ -1,0 +1,31 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "notify.proto",
+    "version": "version not set"
+  },
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {},
+  "definitions": {
+    "SendRequestMsgType": {
+      "type": "string",
+      "enum": [
+        "MARKETING",
+        "BLOCK"
+      ],
+      "default": "MARKETING"
+    },
+    "notifySendResponse": {
+      "type": "object"
+    }
+  }
+}

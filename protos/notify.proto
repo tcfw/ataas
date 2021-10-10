@@ -1,0 +1,23 @@
+syntax="proto3";
+
+package ataas.notify;
+option go_package = "pm.tcfw.com.au/source/ataas/api/pb/notify";
+
+message SendRequest {
+	string uid = 1;
+
+	enum MsgType {
+		MARKETING = 0;
+		BLOCK = 1;
+	}
+
+	MsgType type = 2;
+	string title = 3;
+	string body = 4;
+}
+
+message SendResponse {}
+
+service NotifyService {
+	rpc Send(SendRequest) returns (SendResponse);
+}

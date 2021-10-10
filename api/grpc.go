@@ -7,6 +7,7 @@ import (
 	"google.golang.org/grpc"
 	"pm.tcfw.com.au/source/ataas/api/pb/blocks"
 	"pm.tcfw.com.au/source/ataas/api/pb/excreds"
+	"pm.tcfw.com.au/source/ataas/api/pb/notify"
 	"pm.tcfw.com.au/source/ataas/api/pb/orders"
 	"pm.tcfw.com.au/source/ataas/api/pb/passport"
 	"pm.tcfw.com.au/source/ataas/api/pb/strategy"
@@ -14,6 +15,7 @@ import (
 	"pm.tcfw.com.au/source/ataas/api/pb/users"
 	blocksImpl "pm.tcfw.com.au/source/ataas/internal/blocks"
 	excredsImpl "pm.tcfw.com.au/source/ataas/internal/excreds"
+	notifyImpl "pm.tcfw.com.au/source/ataas/internal/notify"
 	ordersImpl "pm.tcfw.com.au/source/ataas/internal/orders"
 	passportImpl "pm.tcfw.com.au/source/ataas/internal/passport"
 	strategyImpl "pm.tcfw.com.au/source/ataas/internal/strategies"
@@ -59,13 +61,19 @@ func newGRPCServer(ctx context.Context, opts ...grpc.ServerOption) (func(), func
 		panic(err)
 	}
 
+	notifyServer, err := notifyImpl.NewServer(ctx)
+	if err != nil {
+		panic(err)
+	}
+
 	blocks.RegisterBlocksServiceServer(grpcServer, blockServer)
-	orders.RegisterOrdersServiceServer(grpcServer, ordersServer)
-	ticks.RegisterHistoryServiceServer(grpcServer, ticksServer)
-	strategy.RegisterStrategyServiceServer(grpcServer, stratServer)
-	users.RegisterUserServiceServer(grpcServer, usersServer)
-	passport.RegisterPassportSeviceServer(grpcServer, passportServer)
 	excreds.RegisterExCredsServiceServer(grpcServer, excredsServer)
+	notify.RegisterNotifyServiceServer(grpcServer, notifyServer)
+	orders.RegisterOrdersServiceServer(grpcServer, ordersServer)
+	passport.RegisterPassportSeviceServer(grpcServer, passportServer)
+	strategy.RegisterStrategyServiceServer(grpcServer, stratServer)
+	ticks.RegisterHistoryServiceServer(grpcServer, ticksServer)
+	users.RegisterUserServiceServer(grpcServer, usersServer)
 
 	go ticksServer.Collect(ctx)
 	startServices := func() {
