@@ -2,6 +2,7 @@ package notify
 
 import (
 	"context"
+	"os"
 
 	"github.com/mailgun/mailgun-go/v4"
 	"github.com/sirupsen/logrus"
@@ -10,7 +11,7 @@ import (
 )
 
 var domain string = "mg.tcfw.com.au"
-var privateAPIKey string = ""
+var privateAPIKey string = os.Getenv("MAILGUN")
 
 type Server struct {
 	notifyAPI.UnimplementedNotifyServiceServer
