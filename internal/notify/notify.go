@@ -2,7 +2,6 @@ package notify
 
 import (
 	"context"
-	"log"
 
 	"github.com/mailgun/mailgun-go/v4"
 	"github.com/sirupsen/logrus"
@@ -32,6 +31,7 @@ func (s *Server) Send(ctx context.Context, req *notifyAPI.SendRequest) (*notifyA
 
 	users, err := usersSvc()
 	if err != nil {
+		s.log.Warn(err)
 		return nil, err
 	}
 
@@ -40,6 +40,7 @@ func (s *Server) Send(ctx context.Context, req *notifyAPI.SendRequest) (*notifyA
 		Status: usersAPI.UserRequest_ACTIVE,
 	})
 	if err != nil {
+		s.log.Warn(err)
 		return nil, err
 	}
 
@@ -48,7 +49,7 @@ func (s *Server) Send(ctx context.Context, req *notifyAPI.SendRequest) (*notifyA
 	resp, id, err := mg.Send(ctx, message)
 
 	if err != nil {
-		log.Fatal(err)
+		s.log.Warn(err)
 	}
 
 	s.log.Infof("Email Sent - ID: %s Resp: %s\n", id, resp)
