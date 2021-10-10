@@ -183,7 +183,7 @@ func (s *Server) applyState(b *blocks.Block, ns blocks.BlockState, n int) (*orde
 		return nil, err
 	}
 
-	notifyOrder(ctx, b, ns, order)
+	go notifyOrder(ctx, b, ns, order)
 
 	return order, nil
 }
