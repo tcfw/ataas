@@ -99,6 +99,8 @@ func (s *Server) Find(ctx context.Context, req *usersAPI.UserRequest) (*usersAPI
 		q = q.Where(sq.Eq{"id": req.GetId()})
 	case *usersAPI.UserRequest_Email:
 		q = q.Where(sq.Eq{"email": req.GetEmail()})
+	case *usersAPI.UserRequest_Account:
+		q = q.Where(sq.Eq{"account": req.GetAccount()})
 	default:
 		return nil, fmt.Errorf("unknown query type: %s", reqType)
 	}

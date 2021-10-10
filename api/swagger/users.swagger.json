@@ -78,6 +78,12 @@
             "type": "string"
           },
           {
+            "name": "account",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
             "name": "status",
             "in": "query",
             "required": false,
@@ -146,6 +152,12 @@
           },
           {
             "name": "email",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "account",
             "in": "query",
             "required": false,
             "type": "string"
@@ -603,6 +615,9 @@
           "type": "string"
         },
         "email": {
+          "type": "string"
+        },
+        "account": {
           "type": "string"
         },
         "status": {

@@ -41,6 +41,7 @@ message UserRequest {
     oneof query {
         string id = 1;
         string email = 2;
+        string account = 4;
 	}
 	
     enum Status {

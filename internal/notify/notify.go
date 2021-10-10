@@ -36,7 +36,7 @@ func (s *Server) Send(ctx context.Context, req *notifyAPI.SendRequest) (*notifyA
 	}
 
 	user, err := users.Find(ctx, &usersAPI.UserRequest{
-		Query:  &usersAPI.UserRequest_Id{Id: req.Uid},
+		Query:  &usersAPI.UserRequest_Account{Account: req.Uid},
 		Status: usersAPI.UserRequest_ACTIVE,
 	})
 	if err != nil {
